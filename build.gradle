@@ -24,6 +24,13 @@ dependencies {
     // Tests
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.2'
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.8.2'
+    // Reflection
+    api group: 'org.atteo.classindex', name: 'classindex', version: '3.11'
+    annotationProcessor group: 'org.atteo.classindex', name: 'classindex', version: '3.11'
+    // Asm
+    api group: 'org.ow2.asm', name: 'asm', version: '9.3'
+    // Java agent
+    api group: 'net.bytebuddy', name: 'byte-buddy-agent', version: '1.12.10'
 }
 
 test {
