@@ -1,0 +1,99 @@
+plugins {
+    id 'java-library'
+    id 'maven-publish'
+    id 'signing'
+}
+
+java {
+    sourceCompatibility = JavaVersion.VERSION_1_8
+    targetCompatibility = JavaVersion.VERSION_1_8
+    compileJava.options.encoding('UTF-8')
+    withJavadocJar()
+    withSourcesJar()
+}
+
+group = 'io.github.amayaframework'
+archivesBaseName = 'amaya-di'
+version = System.getenv('RELEASE_VERSION') ?: '1.0.0'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    // Tests
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.2'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.8.2'
+}
+
+test {
+    useJUnitPlatform()
+}
+
+jar {
+    from sourceSets.main.output
+    from sourceSets.main.allJava
+}
+
+signing {
+    sign publishing.publications
+}
+
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            // Specify artifacts
+            artifactId = archivesBaseName
+            groupId = group
+            version = version
+            from components.java
+            // Configure pom
+            pom {
+                name.set(archivesBaseName)
+                description.set('The framework responsible for implementing dependencies. ' +
+                        'Implemented without using reflection in runtime.')
+                url.set('https://github.com/AmayaFramework/amaya-di')
+
+                organization {
+                    name.set('io.github.amayaframework')
+                    url.set('https://github.com/AmayaFramework')
+                }
+
+                issueManagement {
+                    system.set('GitHub')
+                    url.set('https://github.com/AmayaFramework/amaya-di/issues')
+                }
+
+                licenses {
+                    license {
+                        name.set('Apache License 2.0')
+                        url.set('https://github.com/AmayaFramework/amaya-di/blob/main/LICENSE')
+                    }
+                }
+
+                scm {
+                    url.set('https://github.com/AmayaFramework/amaya-di')
+                    connection.set('scm:https://github.com/AmayaFramework/amaya-di.git')
+                    developerConnection.set('scm:https://github.com/AmayaFramework/amaya-di.git')
+                }
+
+                developers {
+                    developer {
+                        id.set('RomanQed')
+                        name.set('Roman Bakaldin')
+                        email.set('gbakaldin@gmail.com')
+                    }
+                }
+            }
+        }
+    }
+    repositories {
+        maven {
+            url "https://s01.oss.sonatype.org/service/local/staging/deploy/maven2"
+            credentials {
+                username System.getenv('SONATYPE_USERNAME')
+                password System.getenv('SONATYPE_PASSWORD')
+            }
+        }
+    }
+}
