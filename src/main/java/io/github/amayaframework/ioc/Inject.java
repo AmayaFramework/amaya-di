@@ -1,4 +1,4 @@
-package io.github.amayaframework.di;
+package io.github.amayaframework.ioc;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -8,4 +8,5 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.FIELD, ElementType.METHOD, ElementType.CONSTRUCTOR})
 public @interface Inject {
+    InjectPolicy value() default InjectPolicy.SINGLETON;
 }

@@ -1,4 +1,4 @@
-package io.github.amayaframework.di;
+package io.github.amayaframework.ioc;
 
 import org.atteo.classindex.IndexAnnotated;
 
@@ -10,6 +10,5 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)
 @IndexAnnotated
-public @interface DITarget {
-    TargetType value() default TargetType.DIRECT;
+public @interface DirectInject {
 }
