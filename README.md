@@ -1,2 +1,3 @@
-# amaya-di
-The framework responsible for implementing dependencies. Implemented without using reflection in runtime.
+# amaya-ioc
+A framework responsible for dependency management and class search. 
+DI is implemented without the use of reflection in runtime.
