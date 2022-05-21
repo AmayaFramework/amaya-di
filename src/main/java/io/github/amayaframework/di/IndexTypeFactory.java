@@ -1,21 +1,17 @@
 package io.github.amayaframework.di;
 
-import io.github.amayaframework.nodes.NodeProvider;
-
-import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
-public class IndexTypeFactory implements TypeFactory {
-    private final Collection<Class<?>> sources;
+public final class IndexTypeFactory implements TypeFactory {
+    private final List<Class<?>> sources;
     private final Map<Class<?>, Class<?>> types;
 
-    public IndexTypeFactory(NodeProvider<Class<?>> provider) {
-        Objects.requireNonNull(provider);
-        this.sources = provider.get();
+    public IndexTypeFactory(List<Class<?>> sources) {
+        this.sources = Objects.requireNonNull(sources);
         this.types = new ConcurrentHashMap<>();
     }
 
