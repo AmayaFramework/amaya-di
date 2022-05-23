@@ -1,4 +1,4 @@
-package io.github.amayaframework.di;
+package io.github.amayaframework.di.types;
 
 import java.util.List;
 import java.util.Map;
@@ -6,7 +6,7 @@ import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
-public final class IndexTypeFactory implements TypeFactory {
+public final class IndexTypeFactory implements SubTypeFactory {
     private final List<Class<?>> sources;
     private final Map<Class<?>, Class<?>> types;
 

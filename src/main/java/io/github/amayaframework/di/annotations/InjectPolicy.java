@@ -1,4 +1,4 @@
-package io.github.amayaframework.di;
+package io.github.amayaframework.di.annotations;
 
 /**
  * An enumeration containing supported injection policies.

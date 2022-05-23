@@ -1,4 +1,4 @@
-package io.github.amayaframework.di;
+package io.github.amayaframework.di.annotations;
 
 import java.lang.annotation.*;
 
@@ -10,5 +10,5 @@ import java.lang.annotation.*;
 @Target({ElementType.FIELD, ElementType.METHOD, ElementType.CONSTRUCTOR})
 @Documented
 public @interface Inject {
-    InjectPolicy value() default InjectPolicy.SINGLETON;
+    InjectPolicy value() default InjectPolicy.PROTOTYPE;
 }

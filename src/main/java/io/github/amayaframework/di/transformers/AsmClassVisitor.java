@@ -1,0 +1,34 @@
+package io.github.amayaframework.di.transformers;
+
+import io.github.amayaframework.di.types.InjectType;
+import io.github.amayaframework.di.types.SubTypeFactory;
+import org.objectweb.asm.ClassVisitor;
+import org.objectweb.asm.MethodVisitor;
+
+import java.util.Objects;
+
+import static io.github.amayaframework.di.transformers.Constants.*;
+
+class AsmClassVisitor extends ClassVisitor {
+    private final InjectType type;
+    private final SubTypeFactory factory;
+
+    protected AsmClassVisitor(ClassVisitor visitor, InjectType type, SubTypeFactory factory) {
+        super(API, visitor);
+        this.type = type;
+        this.factory = factory;
+    }
+
+    @Override
+    public MethodVisitor visitMethod(int access,
+                                     String name,
+                                     String descriptor,
+                                     String signature,
+                                     String[] exceptions) {
+        MethodVisitor visitor = super.visitMethod(access, name, descriptor, signature, exceptions);
+        if (Objects.equals(name, INIT) && Objects.equals(descriptor, EMPTY_DESCRIPTOR)) {
+            return new AsmMethodVisitor(visitor, type, factory);
+        }
+        return visitor;
+    }
+}

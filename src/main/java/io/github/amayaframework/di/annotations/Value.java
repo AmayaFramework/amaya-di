@@ -1,4 +1,4 @@
-package io.github.amayaframework.di;
+package io.github.amayaframework.di.annotations;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;

@@ -1,9 +1,9 @@
-package io.github.amayaframework.di;
+package io.github.amayaframework.di.types;
 
 /**
  * An interface describing a factory looking for subtypes for types.
  */
-public interface TypeFactory {
+public interface SubTypeFactory {
     /**
      * Searches for a subtype for the passed class.
      *
