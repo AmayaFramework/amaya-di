@@ -7,7 +7,7 @@ public interface InjectType {
 
     Collection<InjectMethod> getMethods();
 
-    InjectConstructor getConstructor();
+    Collection<InjectConstructor> getConstructors();
 
     Class<?> getTarget();
 }

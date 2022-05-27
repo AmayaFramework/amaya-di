@@ -7,11 +7,15 @@ import io.github.amayaframework.di.annotations.Value;
 import org.atteo.classindex.ClassIndex;
 
 import java.lang.reflect.*;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 public final class ReflectTypeFactory implements InjectTypeFactory {
+    private static final Predicate<AnnotatedElement> FILTER = element -> element.isAnnotationPresent(Inject.class);
 
     private Data extractData(AnnotatedElement element, String name) {
         Inject inject = element.getAnnotation(Inject.class);
@@ -69,31 +73,26 @@ public final class ReflectTypeFactory implements InjectTypeFactory {
 
     @Override
     public InjectType getInjectType(Class<?> clazz) {
-        List<InjectField> fields = new LinkedList<>();
-        for (Field field : clazz.getDeclaredFields()) {
-            if (field.isAnnotationPresent(Inject.class)) {
-                fields.add(getField(field));
-            }
+        if (Modifier.isAbstract(clazz.getModifiers())) {
+            throw new IllegalStateException(String.format("The %s type cannot be abstract", clazz.getName()));
         }
-        List<InjectMethod> methods = new LinkedList<>();
-        for (Method method : clazz.getMethods()) {
-            if (method.isAnnotationPresent(Inject.class)) {
-                methods.add(getMethod(method));
-            }
-        }
-        Constructor<?> found = null;
-        for (Constructor<?> constructor : clazz.getDeclaredConstructors()) {
-            if (!constructor.isAnnotationPresent(Inject.class)) {
-                continue;
-            }
-            if (found != null) {
-                throw new IllegalStateException("Found more than 1 constructor for injection");
-            }
-            found = constructor;
-        }
-        InjectConstructor injectConstructor = found == null ? null : getConstructor(found);
-        return new InjectType() {
+        // Find fields
+        List<InjectField> fields = Arrays.stream(clazz.getDeclaredFields())
+                .filter(FILTER)
+                .map(this::getField)
+                .collect(Collectors.toList());
+        // Find methods
+        List<InjectMethod> methods = Arrays.stream(clazz.getMethods())
+                .filter(FILTER)
+                .map(this::getMethod)
+                .collect(Collectors.toList());
+        // Find constructors
+        List<InjectConstructor> constructors = Arrays.stream(clazz.getDeclaredConstructors())
+                .filter(FILTER)
+                .map(this::getConstructor)
+                .collect(Collectors.toList());
 
+        return new InjectType() {
             @Override
             public Collection<InjectField> getFields() {
                 return fields;
@@ -105,8 +104,8 @@ public final class ReflectTypeFactory implements InjectTypeFactory {
             }
 
             @Override
-            public InjectConstructor getConstructor() {
-                return injectConstructor;
+            public Collection<InjectConstructor> getConstructors() {
+                return constructors;
             }
 
             @Override
