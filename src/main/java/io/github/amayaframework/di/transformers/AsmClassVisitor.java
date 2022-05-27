@@ -4,17 +4,19 @@ import io.github.amayaframework.di.types.InjectType;
 import io.github.amayaframework.di.types.SubTypeFactory;
 import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.MethodVisitor;
+import org.objectweb.asm.Opcodes;
 
 import java.util.Objects;
 
-import static io.github.amayaframework.di.transformers.Constants.*;
+import static com.github.romanqed.jeflect.lambdas.AsmUtil.EMPTY_DESCRIPTOR;
+import static com.github.romanqed.jeflect.lambdas.AsmUtil.INIT;
 
 class AsmClassVisitor extends ClassVisitor {
     private final InjectType type;
     private final SubTypeFactory factory;
 
     protected AsmClassVisitor(ClassVisitor visitor, InjectType type, SubTypeFactory factory) {
-        super(API, visitor);
+        super(Opcodes.ASM8, visitor);
         this.type = type;
         this.factory = factory;
     }

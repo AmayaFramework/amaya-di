@@ -1,5 +1,10 @@
 package io.github.amayaframework.di.types;
 
+import io.github.amayaframework.di.annotations.Source;
+import org.atteo.classindex.ClassIndex;
+
+import java.lang.reflect.Modifier;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -10,9 +15,21 @@ public final class IndexTypeFactory implements SubTypeFactory {
     private final List<Class<?>> sources;
     private final Map<Class<?>, Class<?>> types;
 
-    public IndexTypeFactory(List<Class<?>> sources) {
-        this.sources = Objects.requireNonNull(sources);
+    public IndexTypeFactory() {
+        this.sources = findSubTypes();
         this.types = new ConcurrentHashMap<>();
+    }
+
+    private static List<Class<?>> findSubTypes() {
+        Iterable<Class<?>> found = ClassIndex.getAnnotated(Source.class);
+        List<Class<?>> ret = new LinkedList<>();
+        for (Class<?> clazz : found) {
+            if (Modifier.isAbstract(clazz.getModifiers())) {
+                throw new IllegalStateException(String.format("Source %s cannot be abstract", clazz.getName()));
+            }
+            ret.add(clazz);
+        }
+        return ret;
     }
 
     private Class<?> findSubType(Class<?> clazz) {
@@ -40,6 +57,9 @@ public final class IndexTypeFactory implements SubTypeFactory {
         if (ret != null) {
             types.put(clazz, ret);
             return ret;
+        }
+        if (Modifier.isAbstract(clazz.getModifiers())) {
+            throw new IllegalStateException("The type is abstract and has no subtypes");
         }
         return clazz;
     }

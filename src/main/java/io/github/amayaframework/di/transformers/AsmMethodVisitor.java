@@ -8,16 +8,17 @@ import org.objectweb.asm.Type;
 
 import java.util.Collection;
 
-import static io.github.amayaframework.di.transformers.Constants.*;
+import static com.github.romanqed.jeflect.lambdas.AsmUtil.EMPTY_DESCRIPTOR;
+import static com.github.romanqed.jeflect.lambdas.AsmUtil.INIT;
 
-public class AsmMethodVisitor extends MethodVisitor {
+class AsmMethodVisitor extends MethodVisitor {
     private final Type owner;
     private final Collection<InjectField> fields;
     private final Collection<InjectMethod> methods;
     private final SubTypeFactory factory;
 
     AsmMethodVisitor(MethodVisitor visitor, InjectType type, SubTypeFactory factory) {
-        super(API, visitor);
+        super(Opcodes.ASM8, visitor);
         this.owner = Type.getType(type.getTarget());
         this.fields = type.getFields();
         this.methods = type.getMethods();
@@ -60,6 +61,7 @@ public class AsmMethodVisitor extends MethodVisitor {
     private void loadArgument(InjectMember member) {
         // TODO
         Type subType = Type.getType(factory.getSubType(member.getClazz()));
+        // Prototype
         if (member.getPolicy() == InjectPolicy.PROTOTYPE) {
             super.visitTypeInsn(Opcodes.NEW, subType.getInternalName());
             super.visitInsn(Opcodes.DUP);
@@ -69,5 +71,7 @@ public class AsmMethodVisitor extends MethodVisitor {
                     EMPTY_DESCRIPTOR,
                     false);
         }
+        // Singleton
+        // Value
     }
 }
