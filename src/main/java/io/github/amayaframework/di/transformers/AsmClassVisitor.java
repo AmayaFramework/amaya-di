@@ -91,16 +91,13 @@ class AsmClassVisitor extends ClassVisitor {
 
         private void loadArgument(InjectMember member) {
             InjectPolicy policy = member.getPolicy();
+            Class<?> subType = factory.getSubType(member.getClazz());
             // Prototype
             if (policy == InjectPolicy.PROTOTYPE) {
-                Type subType = Type.getType(factory.getSubType(member.getClazz()));
-                super.visitTypeInsn(Opcodes.NEW, subType.getInternalName());
+                String typeName = Type.getInternalName(subType);
+                super.visitTypeInsn(Opcodes.NEW, typeName);
                 super.visitInsn(Opcodes.DUP);
-                super.visitMethodInsn(Opcodes.INVOKESPECIAL,
-                        subType.getInternalName(),
-                        INIT,
-                        EMPTY_DESCRIPTOR,
-                        false);
+                super.visitMethodInsn(Opcodes.INVOKESPECIAL, typeName, INIT, EMPTY_DESCRIPTOR, false);
                 return;
             }
             // Singleton and field
@@ -111,7 +108,8 @@ class AsmClassVisitor extends ClassVisitor {
                     method.getName(),
                     Type.getMethodDescriptor(method),
                     false);
-            super.visitLdcInsn(Objects.hash(member.getValue(), member.getClazz()));
+            String name = policy == InjectPolicy.SINGLETON ? subType.getName() : member.getValue();
+            super.visitLdcInsn(Objects.hash(subType, name));
             Class<?> container = method.getReturnType();
             // Invoke necessary method from container
             boolean isInterface = container.isInterface();
