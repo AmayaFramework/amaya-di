@@ -91,28 +91,7 @@ public final class ReflectTypeFactory implements InjectTypeFactory {
                 .filter(FILTER)
                 .map(this::getConstructor)
                 .collect(Collectors.toList());
-
-        return new InjectType() {
-            @Override
-            public Collection<InjectField> getFields() {
-                return fields;
-            }
-
-            @Override
-            public Collection<InjectMethod> getMethods() {
-                return methods;
-            }
-
-            @Override
-            public Collection<InjectConstructor> getConstructors() {
-                return constructors;
-            }
-
-            @Override
-            public Class<?> getTarget() {
-                return clazz;
-            }
-        };
+        return new InjectType(clazz, fields, methods, constructors);
     }
 
     private static class Data {

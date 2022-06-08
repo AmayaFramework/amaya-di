@@ -1,13 +1,54 @@
 package io.github.amayaframework.di.types;
 
 import java.util.Collection;
+import java.util.Objects;
 
-public interface InjectType {
-    Collection<InjectField> getFields();
+public class InjectType {
+    private final Class<?> target;
+    private final Collection<InjectField> fields;
+    private final Collection<InjectMethod> methods;
+    private final Collection<InjectConstructor> constructors;
 
-    Collection<InjectMethod> getMethods();
+    public InjectType(Class<?> target,
+                      Collection<InjectField> fields,
+                      Collection<InjectMethod> methods,
+                      Collection<InjectConstructor> constructors) {
+        this.target = target;
+        this.fields = fields;
+        this.methods = methods;
+        this.constructors = constructors;
+    }
 
-    Collection<InjectConstructor> getConstructors();
+    public Class<?> getTarget() {
+        return target;
+    }
 
-    Class<?> getTarget();
+    public Collection<InjectField> getFields() {
+        return fields;
+    }
+
+    public Collection<InjectMethod> getMethods() {
+        return methods;
+    }
+
+    Collection<InjectConstructor> getConstructors() {
+        return constructors;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof InjectType)) {
+            return false;
+        }
+        InjectType that = (InjectType) o;
+        return Objects.equals(target, that.target);
+    }
+
+    @Override
+    public int hashCode() {
+        return target.hashCode();
+    }
 }
