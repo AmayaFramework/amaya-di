@@ -7,10 +7,7 @@ import io.github.amayaframework.di.types.SubTypeFactory;
 import java.lang.instrument.ClassFileTransformer;
 import java.lang.instrument.Instrumentation;
 import java.lang.instrument.UnmodifiableClassException;
-import java.util.Collection;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
 public class AsmTransformer implements Transformer {
     private final Instrumentation instrumentation;
@@ -22,12 +19,9 @@ public class AsmTransformer implements Transformer {
     }
 
     private static boolean hasEmptyInit(Class<?> clazz) {
-        try {
-            clazz.getDeclaredConstructor();
-            return true;
-        } catch (NoSuchMethodException e) {
-            return false;
-        }
+        return Arrays.stream(clazz.getDeclaredConstructors())
+                .filter(e -> e.getParameterCount() == 0)
+                .count() == 1;
     }
 
     @Override
