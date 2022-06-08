@@ -8,7 +8,7 @@ public interface Container {
         return (E) getValue(value.hashCode());
     }
 
-    <E> E setValue(Value<E> field, E value);
+    <E> E putValue(Value<E> field, E value);
 
     <E> E removeValue(Value<E> value);
 

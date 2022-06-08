@@ -108,8 +108,13 @@ class AsmClassVisitor extends ClassVisitor {
                     method.getName(),
                     Type.getMethodDescriptor(method),
                     false);
-            String name = policy == InjectPolicy.SINGLETON ? subType.getName() : member.getValue();
-            super.visitLdcInsn(Objects.hash(subType, name));
+            int hashcode;
+            if (policy == InjectPolicy.SINGLETON) {
+                hashcode = subType.hashCode();
+            } else {
+                hashcode = Objects.hash(subType, member.getValue());
+            }
+            super.visitLdcInsn(hashcode);
             Class<?> container = method.getReturnType();
             // Invoke necessary method from container
             boolean isInterface = container.isInterface();
