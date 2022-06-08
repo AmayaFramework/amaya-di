@@ -4,32 +4,40 @@ import java.lang.reflect.Constructor;
 import java.util.Objects;
 
 /**
- *
+ * A container containing key-related data.
  */
 public interface Container {
     /**
-     * @param key
-     * @return
+     * Returns a stored object corresponding to an integer key.
+     *
+     * @param key required key
+     * @return found object or null
      */
     Object get(int key);
 
     /**
-     * @param key
-     * @param value
-     * @return
+     * Assigns an object to the corresponding key.
+     *
+     * @param key   required key
+     * @param value object to assign
+     * @return the previous object associated with the key, or null
      */
     Object put(int key, Object value);
 
     /**
-     * @param key
-     * @return
+     * Removes the object associated with the key.
+     *
+     * @param key required key
+     * @return removed object or null
      */
     Object remove(int key);
 
     /**
-     * @param value
-     * @param <E>
-     * @return
+     * Returns the object described by the {@link Value} object
+     *
+     * @param value required value
+     * @param <E>   type of required object
+     * @return found object or null
      */
     @SuppressWarnings("unchecked")
     default <E> E getValue(Value<E> value) {
@@ -37,10 +45,12 @@ public interface Container {
     }
 
     /**
-     * @param key
-     * @param value
-     * @param <E>
-     * @return
+     * Assigns an object of the same type to the specified {@link Value}.
+     *
+     * @param key   required value
+     * @param value object to assign, cannot be null
+     * @param <E>   type of assigned object
+     * @return the previous object associated with the key, or null
      */
     @SuppressWarnings("unchecked")
     default <E> E putValue(Value<E> key, E value) {
@@ -49,9 +59,11 @@ public interface Container {
     }
 
     /**
-     * @param value
-     * @param <E>
-     * @return
+     * Remove the object associated with the specified {@link Value}.
+     *
+     * @param value required value
+     * @param <E>   type of removed object
+     * @return removed object or null
      */
     @SuppressWarnings("unchecked")
     default <E> E removeValue(Value<E> value) {
@@ -59,9 +71,11 @@ public interface Container {
     }
 
     /**
-     * @param clazz
-     * @param <E>
-     * @return
+     * Returns an object of the class, if the object does not exist, instantiates the class.
+     *
+     * @param clazz singleton class
+     * @param <E>   singleton type
+     * @return instance of the class
      */
     @SuppressWarnings("unchecked")
     default <E> E getSingleton(Class<E> clazz) {
@@ -83,9 +97,11 @@ public interface Container {
     }
 
     /**
-     * @param clazz
-     * @param <E>
-     * @return
+     * Deletes an object of the class, if it exists.
+     *
+     * @param clazz singleton class
+     * @param <E>   singleton type
+     * @return deleted object or null
      */
     @SuppressWarnings("unchecked")
     default <E> E removeSingleton(Class<E> clazz) {
