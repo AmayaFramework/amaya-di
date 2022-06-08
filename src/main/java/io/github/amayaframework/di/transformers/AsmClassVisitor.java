@@ -1,7 +1,7 @@
 package io.github.amayaframework.di.transformers;
 
 import com.github.romanqed.jeflect.lambdas.AsmUtil;
-import io.github.amayaframework.di.annotations.InjectPolicy;
+import io.github.amayaframework.di.InjectPolicy;
 import io.github.amayaframework.di.containers.ProviderType;
 import io.github.amayaframework.di.types.*;
 import org.objectweb.asm.ClassVisitor;

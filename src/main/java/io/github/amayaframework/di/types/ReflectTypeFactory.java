@@ -1,9 +1,9 @@
 package io.github.amayaframework.di.types;
 
-import io.github.amayaframework.di.annotations.DirectInject;
-import io.github.amayaframework.di.annotations.Inject;
-import io.github.amayaframework.di.annotations.InjectPolicy;
-import io.github.amayaframework.di.annotations.Value;
+import io.github.amayaframework.di.DirectInject;
+import io.github.amayaframework.di.Inject;
+import io.github.amayaframework.di.InjectPolicy;
+import io.github.amayaframework.di.Value;
 import org.atteo.classindex.ClassIndex;
 
 import java.lang.reflect.*;

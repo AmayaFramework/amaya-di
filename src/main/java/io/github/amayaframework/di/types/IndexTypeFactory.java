@@ -1,6 +1,6 @@
 package io.github.amayaframework.di.types;
 
-import io.github.amayaframework.di.annotations.Source;
+import io.github.amayaframework.di.Source;
 import org.atteo.classindex.ClassIndex;
 
 import java.lang.reflect.Modifier;

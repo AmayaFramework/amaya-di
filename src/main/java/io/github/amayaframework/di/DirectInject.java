@@ -1,4 +1,4 @@
-package io.github.amayaframework.di.annotations;
+package io.github.amayaframework.di;
 
 import org.atteo.classindex.IndexAnnotated;
 
