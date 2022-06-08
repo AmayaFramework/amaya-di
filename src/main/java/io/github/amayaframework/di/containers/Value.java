@@ -11,6 +11,10 @@ public class Value<T> {
         this.type = Objects.requireNonNull(type);
     }
 
+    public static int hashcode(String name, Class<?> type) {
+        return Objects.hash(name, type);
+    }
+
     public String getName() {
         return name;
     }
@@ -22,7 +26,7 @@ public class Value<T> {
 
     @Override
     public int hashCode() {
-        return Objects.hash(name, type);
+        return hashcode(name, type);
     }
 
     @Override

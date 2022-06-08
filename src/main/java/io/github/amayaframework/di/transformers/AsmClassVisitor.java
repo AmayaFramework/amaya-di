@@ -4,6 +4,7 @@ import com.github.romanqed.jeflect.lambdas.AsmUtil;
 import io.github.amayaframework.di.InjectPolicy;
 import io.github.amayaframework.di.containers.Container;
 import io.github.amayaframework.di.containers.ProviderType;
+import io.github.amayaframework.di.containers.Value;
 import io.github.amayaframework.di.types.*;
 import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.MethodVisitor;
@@ -118,7 +119,7 @@ class AsmClassVisitor extends ClassVisitor {
                     throw new IllegalStateException("Unable to get container from provider due to", e);
                 }
             } else {
-                hashcode = Objects.hash(subType, member.getValue());
+                hashcode = Value.hashcode(member.getValue(), subType);
             }
             super.visitLdcInsn(hashcode);
             Class<?> container = method.getReturnType();
