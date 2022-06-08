@@ -1,5 +1,6 @@
 package io.github.amayaframework.di.transformers;
 
+import io.github.amayaframework.di.containers.ProviderType;
 import io.github.amayaframework.di.types.InjectType;
 import io.github.amayaframework.di.types.SubTypeFactory;
 import org.objectweb.asm.ClassVisitor;
@@ -14,11 +15,13 @@ import static com.github.romanqed.jeflect.lambdas.AsmUtil.INIT;
 class AsmClassVisitor extends ClassVisitor {
     private final InjectType type;
     private final SubTypeFactory factory;
+    private final ProviderType provider;
 
-    protected AsmClassVisitor(ClassVisitor visitor, InjectType type, SubTypeFactory factory) {
+    protected AsmClassVisitor(ClassVisitor visitor, InjectType type, SubTypeFactory factory, ProviderType provider) {
         super(Opcodes.ASM8, visitor);
         this.type = type;
         this.factory = factory;
+        this.provider = provider;
     }
 
     @Override
@@ -29,7 +32,7 @@ class AsmClassVisitor extends ClassVisitor {
                                      String[] exceptions) {
         MethodVisitor visitor = super.visitMethod(access, name, descriptor, signature, exceptions);
         if (Objects.equals(name, INIT) && Objects.equals(descriptor, EMPTY_DESCRIPTOR)) {
-            return new AsmMethodVisitor(visitor, type, factory);
+            return new AsmMethodVisitor(visitor, type, factory, provider);
         }
         return visitor;
     }

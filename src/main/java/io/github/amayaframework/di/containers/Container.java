@@ -1,18 +1,18 @@
 package io.github.amayaframework.di.containers;
 
 public interface Container {
-    Object getField(Integer key);
+    Object getValue(int key);
 
     @SuppressWarnings("unchecked")
-    default <E> E getField(Field<E> field) {
-        return (E) getField(field.hashCode());
+    default <E> E getValue(Value<E> value) {
+        return (E) getValue(value.hashCode());
     }
 
-    <E> E setField(Field<E> field, E value);
+    <E> E setValue(Value<E> field, E value);
 
-    <E> E removeField(Field<E> field);
+    <E> E removeValue(Value<E> value);
 
-    Object getSingleton(Integer key);
+    Object getSingleton(int key);
 
     @SuppressWarnings("unchecked")
     default <E> E getSingleton(Class<E> clazz) {

@@ -2,11 +2,11 @@ package io.github.amayaframework.di.containers;
 
 import java.util.Objects;
 
-public class Field<T> {
+public class Value<T> {
     private final String name;
     private final Class<?> type;
 
-    public Field(String name, Class<?> type) {
+    public Value(String name, Class<?> type) {
         this.name = Objects.requireNonNull(name);
         this.type = Objects.requireNonNull(type);
     }
@@ -30,10 +30,10 @@ public class Field<T> {
         if (obj == this) {
             return true;
         }
-        if (!(obj instanceof Field)) {
+        if (!(obj instanceof Value)) {
             return false;
         }
-        Field<?> field = (Field<?>) obj;
-        return field.name.equals(name) && field.type == type;
+        Value<?> value = (Value<?>) obj;
+        return value.name.equals(name) && value.type == type;
     }
 }

@@ -1,13 +1,12 @@
 package io.github.amayaframework.di.transformers;
 
+import io.github.amayaframework.di.containers.ProviderType;
 import io.github.amayaframework.di.types.InjectType;
 import io.github.amayaframework.di.types.SubTypeFactory;
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.ClassWriter;
 
-import java.io.FileOutputStream;
-import java.io.IOException;
 import java.lang.instrument.ClassFileTransformer;
 import java.security.ProtectionDomain;
 import java.util.Objects;
@@ -15,10 +14,12 @@ import java.util.Objects;
 class AsmClassFileTransformer implements ClassFileTransformer {
     private final InjectType type;
     private final SubTypeFactory factory;
+    private final ProviderType provider;
 
-    AsmClassFileTransformer(InjectType type, SubTypeFactory factory) {
+    AsmClassFileTransformer(InjectType type, SubTypeFactory factory, ProviderType provider) {
         this.type = type;
         this.factory = factory;
+        this.provider = provider;
     }
 
     @Override
@@ -33,17 +34,8 @@ class AsmClassFileTransformer implements ClassFileTransformer {
         ClassReader reader = new ClassReader(classfileBuffer);
         ClassWriter writer = new ClassWriter(reader, ClassWriter.COMPUTE_MAXS);
         int flags = ClassReader.SKIP_FRAMES | ClassReader.SKIP_DEBUG;
-        ClassVisitor visitor = new AsmClassVisitor(writer, type, factory);
+        ClassVisitor visitor = new AsmClassVisitor(writer, type, factory, provider);
         reader.accept(visitor, flags);
-        // FIXME
-//        return writer.toByteArray();
-        try {
-            FileOutputStream stream = new FileOutputStream("./Test.class");
-            stream.write(writer.toByteArray());
-            stream.close();
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-        return classfileBuffer;
+        return writer.toByteArray();
     }
 }

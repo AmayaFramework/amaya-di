@@ -1,5 +1,6 @@
 package io.github.amayaframework.di.transformers;
 
+import io.github.amayaframework.di.containers.ProviderType;
 import io.github.amayaframework.di.types.InjectType;
 import io.github.amayaframework.di.types.SubTypeFactory;
 
@@ -30,7 +31,7 @@ public class AsmTransformer implements Transformer {
     }
 
     @Override
-    public void transform(Collection<InjectType> types) throws UnmodifiableClassException {
+    public void transform(Collection<InjectType> types, ProviderType provider) throws UnmodifiableClassException {
         List<ClassFileTransformer> transformers = new LinkedList<>();
         Class<?>[] classes = new Class<?>[types.size()];
         int index = 0;
@@ -40,7 +41,7 @@ public class AsmTransformer implements Transformer {
                 throw new IllegalStateException("Empty constructor not found");
             }
             classes[index++] = clazz;
-            ClassFileTransformer toAdd = new AsmClassFileTransformer(type, factory);
+            ClassFileTransformer toAdd = new AsmClassFileTransformer(type, factory, provider);
             instrumentation.addTransformer(toAdd, true);
             transformers.add(toAdd);
         }
