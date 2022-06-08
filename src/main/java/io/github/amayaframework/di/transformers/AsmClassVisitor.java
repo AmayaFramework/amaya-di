@@ -2,6 +2,7 @@ package io.github.amayaframework.di.transformers;
 
 import com.github.romanqed.jeflect.lambdas.AsmUtil;
 import io.github.amayaframework.di.InjectPolicy;
+import io.github.amayaframework.di.containers.Container;
 import io.github.amayaframework.di.containers.ProviderType;
 import io.github.amayaframework.di.types.*;
 import org.objectweb.asm.ClassVisitor;
@@ -110,6 +111,12 @@ class AsmClassVisitor extends ClassVisitor {
             int hashcode;
             if (policy == InjectPolicy.SINGLETON) {
                 hashcode = subType.hashCode();
+                try {
+                    Container container = (Container) method.invoke(null);
+                    container.getSingleton(subType);
+                } catch (Exception e) {
+                    throw new IllegalStateException("Unable to get container from provider due to", e);
+                }
             } else {
                 hashcode = Objects.hash(subType, member.getValue());
             }
