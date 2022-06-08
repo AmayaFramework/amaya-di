@@ -18,8 +18,7 @@ import static com.github.romanqed.jeflect.lambdas.AsmUtil.INIT;
 
 class AsmClassVisitor extends ClassVisitor {
     private static final String DESCRIPTOR = AsmUtil.formatDescriptor("L" + AsmUtil.OBJECT + ";", "I");
-    private static final String VALUE = "getValue";
-    private static final String SINGLETON = "getSingleton";
+    private static final String METHOD_NAME = "get";
     private final InjectType type;
     private final SubTypeFactory factory;
     private final ProviderType provider;
@@ -120,7 +119,7 @@ class AsmClassVisitor extends ClassVisitor {
             boolean isInterface = container.isInterface();
             super.visitMethodInsn(isInterface ? Opcodes.INVOKEINTERFACE : Opcodes.INVOKEVIRTUAL,
                     Type.getInternalName(container),
-                    policy == InjectPolicy.SINGLETON ? SINGLETON : VALUE,
+                    METHOD_NAME,
                     DESCRIPTOR,
                     isInterface);
             // Cast to expected type
