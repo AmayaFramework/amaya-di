@@ -13,7 +13,7 @@ java {
 }
 
 group = 'io.github.amayaframework'
-archivesBaseName = 'amaya-ioc'
+archivesBaseName = 'amaya-di'
 version = System.getenv('RELEASE_VERSION') ?: '1.0.0'
 
 repositories {
@@ -59,7 +59,7 @@ publishing {
                 name.set(archivesBaseName)
                 description.set('The framework responsible for implementing dependencies. ' +
                         'Implemented without using reflection in runtime.')
-                url.set('https://github.com/AmayaFramework/amaya-ioc')
+                url.set('https://github.com/AmayaFramework/amaya-di')
 
                 organization {
                     name.set('io.github.amayaframework')
@@ -68,7 +68,7 @@ publishing {
 
                 issueManagement {
                     system.set('GitHub')
-                    url.set('https://github.com/AmayaFramework/amaya-ioc/issues')
+                    url.set('https://github.com/AmayaFramework/amaya-di/issues')
                 }
 
                 licenses {
@@ -79,9 +79,9 @@ publishing {
                 }
 
                 scm {
-                    url.set('https://github.com/AmayaFramework/amaya-ioc')
-                    connection.set('scm:https://github.com/AmayaFramework/amaya-ioc.git')
-                    developerConnection.set('scm:https://github.com/AmayaFramework/amaya-ioc.git')
+                    url.set('https://github.com/AmayaFramework/amaya-di')
+                    connection.set('scm:https://github.com/AmayaFramework/amaya-di.git')
+                    developerConnection.set('scm:https://github.com/AmayaFramework/amaya-di.git')
                 }
 
                 developers {

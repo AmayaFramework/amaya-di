@@ -1,6 +1,6 @@
 package io.github.amayaframework.di.types;
 
-import io.github.amayaframework.di.DirectInject;
+import io.github.amayaframework.di.Inject;
 import io.github.amayaframework.di.Value;
 import org.atteo.classindex.ClassIndex;
 
@@ -80,7 +80,7 @@ public final class ReflectTypeFactory implements InjectTypeFactory {
 
     @Override
     public Collection<InjectType> getInjectTypes() {
-        Iterable<Class<?>> found = ClassIndex.getAnnotated(DirectInject.class);
+        Iterable<Class<?>> found = ClassIndex.getAnnotated(Inject.class);
         List<InjectType> ret = new LinkedList<>();
         for (Class<?> clazz : found) {
             ret.add(getInjectType(clazz));

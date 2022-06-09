@@ -10,5 +10,5 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)
 @IndexAnnotated
-public @interface DirectInject {
+public @interface Inject {
 }
