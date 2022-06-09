@@ -1,6 +1,5 @@
 package io.github.amayaframework.di.types;
 
-import io.github.amayaframework.di.InjectPolicy;
 import org.objectweb.asm.Type;
 
 import java.lang.reflect.Method;

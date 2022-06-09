@@ -1,7 +1,5 @@
 package io.github.amayaframework.di.types;
 
-import io.github.amayaframework.di.InjectPolicy;
-
 import java.lang.reflect.Field;
 
 public class InjectField extends InjectMember {
