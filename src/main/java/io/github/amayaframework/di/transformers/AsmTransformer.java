@@ -9,8 +9,6 @@ import java.lang.instrument.ClassFileTransformer;
 import java.lang.instrument.Instrumentation;
 import java.lang.instrument.UnmodifiableClassException;
 import java.util.Arrays;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.Objects;
 
 /**
@@ -36,20 +34,14 @@ public class AsmTransformer implements Transformer {
     }
 
     @Override
-    public void transform(Class<?>[] classes, ProviderType provider) throws UnmodifiableClassException {
-        List<ClassFileTransformer> transformers = new LinkedList<>();
-        for (Class<?> clazz : classes) {
-            if (!hasEmptyInit(clazz)) {
-                throw new IllegalStateException("Empty constructor not found");
-            }
-            InjectType type = injectFactory.getInjectType(clazz);
-            ClassFileTransformer toAdd = new AsmClassFileTransformer(type, typeFactory, provider);
-            instrumentation.addTransformer(toAdd, true);
-            transformers.add(toAdd);
+    public void transform(Class<?> clazz, ProviderType provider) throws UnmodifiableClassException {
+        if (!hasEmptyInit(clazz)) {
+            throw new IllegalStateException("Empty constructor not found");
         }
-        instrumentation.retransformClasses(classes);
-        for (ClassFileTransformer transformer : transformers) {
-            instrumentation.removeTransformer(transformer);
-        }
+        InjectType type = injectFactory.getInjectType(clazz);
+        ClassFileTransformer transformer = new AsmClassFileTransformer(type, typeFactory, provider);
+        instrumentation.addTransformer(transformer, true);
+        instrumentation.retransformClasses(clazz);
+        instrumentation.removeTransformer(transformer);
     }
 }
