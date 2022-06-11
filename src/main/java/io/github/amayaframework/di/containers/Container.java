@@ -1,6 +1,5 @@
 package io.github.amayaframework.di.containers;
 
-import java.lang.reflect.Constructor;
 import java.util.Objects;
 
 /**
@@ -68,43 +67,5 @@ public interface Container {
     @SuppressWarnings("unchecked")
     default <E> E removeValue(Value<E> value) {
         return (E) remove(value.hashCode());
-    }
-
-    /**
-     * Returns an object of the class, if the object does not exist, instantiates the class.
-     *
-     * @param clazz singleton class
-     * @param <E>   singleton type
-     * @return instance of the class
-     */
-    @SuppressWarnings("unchecked")
-    default <E> E getSingleton(Class<E> clazz) {
-        Objects.requireNonNull(clazz);
-        int hashcode = clazz.hashCode();
-        E ret = (E) get(hashcode);
-        if (ret != null) {
-            return ret;
-        }
-        try {
-            Constructor<?> constructor = clazz.getDeclaredConstructor();
-            constructor.setAccessible(true);
-            ret = (E) constructor.newInstance();
-            put(hashcode, ret);
-        } catch (Exception e) {
-            throw new IllegalStateException("Unable to instantiate singleton due to", e);
-        }
-        return ret;
-    }
-
-    /**
-     * Deletes an object of the class, if it exists.
-     *
-     * @param clazz singleton class
-     * @param <E>   singleton type
-     * @return deleted object or null
-     */
-    @SuppressWarnings("unchecked")
-    default <E> E removeSingleton(Class<E> clazz) {
-        return (E) remove(clazz.hashCode());
     }
 }

@@ -12,6 +12,7 @@ import java.security.ProtectionDomain;
 import java.util.Objects;
 
 class AsmClassFileTransformer implements ClassFileTransformer {
+    private static final int OPTIONS = ClassReader.SKIP_DEBUG | ClassReader.SKIP_FRAMES;
     private final InjectType type;
     private final SubTypeFactory factory;
     private final ProviderType provider;
@@ -32,10 +33,9 @@ class AsmClassFileTransformer implements ClassFileTransformer {
             return classfileBuffer;
         }
         ClassReader reader = new ClassReader(classfileBuffer);
-        ClassWriter writer = new ClassWriter(reader, ClassWriter.COMPUTE_MAXS);
-        int flags = ClassReader.SKIP_FRAMES | ClassReader.SKIP_DEBUG;
+        ClassWriter writer = new ClassWriter(reader, ClassWriter.COMPUTE_FRAMES);
         ClassVisitor visitor = new AsmClassVisitor(writer, type, factory, provider);
-        reader.accept(visitor, flags);
+        reader.accept(visitor, OPTIONS);
         return writer.toByteArray();
     }
 }
