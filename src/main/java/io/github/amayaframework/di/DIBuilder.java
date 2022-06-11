@@ -17,6 +17,7 @@ import java.util.Objects;
 import java.util.Optional;
 
 public class DIBuilder {
+    private static final DIBuilder DEFAULT_BUILDER = new DIBuilder();
     private static final ProviderType PROVIDER_TYPE = ProviderType.fromClass(ContainerProvider.class);
     private ProviderType provider;
     private Instrumentation instrumentation;
@@ -30,7 +31,7 @@ public class DIBuilder {
     }
 
     public static DI createDefault() {
-        return new DIBuilder().build();
+        return DEFAULT_BUILDER.build();
     }
 
     private void resetValues() {
