@@ -16,17 +16,17 @@ public class MapContainer implements Container {
     }
 
     @Override
-    public Object get(int key) {
+    public Object get(Integer key) {
         return body.get(key);
     }
 
     @Override
-    public Object put(int key, Object value) {
+    public Object put(Integer key, Object value) {
         return body.put(key, value);
     }
 
     @Override
-    public Object remove(int key) {
+    public Object remove(Integer key) {
         return body.remove(key);
     }
 }

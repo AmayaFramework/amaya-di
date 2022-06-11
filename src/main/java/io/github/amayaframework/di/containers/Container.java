@@ -13,7 +13,7 @@ public interface Container {
      * @param key required key
      * @return found object or null
      */
-    Object get(int key);
+    Object get(Integer key);
 
     /**
      * Assigns an object to the corresponding key.
@@ -22,7 +22,7 @@ public interface Container {
      * @param value object to assign
      * @return the previous object associated with the key, or null
      */
-    Object put(int key, Object value);
+    Object put(Integer key, Object value);
 
     /**
      * Removes the object associated with the key.
@@ -30,7 +30,7 @@ public interface Container {
      * @param key required key
      * @return removed object or null
      */
-    Object remove(int key);
+    Object remove(Integer key);
 
     /**
      * Returns the object described by the {@link Value} object

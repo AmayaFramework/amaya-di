@@ -18,7 +18,9 @@ public class AsmTransformer implements Transformer {
     private final InjectTypeFactory injectFactory;
     private final SubTypeFactory typeFactory;
 
-    public AsmTransformer(Instrumentation instrumentation, InjectTypeFactory injectFactory, SubTypeFactory typeFactory) {
+    public AsmTransformer(Instrumentation instrumentation,
+                          InjectTypeFactory injectFactory,
+                          SubTypeFactory typeFactory) {
         this.instrumentation = Objects.requireNonNull(instrumentation);
         this.injectFactory = Objects.requireNonNull(injectFactory);
         this.typeFactory = Objects.requireNonNull(typeFactory);

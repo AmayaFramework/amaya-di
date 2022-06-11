@@ -19,30 +19,27 @@ public class MetaConstructorFactory implements ConstructorFactory {
     private final MetaFactory metaFactory;
     private final InjectTypeFactory injectFactory;
     private final SubTypeFactory typeFactory;
-    private final ProviderType provider;
 
     public MetaConstructorFactory(MetaFactory metaFactory,
                                   InjectTypeFactory injectFactory,
-                                  SubTypeFactory typeFactory,
-                                  ProviderType provider) {
+                                  SubTypeFactory typeFactory) {
         this.metaFactory = Objects.requireNonNull(metaFactory);
         this.injectFactory = Objects.requireNonNull(injectFactory);
         this.typeFactory = Objects.requireNonNull(typeFactory);
-        this.provider = provider;
     }
 
-    private Callable<?> getDependency(InjectMember member) throws Throwable {
+    private Callable<?> getDependency(InjectMember member, ProviderType provider) throws Throwable {
         InjectPolicy policy = member.getPolicy();
         Class<?> subType = typeFactory.getSubType(member.getClazz());
         // Prototype
         if (policy == InjectPolicy.PROTOTYPE) {
-            return getConstructor(subType);
+            return getConstructor(subType, provider);
         }
         ContainerAccessor accessor = metaFactory.packLambdaMethod(ACCESSOR, provider.getMethod());
         // Singleton
         if (policy == InjectPolicy.SINGLETON) {
-            int hashCode = subType.hashCode();
-            Callable<?> constructor = getConstructor(subType);
+            Integer hashCode = subType.hashCode();
+            Callable<?> constructor = getConstructor(subType, provider);
             return () -> {
                 Container container = accessor.get();
                 Object singleton = container.get(hashCode);
@@ -53,7 +50,7 @@ public class MetaConstructorFactory implements ConstructorFactory {
                 return singleton;
             };
         }
-        int hashCode = Value.hashcode(member.getValue(), subType);
+        Integer hashCode = Value.hashcode(member.getValue(), subType);
         return () -> {
             Container container = accessor.get();
             return container.get(hashCode);
@@ -62,7 +59,7 @@ public class MetaConstructorFactory implements ConstructorFactory {
 
     @Override
     @SuppressWarnings("unchecked")
-    public <E> Callable<E> getConstructor(Class<E> clazz) throws Throwable {
+    public <E> Callable<E> getConstructor(Class<E> clazz, ProviderType provider) throws Throwable {
         InjectType type = injectFactory.getInjectType(clazz);
         if (type == null) {
             return metaFactory.packLambdaConstructor(ReflectUtil.CALLABLE, clazz.getDeclaredConstructor());
@@ -75,7 +72,7 @@ public class MetaConstructorFactory implements ConstructorFactory {
         int index = 0;
         for (InjectMethod method : methods) {
             setters[index] = metaFactory.packLambdaMethod(SETTER, method.getMethod());
-            dependencies[index] = getDependency(method);
+            dependencies[index] = getDependency(method, provider);
             ++index;
         }
         // Prepare constructor
@@ -85,7 +82,7 @@ public class MetaConstructorFactory implements ConstructorFactory {
             init = metaFactory.packLambdaConstructor(ReflectUtil.CALLABLE, clazz.getDeclaredConstructor());
         } else {
             Producer producer = metaFactory.packLambdaConstructor(PRODUCER, constructor.getConstructor());
-            Callable<?> dependency = getDependency(constructor);
+            Callable<?> dependency = getDependency(constructor, provider);
             init = () -> producer.produce(dependency.call());
         }
         return () -> {

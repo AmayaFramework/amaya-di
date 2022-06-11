@@ -18,7 +18,7 @@ import static com.github.romanqed.jeflect.lambdas.AsmUtil.EMPTY_DESCRIPTOR;
 import static com.github.romanqed.jeflect.lambdas.AsmUtil.INIT;
 
 class AsmClassVisitor extends ClassVisitor {
-    private static final String DESCRIPTOR = AsmUtil.formatDescriptor("L" + AsmUtil.OBJECT + ";", "I");
+    private static final String DESCRIPTOR = getDescriptor();
     private static final String METHOD_NAME = "get";
     private final InjectType type;
     private final SubTypeFactory factory;
@@ -29,6 +29,14 @@ class AsmClassVisitor extends ClassVisitor {
         this.type = type;
         this.factory = factory;
         this.provider = provider;
+    }
+
+    private static String getDescriptor() {
+        try {
+            return Type.getMethodDescriptor(Container.class.getMethod("get", Integer.class));
+        } catch (NoSuchMethodException e) {
+            throw new IllegalStateException("It is impossible to find get method for extracting the descriptor");
+        }
     }
 
     @Override
@@ -121,6 +129,7 @@ class AsmClassVisitor extends ClassVisitor {
                 hashCode = Value.hashcode(member.getValue(), subType);
             }
             super.visitLdcInsn(hashCode);
+            AsmUtil.packPrimitive(mv, Type.INT_TYPE);
             Class<?> container = method.getReturnType();
             // Invoke necessary method from container
             boolean isInterface = container.isInterface();
