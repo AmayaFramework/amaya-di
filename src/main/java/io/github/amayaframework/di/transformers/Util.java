@@ -8,7 +8,7 @@ import org.objectweb.asm.Type;
 import static com.github.romanqed.jeflect.lambdas.AsmUtil.EMPTY_DESCRIPTOR;
 import static com.github.romanqed.jeflect.lambdas.AsmUtil.INIT;
 
-class Util {
+final class Util {
     static final String GET_DESCRIPTOR = makeGetDescriptor();
     static final String GET_METHOD_NAME = "get";
     static final String PUT_DESCRIPTOR = makePutDescriptor();
