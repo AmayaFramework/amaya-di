@@ -2,11 +2,13 @@ package io.github.amayaframework.di.types;
 
 import io.github.amayaframework.di.Inject;
 import io.github.amayaframework.di.Value;
-import org.atteo.classindex.ClassIndex;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.*;
-import java.util.*;
+import java.util.Arrays;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 public final class ReflectTypeFactory implements InjectTypeFactory {
@@ -65,31 +67,27 @@ public final class ReflectTypeFactory implements InjectTypeFactory {
         return ret;
     }
 
-    private List<InjectConstructor> findConstructors(Constructor<?>[] constructors) {
-        List<InjectConstructor> ret = new LinkedList<>();
+    private InjectConstructor findConstructor(Constructor<?>[] constructors) {
+        InjectConstructor ret = null;
         for (Constructor<?> constructor : constructors) {
             Data data = extractData(constructor, null);
             if (data == null) {
                 continue;
             }
             checkParameters(constructor);
-            ret.add(new InjectConstructor(constructor, data.policy, data.value));
-        }
-        return ret;
-    }
-
-    @Override
-    public Collection<InjectType> getInjectTypes() {
-        Iterable<Class<?>> found = ClassIndex.getAnnotated(Inject.class);
-        List<InjectType> ret = new LinkedList<>();
-        for (Class<?> clazz : found) {
-            ret.add(getInjectType(clazz));
+            if (ret != null) {
+                throw new IllegalStateException("Found more than 1 constructor for injection");
+            }
+            ret = new InjectConstructor(constructor, data.policy, data.value);
         }
         return ret;
     }
 
     @Override
     public InjectType getInjectType(Class<?> clazz) {
+        if (!clazz.isAnnotationPresent(Inject.class)) {
+            return null;
+        }
         if (Modifier.isAbstract(clazz.getModifiers())) {
             throw new IllegalStateException(String.format("The %s type cannot be abstract", clazz.getName()));
         }
@@ -97,9 +95,12 @@ public final class ReflectTypeFactory implements InjectTypeFactory {
         List<InjectField> fields = findFields(clazz.getDeclaredFields());
         // Find methods
         List<InjectMethod> methods = findMethods(clazz.getMethods());
-        // Find constructors
-        List<InjectConstructor> constructors = findConstructors(clazz.getDeclaredConstructors());
-        return new InjectType(clazz, fields, methods, constructors);
+        // Find constructor
+        InjectConstructor constructor = findConstructor(clazz.getDeclaredConstructors());
+        if (fields.isEmpty() && methods.isEmpty() && constructor == null) {
+            throw new IllegalStateException("No elements found for injection");
+        }
+        return new InjectType(clazz, fields, methods, constructor);
     }
 
     private static class Data {

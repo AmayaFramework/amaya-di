@@ -108,9 +108,9 @@ class AsmClassVisitor extends ClassVisitor {
                     method.getName(),
                     Type.getMethodDescriptor(method),
                     false);
-            int hashcode;
+            int hashCode;
             if (policy == InjectPolicy.SINGLETON) {
-                hashcode = subType.hashCode();
+                hashCode = subType.hashCode();
                 try {
                     Container container = (Container) method.invoke(null);
                     container.getSingleton(subType);
@@ -118,9 +118,9 @@ class AsmClassVisitor extends ClassVisitor {
                     throw new IllegalStateException("Unable to get container from provider due to", e);
                 }
             } else {
-                hashcode = Value.hashcode(member.getValue(), subType);
+                hashCode = Value.hashcode(member.getValue(), subType);
             }
-            super.visitLdcInsn(hashcode);
+            super.visitLdcInsn(hashCode);
             Class<?> container = method.getReturnType();
             // Invoke necessary method from container
             boolean isInterface = container.isInterface();

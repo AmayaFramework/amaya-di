@@ -48,8 +48,4 @@ public enum InjectPolicy {
     public static InjectPolicy fromAnnotation(Annotation annotation) {
         return children.get(annotation.annotationType());
     }
-
-    public Class<? extends Annotation> getAnnotation() {
-        return annotation;
-    }
 }

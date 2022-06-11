@@ -7,16 +7,16 @@ public class InjectType {
     private final Class<?> target;
     private final Collection<InjectField> fields;
     private final Collection<InjectMethod> methods;
-    private final Collection<InjectConstructor> constructors;
+    private final InjectConstructor constructor;
 
     public InjectType(Class<?> target,
                       Collection<InjectField> fields,
                       Collection<InjectMethod> methods,
-                      Collection<InjectConstructor> constructors) {
+                      InjectConstructor constructor) {
         this.target = target;
         this.fields = fields;
         this.methods = methods;
-        this.constructors = constructors;
+        this.constructor = constructor;
     }
 
     public Class<?> getTarget() {
@@ -31,8 +31,8 @@ public class InjectType {
         return methods;
     }
 
-    Collection<InjectConstructor> getConstructors() {
-        return constructors;
+    public InjectConstructor getConstructor() {
+        return constructor;
     }
 
     @Override

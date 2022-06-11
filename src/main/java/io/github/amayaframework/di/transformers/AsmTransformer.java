@@ -2,20 +2,26 @@ package io.github.amayaframework.di.transformers;
 
 import io.github.amayaframework.di.containers.ProviderType;
 import io.github.amayaframework.di.types.InjectType;
+import io.github.amayaframework.di.types.InjectTypeFactory;
 import io.github.amayaframework.di.types.SubTypeFactory;
 
 import java.lang.instrument.ClassFileTransformer;
 import java.lang.instrument.Instrumentation;
 import java.lang.instrument.UnmodifiableClassException;
-import java.util.*;
+import java.util.Arrays;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Objects;
 
 public class AsmTransformer implements Transformer {
     private final Instrumentation instrumentation;
-    private final SubTypeFactory factory;
+    private final InjectTypeFactory injectFactory;
+    private final SubTypeFactory typeFactory;
 
-    public AsmTransformer(Instrumentation instrumentation, SubTypeFactory factory) {
+    public AsmTransformer(Instrumentation instrumentation, InjectTypeFactory injectFactory, SubTypeFactory typeFactory) {
         this.instrumentation = Objects.requireNonNull(instrumentation);
-        this.factory = Objects.requireNonNull(factory);
+        this.injectFactory = Objects.requireNonNull(injectFactory);
+        this.typeFactory = Objects.requireNonNull(typeFactory);
     }
 
     private static boolean hasEmptyInit(Class<?> clazz) {
@@ -25,17 +31,14 @@ public class AsmTransformer implements Transformer {
     }
 
     @Override
-    public void transform(Collection<InjectType> types, ProviderType provider) throws UnmodifiableClassException {
+    public void transform(Class<?>[] classes, ProviderType provider) throws UnmodifiableClassException {
         List<ClassFileTransformer> transformers = new LinkedList<>();
-        Class<?>[] classes = new Class<?>[types.size()];
-        int index = 0;
-        for (InjectType type : types) {
-            Class<?> clazz = type.getTarget();
+        for (Class<?> clazz : classes) {
             if (!hasEmptyInit(clazz)) {
                 throw new IllegalStateException("Empty constructor not found");
             }
-            classes[index++] = clazz;
-            ClassFileTransformer toAdd = new AsmClassFileTransformer(type, factory, provider);
+            InjectType type = injectFactory.getInjectType(clazz);
+            ClassFileTransformer toAdd = new AsmClassFileTransformer(type, typeFactory, provider);
             instrumentation.addTransformer(toAdd, true);
             transformers.add(toAdd);
         }
