@@ -13,6 +13,9 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
 
+/**
+ * An implementation of {@link Transformer} that uses the Asm library to edit the bytecode of classes.
+ */
 public class AsmTransformer implements Transformer {
     private final Instrumentation instrumentation;
     private final InjectTypeFactory injectFactory;

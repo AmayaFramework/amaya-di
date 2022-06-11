@@ -7,7 +7,9 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
-
+/**
+ * A class that stores data about a singleton class that stores a {@link Container}.
+ */
 public class ProviderType {
     private final Class<?> type;
     private final Method method;

@@ -11,6 +11,10 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
+/**
+ * <p>Implementation {@link InjectTypeFactory} using standard reflection.</p>
+ * <p>All classes must be annotated with {@link Inject}.</p>
+ */
 public final class ReflectTypeFactory implements InjectTypeFactory {
     private Data extractData(AnnotatedElement element, String name) {
         List<Annotation> found = Arrays.stream(element.getDeclaredAnnotations())

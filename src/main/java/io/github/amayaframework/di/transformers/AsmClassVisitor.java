@@ -126,7 +126,7 @@ class AsmClassVisitor extends ClassVisitor {
                     throw new IllegalStateException("Unable to get container from provider due to", e);
                 }
             } else {
-                hashCode = Value.hashcode(member.getValue(), subType);
+                hashCode = Value.hashCode(member.getValue(), subType);
             }
             super.visitLdcInsn(hashCode);
             AsmUtil.packPrimitive(mv, Type.INT_TYPE);

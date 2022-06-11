@@ -12,6 +12,9 @@ import java.util.Collection;
 import java.util.Objects;
 import java.util.concurrent.Callable;
 
+/**
+ * Implementation of {@link ConstructorFactory} using meta-lambdas.
+ */
 public class MetaConstructorFactory implements ConstructorFactory {
     private static final LambdaType<Setter> SETTER = LambdaType.fromClass(Setter.class);
     private static final LambdaType<Producer> PRODUCER = LambdaType.fromClass(Producer.class);
@@ -50,7 +53,7 @@ public class MetaConstructorFactory implements ConstructorFactory {
                 return singleton;
             };
         }
-        Integer hashCode = Value.hashcode(member.getValue(), subType);
+        Integer hashCode = Value.hashCode(member.getValue(), subType);
         return () -> {
             Container container = accessor.get();
             return container.get(hashCode);

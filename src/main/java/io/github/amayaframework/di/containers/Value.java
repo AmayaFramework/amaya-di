@@ -2,21 +2,30 @@ package io.github.amayaframework.di.containers;
 
 import java.util.Objects;
 
+/**
+ * A class describing the concept of "value": a name-type pair.
+ *
+ * @param <T> class type
+ */
 public class Value<T> {
     private final String name;
-    private final Class<?> type;
+    private final Class<T> type;
 
-    public Value(String name, Class<?> type) {
+    public Value(String name, Class<T> type) {
         this.name = Objects.requireNonNull(name);
         this.type = Objects.requireNonNull(type);
     }
 
-    public static int hashcode(String name, Class<?> type) {
+    public static int hashCode(String name, Class<?> type) {
         return Objects.hash(name, type);
     }
 
     public String getName() {
         return name;
+    }
+
+    public Class<T> getType() {
+        return type;
     }
 
     @Override
@@ -26,7 +35,7 @@ public class Value<T> {
 
     @Override
     public int hashCode() {
-        return hashcode(name, type);
+        return hashCode(name, type);
     }
 
     @Override
