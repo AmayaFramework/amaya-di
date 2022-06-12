@@ -129,7 +129,7 @@ public class DIBuilder {
     }
 
     /**
-     * Sets a flag indicating that all classes annotated with {@link Autowire}
+     * Sets a flag indicating that all classes annotated with {@link AutoTransform}
      * will be found and transformed when creating {@link DI}.
      *
      * @param autoTransform boolean flag, if it is necessary to process classes - true, if not - false.

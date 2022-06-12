@@ -11,5 +11,5 @@ import java.lang.annotation.*;
 @Target(ElementType.TYPE)
 @IndexAnnotated
 @Documented
-public @interface Autowire {
+public @interface AutoTransform {
 }

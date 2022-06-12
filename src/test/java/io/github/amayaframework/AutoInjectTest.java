@@ -77,7 +77,7 @@ public class AutoInjectTest extends Assertions {
     }
 
     @Inject
-    @Autowire
+    @AutoTransform
     public static class PrototypeTest {
         @Prototype
         private SourceClass field1;
@@ -86,14 +86,14 @@ public class AutoInjectTest extends Assertions {
     }
 
     @Inject
-    @Autowire
+    @AutoTransform
     public static class SingletonTest {
         @Singleton
         private SourceClass field1;
     }
 
     @Inject
-    @Autowire
+    @AutoTransform
     public static class ValueTest {
         @Value("FIELD1")
         private Integer field1;
@@ -109,7 +109,7 @@ public class AutoInjectTest extends Assertions {
 
     @Source
     @Inject
-    @Autowire
+    @AutoTransform
     public static class SourceChildrenClass extends SourceClass {
         @Prototype
         public InnerFinal field;

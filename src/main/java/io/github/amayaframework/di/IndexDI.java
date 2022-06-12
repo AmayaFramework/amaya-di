@@ -63,7 +63,7 @@ final class IndexDI implements DI {
 
     @Override
     public Class<?>[] transform() {
-        Iterable<Class<?>> found = ClassIndex.getAnnotated(Autowire.class);
+        Iterable<Class<?>> found = ClassIndex.getAnnotated(AutoTransform.class);
         Class<?>[] classes = StreamSupport.stream(found.spliterator(), false).toArray(Class<?>[]::new);
         if (classes.length == 0) {
             return classes;
