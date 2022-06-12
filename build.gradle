@@ -58,7 +58,7 @@ publishing {
             // Configure pom
             pom {
                 name.set(archivesBaseName)
-                description.set('The framework responsible for implementing dependencies. ' +
+                description.set('The framework responsible for injecting dependencies. ' +
                         'Implemented without using reflection in runtime.')
                 url.set('https://github.com/AmayaFramework/amaya-di')
 
