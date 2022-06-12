@@ -34,6 +34,57 @@ dependencies {
 
 ## Usage example
 
+First you need to initialize DI. If it is intended to be used with auto-transformation, then in the future
+an instance of DI (unless additional transformations are planned) will not be needed, and may not be saved.
+Otherwise, it is recommended to declare a static container at your discretion and save the DI instance.
+
+The default instance can be created like this:
+
+```Java
+private static final DI INJECTOR = DIBuilder.createDefault();
+```
+
+Next, we declare a class with a single field of primitive type:
+
+```Java
+
+@Inject
+@AutoTransform
+class Target {
+    @Prototype
+    private String value;
+
+    public String getValue() {
+        return value;
+    }
+}
+```
+
+And now you can create an instance of the class and check the result:
+
+```Java
+public class Main {
+    private static final DI INJECTOR = DIBuilder.createDefault();
+
+    public static void main(String[] args) {
+        Target target = new Target();
+        System.out.println(target.getValue());
+    }
+}
+
+@Inject
+@AutoTransform
+class Target {
+    @Prototype
+    private String value;
+
+    public String getValue() {
+        return value;
+    }
+}
+```
+
+However, if auto transformation is not intended to be used, the target class MUST BE PUBLIC.
 
 ## Built With
 
@@ -41,7 +92,7 @@ dependencies {
 * [classindex](https://github.com/atteo/classindex) - Annotation scanning
 * [jeflect](https://github.com/RomanQed/jeflect) - Method wrapping
 * [asm](https://asm.ow2.io) - Modification of classes
-* [byte-buddy-agent](https://github.com/raphw/byte-buddy) - Installing javaagent
+* [byte-buddy-agent](https://github.com/raphw/byte-buddy) - Javaagent installation
 
 ## Authors
 
@@ -53,4 +104,3 @@ in this project.
 ## License
 
 This project is licensed under the Apache License Version 2.0 - see the [LICENSE](LICENSE) file for details
-
