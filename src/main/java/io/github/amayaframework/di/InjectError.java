@@ -1,7 +1,7 @@
 package io.github.amayaframework.di;
 
 /**
- *
+ * An error that is thrown when any errors occurred during the injection process.
  */
 public class InjectError extends RuntimeException {
     public InjectError(Class<?> clazz, Throwable cause) {
