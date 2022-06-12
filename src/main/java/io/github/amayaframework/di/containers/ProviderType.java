@@ -1,5 +1,6 @@
 package io.github.amayaframework.di.containers;
 
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.Arrays;
@@ -11,18 +12,21 @@ import java.util.stream.Collectors;
  * A class that stores data about a singleton class that stores a {@link Container}.
  */
 public class ProviderType {
+    private static final Class<? extends Annotation> PROVIDER = ProviderMethod.class;
+    private static final Class<? extends Annotation> LOCK = LockMethod.class;
     private final Class<?> type;
-    private final Method method;
+    private final Method containerMethod;
+    private final Method lockMethod;
 
-    private ProviderType(Class<?> type, Method method) {
+    private ProviderType(Class<?> type, Method containerMethod, Method lockMethod) {
         this.type = type;
-        this.method = method;
+        this.containerMethod = containerMethod;
+        this.lockMethod = lockMethod;
     }
 
-    public static ProviderType fromClass(Class<?> clazz) {
-        Objects.requireNonNull(clazz);
+    private static Method findMethodAnnotatedWith(Class<?> clazz, Class<? extends Annotation> annotation) {
         List<Method> methods = Arrays.stream(clazz.getDeclaredMethods())
-                .filter(method -> method.isAnnotationPresent(Provider.class)
+                .filter(method -> method.isAnnotationPresent(annotation)
                         && Modifier.isStatic(method.getModifiers())
                         && Modifier.isPublic(method.getModifiers()))
                 .collect(Collectors.toList());
@@ -32,22 +36,37 @@ public class ProviderType {
         if (methods.size() > 1) {
             throw new IllegalStateException("More than one annotated static method found");
         }
-        Method method = methods.get(0);
-        Class<?> container = method.getReturnType();
-        if (!Container.class.isAssignableFrom(container)) {
-            throw new IllegalStateException("The returned type doesn't implement the container interface");
-        }
+        return methods.get(0);
+    }
+
+    private static void checkMethod(Method method) {
         if (method.getParameterCount() != 0) {
             throw new IllegalStateException("The found method contains parameters");
         }
-        return new ProviderType(clazz, method);
+    }
+
+    public static ProviderType fromClass(Class<?> clazz) {
+        Objects.requireNonNull(clazz);
+        Method containerMethod = findMethodAnnotatedWith(clazz, PROVIDER);
+        checkMethod(containerMethod);
+        Class<?> container = containerMethod.getReturnType();
+        if (!Container.class.isAssignableFrom(container)) {
+            throw new IllegalStateException("The returned type doesn't implement the container interface");
+        }
+        Method lockMethod = findMethodAnnotatedWith(clazz, LOCK);
+        checkMethod(lockMethod);
+        return new ProviderType(clazz, containerMethod, lockMethod);
     }
 
     public Class<?> getType() {
         return type;
     }
 
-    public Method getMethod() {
-        return method;
+    public Method getContainerMethod() {
+        return containerMethod;
+    }
+
+    public Method getLockMethod() {
+        return lockMethod;
     }
 }

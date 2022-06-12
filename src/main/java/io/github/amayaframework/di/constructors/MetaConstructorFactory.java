@@ -38,19 +38,22 @@ public class MetaConstructorFactory implements ConstructorFactory {
         if (policy == InjectPolicy.PROTOTYPE) {
             return getConstructor(subType, provider);
         }
-        ContainerAccessor accessor = metaFactory.packLambdaMethod(ACCESSOR, provider.getMethod());
+        ContainerAccessor accessor = metaFactory.packLambdaMethod(ACCESSOR, provider.getContainerMethod());
         // Singleton
         if (policy == InjectPolicy.SINGLETON) {
             Integer hashCode = subType.hashCode();
             Callable<?> constructor = getConstructor(subType, provider);
+            Object lock = provider.getLockMethod().invoke(null);
             return () -> {
-                Container container = accessor.get();
-                Object singleton = container.get(hashCode);
-                if (singleton == null) {
-                    singleton = constructor.call();
-                    container.put(hashCode, singleton);
+                synchronized (lock) {
+                    Container container = accessor.get();
+                    Object singleton = container.get(hashCode);
+                    if (singleton == null) {
+                        singleton = constructor.call();
+                        container.put(hashCode, singleton);
+                    }
+                    return singleton;
                 }
-                return singleton;
             };
         }
         Integer hashCode = Value.hashCode(member.getValue(), subType);

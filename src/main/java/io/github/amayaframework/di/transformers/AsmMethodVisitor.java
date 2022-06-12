@@ -21,7 +21,7 @@ class AsmMethodVisitor extends LocalVariablesSorter {
     private final Type owner;
     private final Collection<InjectField> fields;
     private final Collection<InjectMethod> methods;
-    private final Map<Class<?>, Integer> singletons;
+    private final Map<Class<?>, Integer> instances;
     private int container = -1;
 
     AsmMethodVisitor(InjectType type,
@@ -36,7 +36,7 @@ class AsmMethodVisitor extends LocalVariablesSorter {
         this.owner = Type.getType(type.getTarget());
         this.fields = type.getFields();
         this.methods = type.getMethods();
-        this.singletons = new HashMap<>();
+        this.instances = new HashMap<>();
     }
 
     @Override
@@ -48,52 +48,52 @@ class AsmMethodVisitor extends LocalVariablesSorter {
         mv.visitInsn(opcode);
     }
 
-    private Class<?> loadContainer() {
-        Method method = provider.getMethod();
-        if (container < 0) {
-            container = newLocal(Util.CONTAINER_TYPE);
-            mv.visitMethodInsn(Opcodes.INVOKESTATIC,
-                    Type.getInternalName(provider.getType()),
-                    method.getName(),
-                    Type.getMethodDescriptor(method),
-                    false);
-            mv.visitVarInsn(Opcodes.ASTORE, container);
+    private void loadContainer() {
+        if (container >= 0) {
+            return;
         }
-        mv.visitVarInsn(Opcodes.ALOAD, container);
-        return method.getReturnType();
+        Method method = provider.getContainerMethod();
+        container = newLocal(Util.CONTAINER_TYPE);
+        mv.visitMethodInsn(Opcodes.INVOKESTATIC,
+                Type.getInternalName(provider.getType()),
+                method.getName(),
+                Type.getMethodDescriptor(method),
+                false);
+        mv.visitVarInsn(Opcodes.ASTORE, container);
     }
 
     private void getFromContainer(int hashCode) {
-        Class<?> container = loadContainer();
+        Class<?> containerType = provider.getContainerMethod().getReturnType();
+        mv.visitVarInsn(Opcodes.ALOAD, container);
         mv.visitLdcInsn(hashCode);
         AsmUtil.packPrimitive(mv, Type.INT_TYPE);
         // Invoke get method from container
-        boolean isInterface = container.isInterface();
+        boolean isInterface = containerType.isInterface();
         mv.visitMethodInsn(isInterface ? Opcodes.INVOKEINTERFACE : Opcodes.INVOKEVIRTUAL,
-                Type.getInternalName(container),
+                Type.getInternalName(containerType),
                 Util.GET_METHOD_NAME,
                 Util.GET_DESCRIPTOR,
                 isInterface);
     }
 
     private void putToContainer(int hashCode, int varIndex) {
-        Class<?> container = loadContainer();
+        Class<?> containerType = provider.getContainerMethod().getReturnType();
+        mv.visitVarInsn(Opcodes.ALOAD, container);
         mv.visitLdcInsn(hashCode);
         AsmUtil.packPrimitive(mv, Type.INT_TYPE);
         mv.visitVarInsn(Opcodes.ALOAD, varIndex);
         // Invoke put method from container
-        boolean isInterface = container.isInterface();
+        boolean isInterface = containerType.isInterface();
         mv.visitMethodInsn(isInterface ? Opcodes.INVOKEINTERFACE : Opcodes.INVOKEVIRTUAL,
-                Type.getInternalName(container),
+                Type.getInternalName(containerType),
                 Util.PUT_METHOD_NAME,
                 Util.PUT_DESCRIPTOR,
                 isInterface);
     }
 
     private void setField(InjectField field) {
-        mv.visitVarInsn(Opcodes.ALOAD, 0);
         // Body
-        loadArgument(field);
+        loadArgument(field, () -> mv.visitVarInsn(Opcodes.ALOAD, 0));
         // Set field
         mv.visitFieldInsn(Opcodes.PUTFIELD,
                 owner.getInternalName(),
@@ -102,9 +102,8 @@ class AsmMethodVisitor extends LocalVariablesSorter {
     }
 
     private void callMethod(InjectMethod method) {
-        mv.visitVarInsn(Opcodes.ALOAD, 1);
         // Body
-        loadArgument(method);
+        loadArgument(method, () -> mv.visitVarInsn(Opcodes.ALOAD, 0));
         // Invoke method
         Class<?> methodOwner = method.getMethod().getDeclaringClass();
         mv.visitMethodInsn(Opcodes.INVOKEVIRTUAL,
@@ -114,43 +113,58 @@ class AsmMethodVisitor extends LocalVariablesSorter {
                 methodOwner.isInterface());
     }
 
-    private void loadSingleton(Class<?> subType) {
-        Integer varIndex = singletons.get(subType);
-        if (varIndex == null) {
-            // Create variable
-            varIndex = newLocal(Util.OBJECT_TYPE);
-            singletons.put(subType, varIndex);
-            // Get from container
+    private int initSingleton(Class<?> subType) {
+        // Create variable
+        int ret = newLocal(Util.OBJECT_TYPE);
+        // Get lock from provider
+        Method lockMethod = provider.getLockMethod();
+        mv.visitMethodInsn(Opcodes.INVOKESTATIC,
+                Type.getInternalName(provider.getType()),
+                lockMethod.getName(),
+                Type.getMethodDescriptor(lockMethod),
+                false);
+        Util.synchronizedCall(this, () -> {
             getFromContainer(subType.hashCode());
             // Save to variable
-            mv.visitVarInsn(Opcodes.ASTORE, varIndex);
+            mv.visitVarInsn(Opcodes.ASTORE, ret);
             // if var == null
-            mv.visitVarInsn(Opcodes.ALOAD, varIndex);
+            mv.visitVarInsn(Opcodes.ALOAD, ret);
             Label label = new Label();
             mv.visitJumpInsn(Opcodes.IFNONNULL, label);
             Util.newObject(mv, Type.getInternalName(subType));
-            mv.visitVarInsn(Opcodes.ASTORE, varIndex);
-            putToContainer(subType.hashCode(), varIndex);
+            mv.visitVarInsn(Opcodes.ASTORE, ret);
+            loadContainer();
+            putToContainer(subType.hashCode(), ret);
             mv.visitInsn(Opcodes.POP);
             mv.visitLabel(label);
-        }
-        // Load from variable
-        mv.visitVarInsn(Opcodes.ALOAD, varIndex);
+        });
+        instances.put(subType, ret);
+        return ret;
     }
 
-    private void loadArgument(InjectMember member) {
+    private void loadArgument(InjectMember member, Runnable loader) {
         InjectPolicy policy = member.getPolicy();
         Class<?> subType = factory.getSubType(member.getClazz());
         // Prototype
         if (policy == InjectPolicy.PROTOTYPE) {
+            loader.run();
             String typeName = Type.getInternalName(subType);
             Util.newObject(mv, typeName);
             return;
         }
         // Singleton or value
         if (policy == InjectPolicy.SINGLETON) {
-            loadSingleton(subType);
+            loadContainer();
+            Integer varIndex = instances.get(subType);
+            if (varIndex == null) {
+                varIndex = initSingleton(subType);
+            }
+            loader.run();
+            // Load from variable
+            mv.visitVarInsn(Opcodes.ALOAD, varIndex);
         } else {
+            loadContainer();
+            loader.run();
             getFromContainer(Value.hashCode(member.getValue(), subType));
         }
         // Cast to expected type

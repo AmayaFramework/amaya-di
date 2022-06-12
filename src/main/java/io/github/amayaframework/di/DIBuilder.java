@@ -18,7 +18,7 @@ import java.util.Optional;
 
 public class DIBuilder {
     private static final DIBuilder DEFAULT_BUILDER = new DIBuilder();
-    private static final ProviderType PROVIDER_TYPE = ProviderType.fromClass(ContainerProvider.class);
+    private static final ProviderType PROVIDER_TYPE = ProviderType.fromClass(Provider.class);
     private ProviderType provider;
     private Instrumentation instrumentation;
     private SubTypeFactory subTypeFactory;
