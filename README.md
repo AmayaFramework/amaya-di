@@ -34,6 +34,8 @@ dependencies {
 
 ## Usage example
 
+### The simplest injection
+
 First you need to initialize DI. If it is intended to be used with auto-transformation, then in the future
 an instance of DI (unless additional transformations are planned) will not be needed, and may not be saved.
 Otherwise, it is recommended to declare a static container at your discretion and save the DI instance.
@@ -41,10 +43,11 @@ Otherwise, it is recommended to declare a static container at your discretion an
 The default instance can be created like this:
 
 ```Java
-private static final DI INJECTOR = DIBuilder.createDefault();
+private static final DI INJECTOR=DIBuilder.createDefault();
 ```
 
-Next, we declare a class with a single field of primitive type:
+Next, for example, we declare a class with a single field of primitive type (in order not to declare additional classes
+that could serve as dependencies for the simplest demonstration):
 
 ```Java
 
@@ -85,6 +88,78 @@ class Target {
 ```
 
 However, if auto transformation is not intended to be used, the target class MUST BE PUBLIC.
+
+### Injection with a subclass
+
+Initialize DI in the same way, and declare our classes: the interface and its implementation, annotated with @Source:
+
+```Java
+interface Coder {
+    String getDescription();
+}
+
+@Source
+class JavaCoder implements Coder {
+
+    @Override
+    public String getDescription() {
+        return "Java coder";
+    }
+}
+```
+
+Next, we also declare our test target class with one field:
+
+```Java
+
+@Inject
+@AutoTransform
+class Target {
+    @Prototype
+    private Coder coder;
+
+    public Coder getCoder() {
+        return coder;
+    }
+}
+```
+
+And as a result, we get such a Main class, by running which we can make sure that the system is working properly:
+
+```Java
+public class Main {
+    private static final DI INJECTOR = DIBuilder.createDefault();
+
+    public static void main(String[] args) {
+        Target target = new Target();
+        System.out.println(target.getCoder().getDescription());
+    }
+}
+
+@Inject
+@AutoTransform
+class Target {
+    @Prototype
+    private Coder coder;
+
+    public Coder getCoder() {
+        return coder;
+    }
+}
+
+interface Coder {
+    String getDescription();
+}
+
+@Source
+class JavaCoder implements Coder {
+
+    @Override
+    public String getDescription() {
+        return "Java coder";
+    }
+}
+```
 
 ## Built With
 
