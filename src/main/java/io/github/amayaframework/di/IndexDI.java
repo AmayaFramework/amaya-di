@@ -9,7 +9,7 @@ import java.lang.instrument.UnmodifiableClassException;
 import java.util.concurrent.Callable;
 import java.util.stream.StreamSupport;
 
-public class IndexDI implements DI {
+final class IndexDI implements DI {
     private final ProviderType provider;
     private final ConstructorFactory constructorFactory;
     private final Transformer transformer;

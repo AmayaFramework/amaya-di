@@ -2,7 +2,7 @@ package io.github.amayaframework.di.types;
 
 import java.lang.reflect.Field;
 
-public class InjectField extends InjectMember {
+public final class InjectField extends InjectMember {
     private final Field field;
     private final String name;
 

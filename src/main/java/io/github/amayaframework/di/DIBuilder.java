@@ -3,6 +3,7 @@ package io.github.amayaframework.di;
 import com.github.romanqed.jeflect.meta.MetaFactory;
 import io.github.amayaframework.di.constructors.ConstructorFactory;
 import io.github.amayaframework.di.constructors.MetaConstructorFactory;
+import io.github.amayaframework.di.containers.Container;
 import io.github.amayaframework.di.containers.ProviderType;
 import io.github.amayaframework.di.transformers.AsmTransformer;
 import io.github.amayaframework.di.transformers.Transformer;
@@ -13,9 +14,13 @@ import io.github.amayaframework.di.types.SubTypeFactory;
 import net.bytebuddy.agent.ByteBuddyAgent;
 
 import java.lang.instrument.Instrumentation;
+import java.lang.invoke.MethodHandles;
 import java.util.Objects;
 import java.util.Optional;
 
+/**
+ * Built-in builder for DI, using {@link MetaFactory} and ClassIndex to search for annotated classes.
+ */
 public class DIBuilder {
     private static final DIBuilder DEFAULT_BUILDER = new DIBuilder();
     private static final ProviderType PROVIDER_TYPE = ProviderType.fromClass(Provider.class);
@@ -47,6 +52,12 @@ public class DIBuilder {
         return instrumentation;
     }
 
+    /**
+     * Sets the instrumentation to be used for class transformation.
+     *
+     * @param instrumentation instance {@link Instrumentation}, obtained by loading javaagent
+     * @return {@link DIBuilder} instance
+     */
     public DIBuilder setInstrumentation(Instrumentation instrumentation) {
         this.instrumentation = Objects.requireNonNull(instrumentation);
         return this;
@@ -56,6 +67,12 @@ public class DIBuilder {
         return provider;
     }
 
+    /**
+     * Sets the provider class that provides the {@link Container} instance.
+     *
+     * @param provider the provider class must contain 2 static getters that return {@link Container} and lock instances
+     * @return {@link DIBuilder} instance
+     */
     public DIBuilder setProvider(Class<?> provider) {
         this.provider = ProviderType.fromClass(provider);
         return this;
@@ -65,6 +82,12 @@ public class DIBuilder {
         return subTypeFactory;
     }
 
+    /**
+     * Sets the factory that supplies subtypes.
+     *
+     * @param factory {@link SubTypeFactory} instance
+     * @return {@link DIBuilder} instance
+     */
     public DIBuilder setSubTypeFactory(SubTypeFactory factory) {
         this.subTypeFactory = Objects.requireNonNull(factory);
         return this;
@@ -74,6 +97,12 @@ public class DIBuilder {
         return injectTypeFactory;
     }
 
+    /**
+     * Specifies a factory that generates information for the subsequent injection of dependencies.
+     *
+     * @param factory {@link InjectTypeFactory} instance
+     * @return {@link DIBuilder} instance
+     */
     public DIBuilder setInjectTypeFactory(InjectTypeFactory factory) {
         this.injectTypeFactory = Objects.requireNonNull(factory);
         return this;
@@ -83,6 +112,13 @@ public class DIBuilder {
         return metaFactory;
     }
 
+    /**
+     * Specifies a factory that generates meta-lambdas for manual injection.
+     *
+     * @param factory the instance of the {@link MetaFactory}
+     *                must contain a correctly initialized {@link MethodHandles.Lookup}
+     * @return {@link DIBuilder} instance
+     */
     public DIBuilder setMetaFactory(MetaFactory factory) {
         this.metaFactory = Objects.requireNonNull(factory);
         return this;
@@ -92,11 +128,21 @@ public class DIBuilder {
         return autoTransform;
     }
 
+    /**
+     * Sets a flag indicating that all classes annotated with {@link Autowire}
+     * will be found and transformed when creating {@link DI}.
+     *
+     * @param autoTransform boolean flag, if it is necessary to process classes - true, if not - false.
+     * @return {@link DIBuilder} instance
+     */
     public DIBuilder setAutoTransform(boolean autoTransform) {
         this.autoTransform = autoTransform;
         return this;
     }
 
+    /**
+     * @return {@link DI} resulting instance
+     */
     public DI build() {
         provider = Optional.ofNullable(provider).orElse(PROVIDER_TYPE);
         instrumentation = Optional.ofNullable(instrumentation).orElse(ByteBuddyAgent.install());

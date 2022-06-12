@@ -4,7 +4,7 @@ import org.objectweb.asm.Type;
 
 import java.lang.reflect.Constructor;
 
-public class InjectConstructor extends InjectMember {
+public final class InjectConstructor extends InjectMember {
     private final Constructor<?> constructor;
     private final Type constructorType;
 

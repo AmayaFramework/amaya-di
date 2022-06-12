@@ -5,6 +5,9 @@ import io.github.amayaframework.di.containers.LockMethod;
 import io.github.amayaframework.di.containers.MapContainer;
 import io.github.amayaframework.di.containers.ProviderMethod;
 
+/**
+ * A class representing the default provider. Uses a lazy singleton.
+ */
 public final class Provider {
 
     @ProviderMethod

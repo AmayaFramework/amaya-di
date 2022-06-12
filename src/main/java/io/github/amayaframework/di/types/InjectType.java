@@ -3,7 +3,7 @@ package io.github.amayaframework.di.types;
 import java.util.Collection;
 import java.util.Objects;
 
-public class InjectType {
+public final class InjectType {
     private final Class<?> target;
     private final Collection<InjectField> fields;
     private final Collection<InjectMethod> methods;

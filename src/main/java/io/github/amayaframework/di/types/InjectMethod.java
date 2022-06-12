@@ -4,7 +4,7 @@ import org.objectweb.asm.Type;
 
 import java.lang.reflect.Method;
 
-public class InjectMethod extends InjectMember {
+public final class InjectMethod extends InjectMember {
     private final Method method;
     private final String name;
     private final Type methodType;
