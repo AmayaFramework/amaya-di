@@ -3,6 +3,7 @@ package io.github.amayaframework.di.constructors;
 import com.github.romanqed.jeflect.ReflectUtil;
 import com.github.romanqed.jeflect.meta.LambdaType;
 import com.github.romanqed.jeflect.meta.MetaFactory;
+import io.github.amayaframework.di.Autowire;
 import io.github.amayaframework.di.containers.Container;
 import io.github.amayaframework.di.containers.ProviderType;
 import io.github.amayaframework.di.containers.Value;
@@ -66,6 +67,9 @@ public class MetaConstructorFactory implements ConstructorFactory {
     @Override
     @SuppressWarnings("unchecked")
     public <E> Callable<E> getConstructor(Class<E> clazz, ProviderType provider) throws Throwable {
+        if (clazz.isAnnotationPresent(Autowire.class)) {
+            return metaFactory.packLambdaConstructor(ReflectUtil.CALLABLE, clazz.getDeclaredConstructor());
+        }
         InjectType type = injectFactory.getInjectType(clazz);
         if (type == null) {
             return metaFactory.packLambdaConstructor(ReflectUtil.CALLABLE, clazz.getDeclaredConstructor());

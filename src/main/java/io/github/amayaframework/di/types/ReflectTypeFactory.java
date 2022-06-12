@@ -66,6 +66,9 @@ public final class ReflectTypeFactory implements InjectTypeFactory {
             if (Modifier.isStatic(method.getModifiers())) {
                 throw new IllegalStateException("Can't inject values into static method");
             }
+            if (method.getReturnType() != void.class) {
+                throw new IllegalStateException("The method must to return nothing");
+            }
             ret.add(new InjectMethod(method, data.policy, data.value));
         }
         return ret;

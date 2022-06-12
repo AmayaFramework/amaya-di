@@ -24,6 +24,7 @@ dependencies {
     // Tests
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.2'
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.8.2'
+    testAnnotationProcessor group: 'org.atteo.classindex', name: 'classindex', version: '3.11'
     // Reflection
     api group: 'org.atteo.classindex', name: 'classindex', version: '3.11'
     annotationProcessor group: 'org.atteo.classindex', name: 'classindex', version: '3.11'

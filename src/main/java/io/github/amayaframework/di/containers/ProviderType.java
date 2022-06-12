@@ -12,8 +12,8 @@ import java.util.stream.Collectors;
  * A class that stores data about a singleton class that stores a {@link Container}.
  */
 public class ProviderType {
-    private static final Class<? extends Annotation> PROVIDER = ProviderMethod.class;
-    private static final Class<? extends Annotation> LOCK = LockMethod.class;
+    private static final Class<? extends Annotation> PROVIDER = ContainerProvider.class;
+    private static final Class<? extends Annotation> LOCK = LockProvider.class;
     private final Class<?> type;
     private final Method containerMethod;
     private final Method lockMethod;
