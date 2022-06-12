@@ -7,8 +7,6 @@ import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.ClassWriter;
 
-import java.io.FileOutputStream;
-import java.io.IOException;
 import java.lang.instrument.ClassFileTransformer;
 import java.security.ProtectionDomain;
 import java.util.Objects;
@@ -38,14 +36,6 @@ class AsmClassFileTransformer implements ClassFileTransformer {
         ClassWriter writer = new ClassWriter(reader, ClassWriter.COMPUTE_FRAMES);
         ClassVisitor visitor = new AsmClassVisitor(writer, type, factory, provider);
         reader.accept(visitor, OPTIONS);
-        byte[] bytes = writer.toByteArray();
-        try {
-            FileOutputStream stream = new FileOutputStream("./Test.class");
-            stream.write(bytes);
-            stream.close();
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-        return bytes;
+        return writer.toByteArray();
     }
 }
