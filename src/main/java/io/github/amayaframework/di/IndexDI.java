@@ -6,6 +6,8 @@ import io.github.amayaframework.di.transformers.Transformer;
 import org.atteo.classindex.ClassIndex;
 
 import java.lang.instrument.UnmodifiableClassException;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.stream.StreamSupport;
 
@@ -13,11 +15,15 @@ final class IndexDI implements DI {
     private final ProviderType provider;
     private final ConstructorFactory constructorFactory;
     private final Transformer transformer;
+    private final Map<Class<?>, Callable<?>> prepared;
+    private final Object lock;
 
     IndexDI(ProviderType provider, ConstructorFactory constructorFactory, Transformer transformer) {
         this.provider = provider;
         this.constructorFactory = constructorFactory;
         this.transformer = transformer;
+        this.prepared = new HashMap<>();
+        this.lock = new Object();
     }
 
     private void checkClass(Class<?> clazz) {
@@ -27,12 +33,21 @@ final class IndexDI implements DI {
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     public <E> Callable<E> prepare(Class<E> clazz) {
-        checkClass(clazz);
-        try {
-            return constructorFactory.getConstructor(clazz, provider);
-        } catch (Throwable e) {
-            throw new InjectError(clazz, e);
+        synchronized (lock) {
+            Callable<E> ret = (Callable<E>) prepared.get(clazz);
+            if (ret != null) {
+                return ret;
+            }
+            checkClass(clazz);
+            try {
+                ret = constructorFactory.getConstructor(clazz, provider);
+            } catch (Throwable e) {
+                throw new InjectError(clazz, e);
+            }
+            prepared.put(clazz, ret);
+            return ret;
         }
     }
 
