@@ -16,7 +16,6 @@ final class Util {
     static final String PUT_DESCRIPTOR = makePutDescriptor();
     static final String PUT_METHOD_NAME = "put";
     static final Type OBJECT_TYPE = Type.getType(Object.class);
-    static final Type THROWABLE_TYPE = Type.getType(Throwable.class);
     static final Type CONTAINER_TYPE = Type.getType(Container.class);
 
     private static String makePutDescriptor() {
