@@ -33,6 +33,8 @@ dependencies {
     api group: 'org.ow2.asm', name: 'asm-commons', version: '9.3'
     // Java agent
     api group: 'net.bytebuddy', name: 'byte-buddy-agent', version: '1.12.10'
+    // Logger
+    implementation group: 'org.slf4j', name: 'slf4j-api', version: '1.7.36'
 }
 
 test {

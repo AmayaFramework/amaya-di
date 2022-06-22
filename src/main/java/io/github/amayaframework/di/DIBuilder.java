@@ -12,6 +12,8 @@ import io.github.amayaframework.di.types.InjectTypeFactory;
 import io.github.amayaframework.di.types.ReflectTypeFactory;
 import io.github.amayaframework.di.types.SubTypeFactory;
 import net.bytebuddy.agent.ByteBuddyAgent;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.lang.instrument.Instrumentation;
 import java.lang.invoke.MethodHandles;
@@ -22,6 +24,7 @@ import java.util.Optional;
  * Built-in builder for DI, using {@link MetaFactory} and ClassIndex to search for annotated classes.
  */
 public class DIBuilder {
+    private static final Logger LOGGER = LoggerFactory.getLogger(DIBuilder.class);
     private static final DIBuilder DEFAULT_BUILDER = new DIBuilder();
     private static final ProviderType PROVIDER_TYPE = ProviderType.fromClass(Provider.class);
     private ProviderType provider;
@@ -140,6 +143,15 @@ public class DIBuilder {
         return this;
     }
 
+    private void logData() {
+        String message = "DI successfully created\n" +
+                "Auto transform: " + autoTransform + '\n' +
+                "Container provider: " + provider.getType() + '\n' +
+                "Sub-type factory: " + subTypeFactory.getClass() + '\n' +
+                "Inject type factory: " + injectTypeFactory.getClass();
+        LOGGER.debug(message);
+    }
+
     /**
      * @return {@link DI} resulting instance
      */
@@ -155,6 +167,7 @@ public class DIBuilder {
         if (autoTransform) {
             ret.transform();
         }
+        logData();
         resetValues();
         return ret;
     }
