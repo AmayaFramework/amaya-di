@@ -144,9 +144,9 @@ class AsmMethodVisitor extends LocalVariablesSorter {
 
     private void loadArgument(InjectMember member, Runnable loader) {
         InjectPolicy policy = member.getPolicy();
-        Class<?> subType = factory.getSubType(member.getClazz());
         // Prototype
         if (policy == InjectPolicy.PROTOTYPE) {
+            Class<?> subType = factory.getSubType(member.getClazz());
             loader.run();
             String typeName = Type.getInternalName(subType);
             Util.newObject(mv, typeName);
@@ -154,6 +154,7 @@ class AsmMethodVisitor extends LocalVariablesSorter {
         }
         // Singleton or value
         if (policy == InjectPolicy.SINGLETON) {
+            Class<?> subType = factory.getSubType(member.getClazz());
             loadContainer();
             Integer varIndex = instances.get(subType);
             if (varIndex == null) {
@@ -165,7 +166,7 @@ class AsmMethodVisitor extends LocalVariablesSorter {
         } else {
             loadContainer();
             loader.run();
-            getFromContainer(Value.hashCode(member.getValue(), subType));
+            getFromContainer(Value.hashCode(member.getValue(), member.getClazz()));
         }
         // Cast to expected type
         mv.visitTypeInsn(Opcodes.CHECKCAST, member.getType().getInternalName());
