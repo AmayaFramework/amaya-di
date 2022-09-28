@@ -1,6 +1,6 @@
 package io.github.amayaframework.di.transformers;
 
-import com.github.romanqed.jeflect.lambdas.AsmUtil;
+import com.github.romanqed.jeflect.AsmUtil;
 import io.github.amayaframework.di.containers.ProviderType;
 import io.github.amayaframework.di.containers.Value;
 import io.github.amayaframework.di.types.*;

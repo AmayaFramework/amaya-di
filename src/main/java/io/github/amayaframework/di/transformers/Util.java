@@ -7,8 +7,8 @@ import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.commons.LocalVariablesSorter;
 
-import static com.github.romanqed.jeflect.lambdas.AsmUtil.EMPTY_DESCRIPTOR;
-import static com.github.romanqed.jeflect.lambdas.AsmUtil.INIT;
+import static com.github.romanqed.jeflect.AsmUtil.EMPTY_DESCRIPTOR;
+import static com.github.romanqed.jeflect.AsmUtil.INIT;
 
 final class Util {
     static final String GET_DESCRIPTOR = makeGetDescriptor();
