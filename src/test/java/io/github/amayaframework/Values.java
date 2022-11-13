@@ -16,10 +16,10 @@ public final class Values {
     private static final Value<Integer> FIELD4 = new Value<>("FIELD4", Integer.class);
 
     static {
-        CONTAINER.putValue(FIELD1, 1);
-        CONTAINER.putValue(FIELD2, 2);
-        CONTAINER.putValue(FIELD3, 3);
-        CONTAINER.putValue(FIELD4, 4);
+        CONTAINER.put(FIELD1, 1);
+        CONTAINER.put(FIELD2, 2);
+        CONTAINER.put(FIELD3, 3);
+        CONTAINER.put(FIELD4, 4);
     }
 
     @ContainerProvider

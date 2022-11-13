@@ -39,8 +39,12 @@ public interface Container {
      * @return found object or null
      */
     @SuppressWarnings("unchecked")
-    default <E> E getValue(Value<E> value) {
+    default <E> E get(Value<E> value) {
         return (E) get(value.hashCode());
+    }
+
+    default <E> E get(Class<? extends E> clazz) {
+        return get(new Value<>(clazz.getName(), clazz));
     }
 
     /**
@@ -52,9 +56,19 @@ public interface Container {
      * @return the previous object associated with the key, or null
      */
     @SuppressWarnings("unchecked")
-    default <E> E putValue(Value<E> key, E value) {
+    default <E> E put(Value<? extends E> key, E value) {
         Objects.requireNonNull(value);
         return (E) put(key.hashCode(), value);
+    }
+
+    default <C extends E, E> E put(Class<E> clazz, C value) {
+        return put(new Value<>(clazz.getName(), clazz), value);
+    }
+
+    default Object put(Object value) {
+        Objects.requireNonNull(value);
+        Class<?> clazz = value.getClass();
+        return put(new Value<>(clazz.getName(), clazz), value);
     }
 
     /**
@@ -65,7 +79,11 @@ public interface Container {
      * @return removed object or null
      */
     @SuppressWarnings("unchecked")
-    default <E> E removeValue(Value<E> value) {
+    default <E> E remove(Value<E> value) {
         return (E) remove(value.hashCode());
+    }
+
+    default <E> E remove(Class<? extends E> clazz) {
+        return remove(new Value<>(clazz.getName(), clazz));
     }
 }
