@@ -9,7 +9,6 @@ import org.objectweb.asm.Opcodes;
 
 import java.util.Objects;
 
-import static com.github.romanqed.jeflect.AsmUtil.EMPTY_DESCRIPTOR;
 import static com.github.romanqed.jeflect.AsmUtil.INIT;
 
 class AsmClassVisitor extends ClassVisitor {
@@ -31,7 +30,7 @@ class AsmClassVisitor extends ClassVisitor {
                                      String signature,
                                      String[] exceptions) {
         MethodVisitor visitor = super.visitMethod(access, name, descriptor, signature, exceptions);
-        if (Objects.equals(name, INIT) && Objects.equals(descriptor, EMPTY_DESCRIPTOR)) {
+        if (Objects.equals(name, INIT)) {
             return new AsmMethodVisitor(type, factory, provider, access, visitor, descriptor);
         }
         return visitor;

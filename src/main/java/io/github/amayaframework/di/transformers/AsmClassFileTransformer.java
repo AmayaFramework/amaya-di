@@ -11,11 +11,14 @@ import org.slf4j.LoggerFactory;
 
 import java.lang.instrument.ClassFileTransformer;
 import java.security.ProtectionDomain;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Objects;
 
 class AsmClassFileTransformer implements ClassFileTransformer {
     private static final Logger LOGGER = LoggerFactory.getLogger(AsmClassFileTransformer.class);
     private static final int OPTIONS = ClassReader.SKIP_DEBUG | ClassReader.SKIP_FRAMES;
+    private final List<Throwable> problems;
     private final InjectType type;
     private final SubTypeFactory factory;
     private final ProviderType provider;
@@ -24,6 +27,11 @@ class AsmClassFileTransformer implements ClassFileTransformer {
         this.type = type;
         this.factory = factory;
         this.provider = provider;
+        this.problems = new LinkedList<>();
+    }
+
+    List<Throwable> getProblems() {
+        return problems;
     }
 
     @Override
@@ -43,6 +51,7 @@ class AsmClassFileTransformer implements ClassFileTransformer {
             LOGGER.debug("Class " + className + " successfully transformed");
         } catch (Throwable e) {
             LOGGER.error("It is impossible to transform " + className + " due to", e);
+            problems.add(e);
             return classfileBuffer;
         }
         return writer.toByteArray();

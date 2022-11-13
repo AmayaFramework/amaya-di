@@ -23,6 +23,7 @@ class AsmMethodVisitor extends LocalVariablesSorter {
     private final Collection<InjectMethod> methods;
     private final Map<Class<?>, Integer> instances;
     private int container = -1;
+    private boolean isUnique = true;
 
     AsmMethodVisitor(InjectType type,
                      SubTypeFactory factory,
@@ -40,8 +41,16 @@ class AsmMethodVisitor extends LocalVariablesSorter {
     }
 
     @Override
+    public void visitMethodInsn(int opcode, String owner, String name, String descriptor, boolean isInterface) {
+        if (this.owner.getInternalName().equals(owner) && AsmUtil.INIT.equals(name)) {
+            this.isUnique = false;
+        }
+        mv.visitMethodInsn(opcode, owner, name, descriptor, isInterface);
+    }
+
+    @Override
     public void visitInsn(int opcode) {
-        if (opcode == Opcodes.RETURN) {
+        if (opcode == Opcodes.RETURN && this.isUnique) {
             fields.forEach(this::setField);
             methods.forEach(this::callMethod);
         }
@@ -142,11 +151,20 @@ class AsmMethodVisitor extends LocalVariablesSorter {
         return ret;
     }
 
+    private void checkEmptyInit(Class<?> clazz) {
+        try {
+            clazz.getDeclaredConstructor();
+        } catch (Throwable e) {
+            throw new IllegalStateException("Class " + clazz.getName() + " not contains empty constructor");
+        }
+    }
+
     private void loadArgument(InjectMember member, Runnable loader) {
         InjectPolicy policy = member.getPolicy();
         // Prototype
         if (policy == InjectPolicy.PROTOTYPE) {
             Class<?> subType = factory.getSubType(member.getClazz());
+            checkEmptyInit(subType);
             loader.run();
             String typeName = Type.getInternalName(subType);
             Util.newObject(mv, typeName);
@@ -155,6 +173,7 @@ class AsmMethodVisitor extends LocalVariablesSorter {
         // Singleton or value
         if (policy == InjectPolicy.SINGLETON) {
             Class<?> subType = factory.getSubType(member.getClazz());
+            checkEmptyInit(subType);
             loadContainer();
             Integer varIndex = instances.get(subType);
             if (varIndex == null) {

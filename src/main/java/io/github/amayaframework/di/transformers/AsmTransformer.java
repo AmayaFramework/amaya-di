@@ -5,10 +5,9 @@ import io.github.amayaframework.di.types.InjectType;
 import io.github.amayaframework.di.types.InjectTypeFactory;
 import io.github.amayaframework.di.types.SubTypeFactory;
 
-import java.lang.instrument.ClassFileTransformer;
 import java.lang.instrument.Instrumentation;
 import java.lang.instrument.UnmodifiableClassException;
-import java.util.Arrays;
+import java.util.List;
 import java.util.Objects;
 
 /**
@@ -27,21 +26,16 @@ public class AsmTransformer implements Transformer {
         this.typeFactory = Objects.requireNonNull(typeFactory);
     }
 
-    private static boolean hasEmptyInit(Class<?> clazz) {
-        return Arrays.stream(clazz.getDeclaredConstructors())
-                .filter(e -> e.getParameterCount() == 0)
-                .count() == 1;
-    }
-
     @Override
     public void transform(Class<?> clazz, ProviderType provider) throws UnmodifiableClassException {
-        if (!hasEmptyInit(clazz)) {
-            throw new IllegalStateException("Empty constructor not found");
-        }
         InjectType type = injectFactory.getInjectType(clazz);
-        ClassFileTransformer transformer = new AsmClassFileTransformer(type, typeFactory, provider);
+        AsmClassFileTransformer transformer = new AsmClassFileTransformer(type, typeFactory, provider);
         instrumentation.addTransformer(transformer, true);
         instrumentation.retransformClasses(clazz);
         instrumentation.removeTransformer(transformer);
+        List<Throwable> problems = transformer.getProblems();
+        if (!problems.isEmpty()) {
+            throw new ClassTransformException(clazz, problems);
+        }
     }
 }

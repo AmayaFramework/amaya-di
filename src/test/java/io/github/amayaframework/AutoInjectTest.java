@@ -76,6 +76,51 @@ public class AutoInjectTest extends Assertions {
         );
     }
 
+    @Test
+    public void testManyConstructors() {
+        ManyConstructorsTest obj1 = new ManyConstructorsTest();
+        ManyConstructorsTest obj2 = new ManyConstructorsTest(1);
+        ManyConstructorsTest obj3 = new ManyConstructorsTest(1, 1);
+        assertAll(
+                () -> assertEquals(0, obj1.field),
+                () -> assertEquals(1, obj2.field),
+                () -> assertEquals(2, obj3.field),
+                () -> assertNotNull(obj1.counter),
+                () -> assertNotNull(obj2.counter),
+                () -> assertNotNull(obj3.counter),
+                () -> assertEquals(3, InitCounter.initCount)
+        );
+    }
+
+    @Inject
+    @AutoTransform
+    public static class ManyConstructorsTest {
+        @Prototype
+        InitCounter counter;
+
+        int field;
+
+        public ManyConstructorsTest() {
+            this.field = 0;
+        }
+
+        public ManyConstructorsTest(int field) {
+            this.field = field;
+        }
+
+        public ManyConstructorsTest(int a, int b) {
+            this(a + b);
+        }
+    }
+
+    public static class InitCounter {
+        static int initCount = 0;
+
+        public InitCounter() {
+            ++initCount;
+        }
+    }
+
     @Inject
     @AutoTransform
     public static class PrototypeTest {
