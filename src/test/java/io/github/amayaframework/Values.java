@@ -9,7 +9,7 @@ public final class Values {
     // Container
     private static final Object LOCK = new Object();
     private static final MapContainer CONTAINER = new MapContainer();
-    // io.github.amayaframework.Values
+    // Values
     private static final Value<Integer> FIELD1 = new Value<>("FIELD1", Integer.class);
     private static final Value<Integer> FIELD2 = new Value<>("FIELD2", Integer.class);
     private static final Value<Integer> FIELD3 = new Value<>("FIELD3", Integer.class);

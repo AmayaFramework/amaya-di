@@ -9,8 +9,8 @@ import org.objectweb.asm.Opcodes;
 
 import java.util.Objects;
 
-import static com.github.romanqed.jeflect.lambdas.AsmUtil.EMPTY_DESCRIPTOR;
-import static com.github.romanqed.jeflect.lambdas.AsmUtil.INIT;
+import static com.github.romanqed.jeflect.AsmUtil.EMPTY_DESCRIPTOR;
+import static com.github.romanqed.jeflect.AsmUtil.INIT;
 
 class AsmClassVisitor extends ClassVisitor {
     private final InjectType type;
