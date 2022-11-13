@@ -8,7 +8,6 @@ import java.lang.reflect.*;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Objects;
 import java.util.stream.Collectors;
 
 /**
@@ -16,7 +15,7 @@ import java.util.stream.Collectors;
  * <p>All classes must be annotated with {@link Inject}.</p>
  */
 public final class ReflectTypeFactory implements InjectTypeFactory {
-    private Data extractData(AnnotatedElement element, String name) {
+    private Data extractData(AnnotatedElement element) {
         List<Annotation> found = Arrays.stream(element.getDeclaredAnnotations())
                 .filter(e -> InjectPolicy.fromAnnotation(e) != null)
                 .collect(Collectors.toList());
@@ -28,10 +27,9 @@ public final class ReflectTypeFactory implements InjectTypeFactory {
         }
         Annotation annotation = found.get(0);
         InjectPolicy policy = InjectPolicy.fromAnnotation(annotation);
+        String name = null;
         if (policy == InjectPolicy.VALUE) {
-            String value = ((Value) annotation).value();
-            name = !value.isEmpty() ? value : name;
-            Objects.requireNonNull(name);
+            name = ((Value) annotation).value();
         }
         return new Data(policy, name);
     }
@@ -46,7 +44,7 @@ public final class ReflectTypeFactory implements InjectTypeFactory {
     private List<InjectField> findFields(Field[] fields) {
         List<InjectField> ret = new LinkedList<>();
         for (Field field : fields) {
-            Data data = extractData(field, field.getName());
+            Data data = extractData(field);
             if (data == null) {
                 continue;
             }
@@ -58,7 +56,7 @@ public final class ReflectTypeFactory implements InjectTypeFactory {
     private List<InjectMethod> findMethods(Method[] methods) {
         List<InjectMethod> ret = new LinkedList<>();
         for (Method method : methods) {
-            Data data = extractData(method, null);
+            Data data = extractData(method);
             if (data == null) {
                 continue;
             }
@@ -77,7 +75,7 @@ public final class ReflectTypeFactory implements InjectTypeFactory {
     private InjectConstructor findConstructor(Constructor<?>[] constructors) {
         InjectConstructor ret = null;
         for (Constructor<?> constructor : constructors) {
-            Data data = extractData(constructor, null);
+            Data data = extractData(constructor);
             if (data == null) {
                 continue;
             }

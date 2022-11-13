@@ -44,7 +44,7 @@ public interface Container {
     }
 
     default <E> E get(Class<? extends E> clazz) {
-        return get(new Value<>(clazz.getName(), clazz));
+        return get(new Value<>("", clazz));
     }
 
     /**
@@ -61,14 +61,19 @@ public interface Container {
         return (E) put(key.hashCode(), value);
     }
 
+    @SuppressWarnings("unchecked")
+    default <E> E put(String name, E value) {
+        return (E) put(new Value<>(name, value.getClass()), value);
+    }
+
     default <C extends E, E> E put(Class<E> clazz, C value) {
-        return put(new Value<>(clazz.getName(), clazz), value);
+        return put(new Value<>("", clazz), value);
     }
 
     default Object put(Object value) {
         Objects.requireNonNull(value);
         Class<?> clazz = value.getClass();
-        return put(new Value<>(clazz.getName(), clazz), value);
+        return put(new Value<>("", clazz), value);
     }
 
     /**
@@ -84,6 +89,6 @@ public interface Container {
     }
 
     default <E> E remove(Class<? extends E> clazz) {
-        return remove(new Value<>(clazz.getName(), clazz));
+        return remove(new Value<>("", clazz));
     }
 }

@@ -55,6 +55,10 @@ public final class Provider {
         return Holder.CONTAINER.put(value);
     }
 
+    public static <E> E put(String name, E value) {
+        return Holder.CONTAINER.put(name, value);
+    }
+
     public static <E> E remove(Class<? extends E> clazz) {
         return Holder.CONTAINER.remove(clazz);
     }
