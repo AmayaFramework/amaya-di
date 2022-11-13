@@ -32,20 +32,18 @@ public class MetaConstructorFactory implements ConstructorFactory {
         this.typeFactory = Objects.requireNonNull(typeFactory);
     }
 
-    private Callable<?> getDependency(InjectMember member, ProviderType provider) throws Throwable {
+    private Callable<?> getDependency(InjectMember member, ContainerAccessor accessor, Object lock) throws Throwable {
         InjectPolicy policy = member.getPolicy();
         // Prototype
         if (policy == InjectPolicy.PROTOTYPE) {
             Class<?> subType = typeFactory.getSubType(member.getClazz());
-            return getConstructor(subType, provider);
+            return getConstructor(subType, accessor, lock);
         }
-        ContainerAccessor accessor = metaFactory.packLambdaMethod(ACCESSOR, provider.getContainerMethod());
         // Singleton
         if (policy == InjectPolicy.SINGLETON) {
             Class<?> subType = typeFactory.getSubType(member.getClazz());
             Integer hashCode = subType.hashCode();
-            Callable<?> constructor = getConstructor(subType, provider);
-            Object lock = provider.getLockMethod().invoke(null);
+            Callable<?> constructor = getConstructor(subType, accessor, lock);
             return () -> {
                 synchronized (lock) {
                     Container container = accessor.get();
@@ -65,9 +63,8 @@ public class MetaConstructorFactory implements ConstructorFactory {
         };
     }
 
-    @Override
     @SuppressWarnings("unchecked")
-    public <E> Callable<E> getConstructor(Class<E> clazz, ProviderType provider) throws Throwable {
+    private <E> Callable<E> getConstructor(Class<E> clazz, ContainerAccessor accessor, Object lock) throws Throwable {
         if (clazz.isAnnotationPresent(AutoTransform.class)) {
             return metaFactory.packLambdaConstructor(ReflectUtil.CALLABLE, clazz.getDeclaredConstructor());
         }
@@ -83,7 +80,7 @@ public class MetaConstructorFactory implements ConstructorFactory {
         int index = 0;
         for (InjectMethod method : methods) {
             setters[index] = metaFactory.packLambdaMethod(SETTER, method.getMethod());
-            dependencies[index] = getDependency(method, provider);
+            dependencies[index] = getDependency(method, accessor, lock);
             ++index;
         }
         // Prepare constructor
@@ -93,7 +90,7 @@ public class MetaConstructorFactory implements ConstructorFactory {
             init = metaFactory.packLambdaConstructor(ReflectUtil.CALLABLE, clazz.getDeclaredConstructor());
         } else {
             Producer producer = metaFactory.packLambdaConstructor(PRODUCER, constructor.getConstructor());
-            Callable<?> dependency = getDependency(constructor, provider);
+            Callable<?> dependency = getDependency(constructor, accessor, lock);
             init = () -> producer.produce(dependency.call());
         }
         return () -> {
@@ -103,5 +100,12 @@ public class MetaConstructorFactory implements ConstructorFactory {
             }
             return (E) ret;
         };
+    }
+
+    @Override
+    public <E> Callable<E> getConstructor(Class<E> clazz, ProviderType provider) throws Throwable {
+        ContainerAccessor accessor = metaFactory.packLambdaMethod(ACCESSOR, provider.getContainerMethod());
+        Object lock = provider.getLockMethod().invoke(null);
+        return getConstructor(clazz, accessor, lock);
     }
 }
