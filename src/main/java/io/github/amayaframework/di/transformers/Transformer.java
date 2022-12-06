@@ -11,11 +11,22 @@ import java.lang.instrument.UnmodifiableClassException;
  */
 public interface Transformer {
     /**
+     * Transforms the passed classes.
+     *
+     * @param classes  the classes to be analyzed and modified
+     * @param provider supplier of singleton container for {@link Container}
+     * @throws UnmodifiableClassException if the class cannot be changed
+     */
+    void transform(Class<?>[] classes, ProviderType provider) throws UnmodifiableClassException;
+
+    /**
      * Transforms the passed class.
      *
      * @param clazz    the class to be analyzed and modified
      * @param provider supplier of singleton container for {@link Container}
      * @throws UnmodifiableClassException if the class cannot be changed
      */
-    void transform(Class<?> clazz, ProviderType provider) throws UnmodifiableClassException;
+    default void transform(Class<?> clazz, ProviderType provider) throws UnmodifiableClassException {
+        transform(new Class[]{clazz}, provider);
+    }
 }

@@ -76,6 +76,10 @@ public interface Container {
         return put(new Value<>("", clazz), value);
     }
 
+    default <E, V extends E> E put(Class<E> type, String name, V value) {
+        return put(new Value<>(name, type), value);
+    }
+
     /**
      * Remove the object associated with the specified {@link Value}.
      *

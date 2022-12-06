@@ -26,12 +26,6 @@ final class IndexDI implements DI {
         this.lock = new Object();
     }
 
-    private void checkClass(Class<?> clazz) {
-        if (!clazz.isAnnotationPresent(Inject.class)) {
-            throw new InjectError("the class does not have an Inject annotation");
-        }
-    }
-
     @Override
     @SuppressWarnings("unchecked")
     public <E> Callable<E> prepare(Class<E> clazz) {
@@ -40,11 +34,10 @@ final class IndexDI implements DI {
             if (ret != null) {
                 return ret;
             }
-            checkClass(clazz);
             try {
                 ret = constructorFactory.getConstructor(clazz, provider);
             } catch (Throwable e) {
-                throw new InjectError(clazz, e);
+                throw new InjectException(clazz, e);
             }
             prepared.put(clazz, ret);
             return ret;
@@ -53,28 +46,24 @@ final class IndexDI implements DI {
 
     @Override
     public void transform(Class<?> clazz) {
-        checkClass(clazz);
         try {
             transformer.transform(clazz, provider);
         } catch (UnmodifiableClassException e) {
-            throw new InjectError(clazz, e);
+            throw new InjectException(clazz, e);
         }
     }
 
     @Override
     public Class<?>[] transform() {
-        Iterable<Class<?>> found = ClassIndex.getAnnotated(AutoTransform.class);
+        Iterable<Class<?>> found = ClassIndex.getAnnotated(Inject.class);
         Class<?>[] classes = StreamSupport.stream(found.spliterator(), false).toArray(Class<?>[]::new);
         if (classes.length == 0) {
             return classes;
         }
-        for (Class<?> clazz : classes) {
-            checkClass(clazz);
-            try {
-                transformer.transform(clazz, provider);
-            } catch (UnmodifiableClassException e) {
-                throw new InjectError(clazz, e);
-            }
+        try {
+            transformer.transform(classes, provider);
+        } catch (UnmodifiableClassException e) {
+            throw new InjectException(e);
         }
         return classes;
     }

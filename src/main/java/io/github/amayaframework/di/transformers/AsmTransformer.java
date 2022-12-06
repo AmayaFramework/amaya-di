@@ -1,13 +1,11 @@
 package io.github.amayaframework.di.transformers;
 
 import io.github.amayaframework.di.containers.ProviderType;
-import io.github.amayaframework.di.types.InjectType;
 import io.github.amayaframework.di.types.InjectTypeFactory;
 import io.github.amayaframework.di.types.SubTypeFactory;
 
 import java.lang.instrument.Instrumentation;
 import java.lang.instrument.UnmodifiableClassException;
-import java.util.List;
 import java.util.Objects;
 
 /**
@@ -27,15 +25,7 @@ public class AsmTransformer implements Transformer {
     }
 
     @Override
-    public void transform(Class<?> clazz, ProviderType provider) throws UnmodifiableClassException {
-        InjectType type = injectFactory.getInjectType(clazz);
-        AsmClassFileTransformer transformer = new AsmClassFileTransformer(type, typeFactory, provider);
-        instrumentation.addTransformer(transformer, true);
-        instrumentation.retransformClasses(clazz);
-        instrumentation.removeTransformer(transformer);
-        List<Throwable> problems = transformer.getProblems();
-        if (!problems.isEmpty()) {
-            throw new ClassTransformException(clazz, problems);
-        }
+    public void transform(Class<?>[] classes, ProviderType provider) throws UnmodifiableClassException {
+        // TODO
     }
 }

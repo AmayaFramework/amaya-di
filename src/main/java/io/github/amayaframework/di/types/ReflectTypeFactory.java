@@ -1,6 +1,5 @@
 package io.github.amayaframework.di.types;
 
-import io.github.amayaframework.di.Inject;
 import io.github.amayaframework.di.Value;
 
 import java.lang.annotation.Annotation;
@@ -12,7 +11,6 @@ import java.util.stream.Collectors;
 
 /**
  * <p>Implementation {@link InjectTypeFactory} using standard reflection.</p>
- * <p>All classes must be annotated with {@link Inject}.</p>
  */
 public final class ReflectTypeFactory implements InjectTypeFactory {
     private Data extractData(AnnotatedElement element) {
@@ -90,9 +88,6 @@ public final class ReflectTypeFactory implements InjectTypeFactory {
 
     @Override
     public InjectType getInjectType(Class<?> clazz) {
-        if (!clazz.isAnnotationPresent(Inject.class)) {
-            return null;
-        }
         if (Modifier.isAbstract(clazz.getModifiers())) {
             throw new IllegalStateException(String.format("The %s type cannot be abstract", clazz.getName()));
         }
