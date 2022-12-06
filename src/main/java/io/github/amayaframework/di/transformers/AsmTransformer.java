@@ -36,7 +36,8 @@ public final class AsmTransformer implements Transformer {
     }
 
     private static InputStream loadClassBody(Class<?> clazz) {
-        return clazz.getResourceAsStream(clazz.getName() + CLASSFILE_POSTFIX);
+        String name = clazz.getName().replace('.', '/');
+        return clazz.getResourceAsStream(name + CLASSFILE_POSTFIX);
     }
 
     private static void close(InputStream stream) {
