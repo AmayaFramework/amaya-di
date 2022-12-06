@@ -55,6 +55,10 @@ public final class Provider {
         return Holder.CONTAINER.put(value);
     }
 
+    public static <E, V extends E> E put(Class<E> type, String name, V value) {
+        return Holder.CONTAINER.put(type, name, value);
+    }
+
     public static <E> E put(String name, E value) {
         return Holder.CONTAINER.put(name, value);
     }

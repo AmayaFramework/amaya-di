@@ -7,7 +7,7 @@ import java.util.Objects;
  *
  * @param <T> class type
  */
-public class Value<T> {
+public final class Value<T> {
     private final String name;
     private final Class<T> type;
 

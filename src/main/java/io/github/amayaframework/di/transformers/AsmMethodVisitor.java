@@ -15,7 +15,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
-class AsmMethodVisitor extends LocalVariablesSorter {
+final class AsmMethodVisitor extends LocalVariablesSorter {
     private final SubTypeFactory factory;
     private final ProviderType provider;
     private final Type owner;

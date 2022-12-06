@@ -15,7 +15,7 @@ import java.util.concurrent.Callable;
 /**
  * Implementation of {@link ConstructorFactory} using meta-lambdas.
  */
-public class MetaConstructorFactory implements ConstructorFactory {
+public final class MetaConstructorFactory implements ConstructorFactory {
     private static final LambdaType<Setter> SETTER = LambdaType.fromClass(Setter.class);
     private static final LambdaType<Producer> PRODUCER = LambdaType.fromClass(Producer.class);
     private static final LambdaType<ContainerAccessor> ACCESSOR = LambdaType.fromClass(ContainerAccessor.class);

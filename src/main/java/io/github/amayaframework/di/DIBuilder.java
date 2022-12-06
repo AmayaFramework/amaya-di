@@ -23,7 +23,7 @@ import java.util.Optional;
 /**
  * Built-in builder for DI, using {@link MetaFactory} and ClassIndex to search for annotated classes.
  */
-public class DIBuilder {
+public final class DIBuilder {
     private static final Logger LOGGER = LoggerFactory.getLogger(DIBuilder.class);
     private static final DIBuilder DEFAULT_BUILDER = new DIBuilder();
     private static final ProviderType PROVIDER_TYPE = ProviderType.fromClass(Provider.class);
@@ -132,7 +132,7 @@ public class DIBuilder {
     }
 
     /**
-     * Sets a flag indicating that all classes annotated with {@link AutoTransform}
+     * Sets a flag indicating that all classes annotated with {@link Inject}
      * will be found and transformed when creating {@link DI}.
      *
      * @param autoTransform boolean flag, if it is necessary to process classes - true, if not - false.

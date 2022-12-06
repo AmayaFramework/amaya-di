@@ -11,12 +11,12 @@ import java.util.Objects;
 
 import static com.github.romanqed.jeflect.AsmUtil.INIT;
 
-class AsmClassVisitor extends ClassVisitor {
+final class AsmClassVisitor extends ClassVisitor {
     private final InjectType type;
     private final SubTypeFactory factory;
     private final ProviderType provider;
 
-    protected AsmClassVisitor(ClassVisitor visitor, InjectType type, SubTypeFactory factory, ProviderType provider) {
+    AsmClassVisitor(ClassVisitor visitor, InjectType type, SubTypeFactory factory, ProviderType provider) {
         super(Opcodes.ASM8, visitor);
         this.type = type;
         this.factory = factory;
