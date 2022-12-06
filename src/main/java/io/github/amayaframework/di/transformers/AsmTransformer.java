@@ -95,6 +95,9 @@ public final class AsmTransformer implements Transformer {
             close(body);
             return true;
         });
+        if (found.isEmpty()) {
+            return;
+        }
         try {
             instrumentation.redefineClasses(found.toArray(new ClassDefinition[0]));
         } catch (ClassNotFoundException e) {
