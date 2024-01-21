@@ -8,4 +8,6 @@ public interface Repository {
     void add(Artifact artifact, Function0<Object> supplier);
 
     void remove(Artifact artifact);
+
+    void clear();
 }
