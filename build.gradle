@@ -5,8 +5,8 @@ plugins {
 }
 
 java {
-    sourceCompatibility = JavaVersion.VERSION_1_8
-    targetCompatibility = JavaVersion.VERSION_1_8
+    sourceCompatibility = JavaVersion.VERSION_11
+    targetCompatibility = JavaVersion.VERSION_11
     compileJava.options.encoding('UTF-8')
     withJavadocJar()
     withSourcesJar()
@@ -22,18 +22,8 @@ repositories {
 
 dependencies {
     // Tests
-    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.9.1'
-    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.9.1'
-    testAnnotationProcessor group: 'org.atteo.classindex', name: 'classindex', version: '3.11'
-    // Annotation scanner
-    api group: 'org.atteo.classindex', name: 'classindex', version: '3.11'
-    annotationProcessor group: 'org.atteo.classindex', name: 'classindex', version: '3.11'
-    // Jeflect
-    api group: 'com.github.romanqed', name: 'jeflect', version: '3.1.0'
-    // Java agent
-    api group: 'net.bytebuddy', name: 'byte-buddy-agent', version: '1.12.10'
-    // Logger
-    implementation group: 'org.slf4j', name: 'slf4j-api', version: '1.7.36'
+    testImplementation group: 'org.junit.jupiter', name: 'junit-jupiter-api', version: '5.10.0'
+    testRuntimeOnly group: 'org.junit.jupiter', name: 'junit-jupiter-engine', version: '5.10.0'
 }
 
 test {
