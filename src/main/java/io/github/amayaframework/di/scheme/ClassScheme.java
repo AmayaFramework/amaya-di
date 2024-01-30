@@ -59,7 +59,6 @@ public final class ClassScheme extends AbstractScheme<Class<?>> {
                 "methodSchemes=" + methodSchemes +
                 ", fieldSchemes=" + fieldSchemes +
                 ", constructorScheme=" + constructorScheme +
-                ", artifacts=" + artifacts +
                 ", target=" + target +
                 '}';
     }
