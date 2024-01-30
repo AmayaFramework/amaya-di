@@ -1,12 +1,12 @@
-package io.github.amayaframework.di;
+package io.github.amayaframework.di.scheme;
 
-import java.lang.reflect.Member;
+import java.util.Objects;
 
-abstract class AbstractScheme<T extends Member> implements Scheme<T> {
+abstract class AbstractScheme<T> implements Scheme<T> {
     protected final T target;
 
     protected AbstractScheme(T target) {
-        this.target = target;
+        this.target = Objects.requireNonNull(target);
     }
 
     @Override

@@ -1,6 +1,7 @@
 package io.github.amayaframework.di;
 
 import com.github.romanqed.jfunc.Function0;
+import io.github.amayaframework.di.scheme.Artifact;
 
 public interface Repository {
     Function0<Object> get(Artifact artifact);
