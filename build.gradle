@@ -24,7 +24,7 @@ dependencies {
     // Tests
     testImplementation group: 'org.junit.jupiter', name: 'junit-jupiter-api', version: '5.10.0'
     testRuntimeOnly group: 'org.junit.jupiter', name: 'junit-jupiter-engine', version: '5.10.0'
-    api group: 'com.github.romanqed', name: 'jeflect', version: '1.1.0L'
+    api group: 'com.github.romanqed', name: 'jeflect', version: '1.1.1L'
 }
 
 test {

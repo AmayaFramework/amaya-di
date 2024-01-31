@@ -1,5 +1,7 @@
 package io.github.amayaframework.di.scheme;
 
+import io.github.amayaframework.di.Artifact;
+
 import java.lang.annotation.Annotation;
 import java.lang.reflect.*;
 import java.util.*;

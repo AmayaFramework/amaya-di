@@ -3,8 +3,8 @@ package io.github.amayaframework.di.stub;
 import com.github.romanqed.jeflect.*;
 import com.github.romanqed.jfunc.Exceptions;
 import com.github.romanqed.jfunc.Function0;
-import io.github.amayaframework.di.Repository;
-import io.github.amayaframework.di.scheme.Artifact;
+import io.github.amayaframework.di.Artifact;
+import io.github.amayaframework.di.ArtifactNotFoundException;
 import io.github.amayaframework.di.scheme.ClassScheme;
 import org.objectweb.asm.ClassWriter;
 import org.objectweb.asm.MethodVisitor;
@@ -14,6 +14,7 @@ import org.objectweb.asm.Type;
 import java.lang.reflect.Method;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Function;
 
 public final class BytecodeStubFactory implements StubFactory {
     private static final String STUB = "Stub";
@@ -190,26 +191,35 @@ public final class BytecodeStubFactory implements StubFactory {
         return writer.toByteArray();
     }
 
+    private static Function0<Object> get(Artifact artifact, Function<Artifact, Function0<Object>> provider) {
+        var ret = provider.apply(artifact);
+        if (ret == null) {
+            throw new ArtifactNotFoundException(artifact);
+        }
+        return ret;
+    }
+
+    private static Function0<?> instantiate(Class<?> clazz,
+                                            Set<Artifact> artifacts,
+                                            Function<Artifact, Function0<Object>> provider) throws Throwable {
+        var constructor = clazz.getDeclaredConstructor(Function0[].class);
+        var arguments = new Function0<?>[artifacts.size()];
+        var count = 0;
+        for (var artifact : artifacts) {
+            arguments[count++] = get(artifact, provider);
+        }
+        return (Function0<?>) constructor.newInstance(new Object[]{arguments});
+    }
+
     @Override
-    public Function0<?> create(ClassScheme scheme, Repository repository) {
+    public Function0<?> create(ClassScheme scheme, Function<Artifact, Function0<Object>> provider) {
         var target = scheme.getTarget();
         var name = target.getName() + STUB;
         var artifacts = scheme.getArtifacts();
         return factory.create(
                 name,
-                () -> {
-                    var internal = Type.getInternalName(target) + STUB;
-                    return generate(internal, scheme, artifacts);
-                },
-                clazz -> {
-                    var constructor = clazz.getDeclaredConstructor(Function0[].class);
-                    var arguments = new Function0<?>[artifacts.size()];
-                    var count = 0;
-                    for (var artifact : artifacts) {
-                        arguments[count++] = repository.get(artifact);
-                    }
-                    return (Function0<?>) constructor.newInstance(new Object[]{arguments});
-                }
+                () -> generate(Type.getInternalName(target) + STUB, scheme, artifacts),
+                clazz -> instantiate(clazz, artifacts, provider)
         );
     }
 }

@@ -1,6 +1,6 @@
 package io.github.amayaframework.di.stub;
 
-import io.github.amayaframework.di.scheme.Artifact;
+import io.github.amayaframework.di.Artifact;
 
 import java.util.HashMap;
 import java.util.Map;

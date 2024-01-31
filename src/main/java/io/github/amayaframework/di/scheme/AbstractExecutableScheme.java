@@ -1,5 +1,7 @@
 package io.github.amayaframework.di.scheme;
 
+import io.github.amayaframework.di.Artifact;
+
 import java.lang.reflect.Executable;
 import java.util.Collections;
 import java.util.Objects;

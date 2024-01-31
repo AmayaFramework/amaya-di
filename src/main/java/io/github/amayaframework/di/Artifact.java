@@ -1,4 +1,4 @@
-package io.github.amayaframework.di.scheme;
+package io.github.amayaframework.di;
 
 import java.util.Arrays;
 import java.util.Objects;
@@ -8,7 +8,7 @@ public final class Artifact {
     private final Object[] metadata;
 
     public Artifact(Class<?> type, Object[] metadata) {
-        this.type = Objects.requireNonNull(type);
+        this.type = type;
         this.metadata = metadata;
     }
 
@@ -17,12 +17,18 @@ public final class Artifact {
     }
 
     public Artifact(Class<?> type) {
-        this.type = Objects.requireNonNull(type);
+        this.type = type;
         this.metadata = null;
     }
 
     public static Artifact of(Class<?> type, Object... metadata) {
+        Objects.requireNonNull(type);
         return new Artifact(type, metadata);
+    }
+
+    public static Artifact of(Class<?> type) {
+        Objects.requireNonNull(type);
+        return new Artifact(type);
     }
 
     public Class<?> getType() {

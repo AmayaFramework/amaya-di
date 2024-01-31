@@ -1,6 +1,6 @@
 package io.github.amayaframework.di.scheme;
 
-public class IllegalSchemeException extends Error {
+public class IllegalSchemeException extends RuntimeException {
     private final Class<?> clazz;
 
     public IllegalSchemeException(Class<?> clazz, String message, Throwable cause) {
