@@ -8,6 +8,8 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 public final class ReflectionSchemeFactory implements SchemeFactory {
+    private static final String OBJECT_NAME = Object.class.getName();
+    private static final String WILDCARD = "?";
     private final Class<? extends Annotation> annotation;
 
     public ReflectionSchemeFactory(Class<? extends Annotation> annotation) {
@@ -18,7 +20,18 @@ public final class ReflectionSchemeFactory implements SchemeFactory {
         if (!(type instanceof ParameterizedType)) {
             return new Artifact(clazz);
         }
-        return new Artifact(clazz, ((ParameterizedType) type).getActualTypeArguments());
+        var arguments = ((ParameterizedType) type).getActualTypeArguments();
+        var count = 0;
+        for (var argument : arguments) {
+            var name = argument.getTypeName();
+            if (name.equals(OBJECT_NAME) || name.equals(WILDCARD)) {
+                ++count;
+            }
+        }
+        if (count == arguments.length) {
+            return new Artifact(clazz);
+        }
+        return new Artifact(clazz, arguments);
     }
 
     private static void process(Parameter[] parameters, int start, Set<Artifact> artifacts, Artifact[] mapping) {

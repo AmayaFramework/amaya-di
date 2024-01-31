@@ -176,14 +176,8 @@ public final class CheckedProviderBuilder implements ServiceProviderBuilder {
         // Fire all delayed stub creations
         for (var entry : provider.body.entrySet()) {
             var artifact = entry.getKey();
-            try {
-                var supplier = entry.getValue().invoke();
-                repository.add(artifact, supplier);
-            } catch (ArtifactNotFoundException e) {
-                throw e;
-            } catch (Throwable e) {
-                throw new RuntimeException(e);
-            }
+            var supplier = Exceptions.suppress(entry.getValue());
+            repository.add(artifact, supplier);
         }
         this.reset();
         return new PlainServiceProvider(repository);
