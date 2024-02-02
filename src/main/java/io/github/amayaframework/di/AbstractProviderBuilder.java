@@ -25,7 +25,7 @@ public abstract class AbstractProviderBuilder implements ServiceProviderBuilder 
 
     @Override
     public ServiceProviderBuilder setRepository(Repository repository) {
-        this.repository = Objects.requireNonNull(repository);
+        this.repository = repository;
         return this;
     }
 
