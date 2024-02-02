@@ -16,7 +16,7 @@ public final class GraphUtil {
         }
         for (var node : ret) {
             var nodes = graph.getAdjacentNodes(node.value);
-            if (nodes == null) {
+            if (nodes == null || nodes.isEmpty()) {
                 node.adjacents = Collections.emptyList();
                 continue;
             }

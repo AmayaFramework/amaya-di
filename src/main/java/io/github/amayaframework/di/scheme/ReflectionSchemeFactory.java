@@ -9,7 +9,10 @@ import java.util.stream.Collectors;
 
 public final class ReflectionSchemeFactory implements SchemeFactory {
     private static final String OBJECT_NAME = Object.class.getName();
+    private static final String EXTENDS = "? extends ";
+    private static final String SUPER = "super";
     private static final String WILDCARD = "?";
+    private static final String OBJECT_SUPER = "? super " + OBJECT_NAME;
     private final Class<? extends Annotation> annotation;
 
     public ReflectionSchemeFactory(Class<? extends Annotation> annotation) {
@@ -20,18 +23,28 @@ public final class ReflectionSchemeFactory implements SchemeFactory {
         if (!(type instanceof ParameterizedType)) {
             return new Artifact(clazz);
         }
-        var arguments = ((ParameterizedType) type).getActualTypeArguments();
+        var parameterized = (ParameterizedType) type;
+        var arguments = parameterized.getActualTypeArguments();
+        var parsed = new String[arguments.length];
         var count = 0;
-        for (var argument : arguments) {
-            var name = argument.getTypeName();
-            if (name.equals(OBJECT_NAME) || name.equals(WILDCARD)) {
+        for (var i = 0; i < arguments.length; ++i) {
+            var name = arguments[i].getTypeName()
+                    .replace(EXTENDS, "")
+                    .replace(OBJECT_SUPER, WILDCARD)
+                    .replace(OBJECT_NAME, WILDCARD);
+            if (name.equals(WILDCARD)) {
                 ++count;
+                continue;
             }
+            if (name.contains(SUPER)) {
+                throw new IllegalTypeException(parameterized);
+            }
+            parsed[i] = name;
         }
         if (count == arguments.length) {
             return new Artifact(clazz);
         }
-        return new Artifact(clazz, arguments);
+        return new Artifact(clazz, parsed);
     }
 
     private static void process(Parameter[] parameters, int start, Set<Artifact> artifacts, Artifact[] mapping) {
