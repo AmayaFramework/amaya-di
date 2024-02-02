@@ -61,6 +61,9 @@ public final class ReflectionSchemeFactory implements SchemeFactory {
     }
 
     private static ConstructorScheme create(Constructor<?> constructor) {
+        if (constructor.getTypeParameters().length != 0) {
+            throw new IllegalMemberException("Cannot use parameterized constructor", constructor);
+        }
         var artifacts = new HashSet<Artifact>();
         var mapping = new Artifact[constructor.getParameterCount()];
         process(constructor.getParameters(), artifacts, mapping);
@@ -68,6 +71,9 @@ public final class ReflectionSchemeFactory implements SchemeFactory {
     }
 
     private static MethodScheme create(Method method) {
+        if (method.getTypeParameters().length != 0) {
+            throw new IllegalMemberException("Cannot use parameterized method", method);
+        }
         var artifacts = new HashSet<Artifact>();
         if (!Modifier.isStatic(method.getModifiers())) {
             var mapping = new Artifact[method.getParameterCount()];
@@ -165,6 +171,9 @@ public final class ReflectionSchemeFactory implements SchemeFactory {
     @Override
     public ClassScheme create(Class<?> clazz) {
         // Check class
+        if (clazz.getTypeParameters().length != 0) {
+            throw new IllegalSchemeException(clazz, "Cannot create scheme of parameterized class");
+        }
         var modifiers = clazz.getModifiers();
         if (!Modifier.isPublic(modifiers)) {
             throw new IllegalSchemeException(clazz, "Cannot create scheme of non-public class");

@@ -5,6 +5,11 @@ import java.lang.reflect.ParameterizedType;
 public class IllegalTypeException extends RuntimeException {
     private final ParameterizedType type;
 
+    public IllegalTypeException(String message, ParameterizedType type) {
+        super(message);
+        this.type = type;
+    }
+
     public IllegalTypeException(ParameterizedType type) {
         super("Illegal parameterized type");
         this.type = type;
