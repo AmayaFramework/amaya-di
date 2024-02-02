@@ -27,8 +27,8 @@ public final class GraphUtil {
         return ret;
     }
 
-    private static <E> Set<E> collectComponents(Node<E> head, Deque<Node<E>> deque) {
-        var ret = new HashSet<E>();
+    private static <E> List<E> collectComponents(Node<E> head, Deque<Node<E>> deque) {
+        var ret = new LinkedList<E>();
         var node = (Node<E>) null;
         do {
             node = deque.pop();
@@ -38,7 +38,7 @@ public final class GraphUtil {
         return ret;
     }
 
-    private static <E> int processNode(Node<E> node, Deque<Node<E>> deque, List<Set<E>> components, int time) {
+    private static <E> int processNode(Node<E> node, Deque<Node<E>> deque, List<List<E>> components, int time) {
         var stack = new LinkedList<Entry<E>>();
         stack.push(new Entry<>(node, 0));
         while (!stack.isEmpty()) {
@@ -77,8 +77,8 @@ public final class GraphUtil {
         return time;
     }
 
-    public static <E> List<Set<E>> findStronglyConnectedComponents(Graph<E> graph) {
-        var ret = new LinkedList<Set<E>>();
+    public static <E> List<List<E>> findStronglyConnectedComponents(Graph<E> graph) {
+        var ret = new LinkedList<List<E>>();
         var nodes = graphToNodes(graph);
         var time = 0;
         var deque = new LinkedList<Node<E>>();

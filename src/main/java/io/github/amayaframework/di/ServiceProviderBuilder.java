@@ -10,9 +10,9 @@ public interface ServiceProviderBuilder {
                                           Class<? extends T> implementation,
                                           Function1<Function0<T>, Function0<T>> wrapper);
 
-    <T> ServiceProviderBuilder addSingleton(Artifact artifact, Class<? extends T> implementation);
+    ServiceProviderBuilder addSingleton(Artifact artifact, Class<?> implementation);
 
-    <T> ServiceProviderBuilder addTransient(Artifact artifact, Class<? extends T> implementation);
+    ServiceProviderBuilder addTransient(Artifact artifact, Class<?> implementation);
 
     <T> ServiceProviderBuilder addService(Class<T> type,
                                           Class<? extends T> implementation,
@@ -24,11 +24,11 @@ public interface ServiceProviderBuilder {
 
     <T> ServiceProviderBuilder addService(Class<T> type, Function1<Function0<T>, Function0<T>> wrapper);
 
-    <T> ServiceProviderBuilder addSingleton(Class<T> type);
+    ServiceProviderBuilder addSingleton(Class<?> type);
 
-    <T> ServiceProviderBuilder addTransient(Class<T> type);
+    ServiceProviderBuilder addTransient(Class<?> type);
 
-    <T> ServiceProviderBuilder addService(Artifact artifact, Function0<T> supplier);
+    ServiceProviderBuilder addService(Artifact artifact, Function0<?> supplier);
 
     <T> ServiceProviderBuilder addService(Class<T> type, Function0<T> supplier);
 

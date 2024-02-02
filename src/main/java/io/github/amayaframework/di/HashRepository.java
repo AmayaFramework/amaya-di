@@ -26,6 +26,12 @@ public final class HashRepository implements Repository {
     }
 
     @Override
+    public boolean contains(Artifact artifact) {
+        Objects.requireNonNull(artifact);
+        return body.containsKey(artifact);
+    }
+
+    @Override
     public void add(Artifact artifact, Function0<Object> supplier) {
         Objects.requireNonNull(artifact);
         Objects.requireNonNull(supplier);

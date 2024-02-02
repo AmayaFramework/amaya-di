@@ -1,16 +1,16 @@
 package io.github.amayaframework.di;
 
-import java.util.Set;
+import java.util.List;
 
 public final class CycleFoundException extends RuntimeException {
-    private final Set<Artifact> cycle;
+    private final List<Artifact> cycle;
 
-    public CycleFoundException(Set<Artifact> cycle) {
+    public CycleFoundException(List<Artifact> cycle) {
         super("A cycle has been found in the dependency graph");
         this.cycle = cycle;
     }
 
-    public Set<Artifact> getCycle() {
+    public List<Artifact> getCycle() {
         return cycle;
     }
 }

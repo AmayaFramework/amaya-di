@@ -5,6 +5,8 @@ import com.github.romanqed.jfunc.Function0;
 public interface Repository {
     Function0<Object> get(Artifact artifact);
 
+    boolean contains(Artifact artifact);
+
     void add(Artifact artifact, Function0<Object> supplier);
 
     void remove(Artifact artifact);
