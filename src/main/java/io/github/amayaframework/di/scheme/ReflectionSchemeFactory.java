@@ -1,5 +1,6 @@
 package io.github.amayaframework.di.scheme;
 
+import com.github.romanqed.jfunc.Exceptions;
 import io.github.amayaframework.di.Artifact;
 
 import java.lang.annotation.Annotation;
@@ -8,59 +9,93 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 public final class ReflectionSchemeFactory implements SchemeFactory {
-    private static final String OBJECT_NAME = Object.class.getName();
-    private static final String EXTENDS = "? extends ";
-    private static final String SUPER = "super";
-    private static final String WILDCARD = "?";
-    private static final String OBJECT_SUPER = "? super " + OBJECT_NAME;
+    private static final String ARRAY = "[";
+    private static final String REFERENCE = "L";
+
     private final Class<? extends Annotation> annotation;
+    private final ClassLoader loader;
+
+    public ReflectionSchemeFactory(Class<? extends Annotation> annotation, ClassLoader loader) {
+        this.annotation = Objects.requireNonNull(annotation);
+        this.loader = loader;
+    }
 
     public ReflectionSchemeFactory(Class<? extends Annotation> annotation) {
-        this.annotation = Objects.requireNonNull(annotation);
+        this(annotation, ReflectionSchemeFactory.class.getClassLoader());
     }
 
-    private static Artifact of(Class<?> clazz, Type type) {
+    private Class<?> of(String name, int array) {
+        if (array == 0) {
+            return Exceptions.suppress(() -> Class.forName(name, false, loader));
+        }
+        return Exceptions.suppress(() -> Class.forName(ARRAY.repeat(array) + REFERENCE + name + ";", false, loader));
+    }
+
+    private Type unpackWildcard(Type type) {
+        if (!(type instanceof WildcardType)) {
+            return type;
+        }
+        var wildcard = (WildcardType) type;
+        if (wildcard.getLowerBounds().length != 0) {
+            throw new IllegalTypeException("Super wildcards are not supported", type);
+        }
+        var bounds = wildcard.getUpperBounds();
+        if (bounds.length != 1) {
+            throw new IllegalTypeException(type);
+        }
+        return bounds[0];
+    }
+
+    private Object process(Type type) {
+        type = unpackWildcard(type);
+        var array = 0;
+        while (type instanceof GenericArrayType) {
+            type = ((GenericArrayType) type).getGenericComponentType();
+            ++array;
+        }
         if (!(type instanceof ParameterizedType)) {
-            return new Artifact(clazz);
+            return of(type.getTypeName(), array);
         }
         var parameterized = (ParameterizedType) type;
+        var clazz = of(parameterized.getRawType().getTypeName(), array);
         var arguments = parameterized.getActualTypeArguments();
-        var parsed = new String[arguments.length];
-        var count = 0;
+        var metadata = new Object[arguments.length];
+        var wildcards = 0;
         for (var i = 0; i < arguments.length; ++i) {
-            var name = arguments[i].getTypeName()
-                    .replace(EXTENDS, "")
-                    .replace(OBJECT_SUPER, WILDCARD)
-                    .replace(OBJECT_NAME, WILDCARD);
-            if (name.equals(WILDCARD)) {
-                ++count;
-                continue;
+            var object = process(arguments[i]);
+            if (object == Object.class) {
+                ++wildcards;
             }
-            if (name.contains(SUPER)) {
-                throw new IllegalTypeException(parameterized);
-            }
-            parsed[i] = name;
+            metadata[i] = object;
         }
-        if (count == arguments.length) {
-            return new Artifact(clazz);
+        if (metadata.length == wildcards) {
+            return clazz;
         }
-        return new Artifact(clazz, parsed);
+        return new Artifact(clazz, metadata);
     }
 
-    private static void process(Parameter[] parameters, int start, Set<Artifact> artifacts, Artifact[] mapping) {
+    private Artifact makeArtifact(Type type) {
+        var ret = process(type);
+        if (ret instanceof Artifact) {
+            return (Artifact) ret;
+        }
+        return new Artifact((Class<?>) ret);
+    }
+
+    private void process(Parameter[] parameters, int start, Set<Artifact> artifacts, Artifact[] mapping) {
         for (var i = start; i < parameters.length; ++i) {
             var parameter = parameters[i];
-            var artifact = of(parameter.getType(), parameter.getParameterizedType());
+            var artifact = makeArtifact(parameter.getParameterizedType());
             artifacts.add(artifact);
             mapping[i - start] = artifact;
         }
     }
 
-    private static void process(Parameter[] parameters, Set<Artifact> artifacts, Artifact[] mapping) {
+    private void process(Parameter[] parameters, Set<Artifact> artifacts, Artifact[] mapping) {
         process(parameters, 0, artifacts, mapping);
     }
 
-    private static ConstructorScheme create(Constructor<?> constructor) {
+    private ConstructorScheme create(Constructor<?> constructor) {
         if (constructor.getTypeParameters().length != 0) {
             throw new IllegalMemberException("Cannot use parameterized constructor", constructor);
         }
@@ -70,7 +105,7 @@ public final class ReflectionSchemeFactory implements SchemeFactory {
         return new ConstructorScheme(constructor, artifacts, mapping);
     }
 
-    private static MethodScheme create(Method method) {
+    private MethodScheme create(Method method) {
         if (method.getTypeParameters().length != 0) {
             throw new IllegalMemberException("Cannot use parameterized method", method);
         }
@@ -85,7 +120,7 @@ public final class ReflectionSchemeFactory implements SchemeFactory {
         if (!first.isAssignableFrom(owner)) {
             throw new IllegalSchemeException(
                     owner,
-                    "The first parameter of the static method must be the superclass of the current class"
+                    "The first parameter makeArtifact the static method must be the superclass makeArtifact the current class"
             );
         }
         var mapping = new Artifact[method.getParameterCount() - 1];
@@ -93,8 +128,8 @@ public final class ReflectionSchemeFactory implements SchemeFactory {
         return new MethodScheme(method, artifacts, mapping);
     }
 
-    private static FieldScheme create(Field field) {
-        var artifact = of(field.getType(), field.getGenericType());
+    private FieldScheme create(Field field) {
+        var artifact = makeArtifact(field.getGenericType());
         return new FieldScheme(field, artifact);
     }
 
@@ -172,32 +207,32 @@ public final class ReflectionSchemeFactory implements SchemeFactory {
     public ClassScheme create(Class<?> clazz) {
         // Check class
         if (clazz.getTypeParameters().length != 0) {
-            throw new IllegalSchemeException(clazz, "Cannot create scheme of parameterized class");
+            throw new IllegalSchemeException(clazz, "Cannot create scheme makeArtifact parameterized class");
         }
         var modifiers = clazz.getModifiers();
         if (!Modifier.isPublic(modifiers)) {
-            throw new IllegalSchemeException(clazz, "Cannot create scheme of non-public class");
+            throw new IllegalSchemeException(clazz, "Cannot create scheme makeArtifact non-public class");
         }
         if (Modifier.isAbstract(modifiers)) {
-            throw new IllegalSchemeException(clazz, "Cannot create scheme of abstract class");
+            throw new IllegalSchemeException(clazz, "Cannot create scheme makeArtifact abstract class");
         }
         if (clazz.isEnum()) {
-            throw new IllegalSchemeException(clazz, "Cannot create scheme of enum class");
+            throw new IllegalSchemeException(clazz, "Cannot create scheme makeArtifact enum class");
         }
         if (clazz.isPrimitive()) {
-            throw new IllegalSchemeException(clazz, "Cannot create scheme of primitive class");
+            throw new IllegalSchemeException(clazz, "Cannot create scheme makeArtifact primitive class");
         }
         if (clazz.isArray()) {
-            throw new IllegalSchemeException(clazz, "Cannot create scheme of array class");
+            throw new IllegalSchemeException(clazz, "Cannot create scheme makeArtifact array class");
         }
         if (clazz.isAnnotation()) {
-            throw new IllegalSchemeException(clazz, "Cannot create scheme of annotation class");
+            throw new IllegalSchemeException(clazz, "Cannot create scheme makeArtifact annotation class");
         }
         if (clazz.isAnonymousClass()) {
-            throw new IllegalSchemeException(clazz, "Cannot create scheme of anonymous class");
+            throw new IllegalSchemeException(clazz, "Cannot create scheme makeArtifact anonymous class");
         }
         if (clazz.getDeclaringClass() != null && !Modifier.isStatic(modifiers)) {
-            throw new IllegalSchemeException(clazz, "Cannot create scheme of non-static member class");
+            throw new IllegalSchemeException(clazz, "Cannot create scheme makeArtifact non-static member class");
         }
         var constructor = findConstructor(clazz);
         var fields = findFields(clazz);
