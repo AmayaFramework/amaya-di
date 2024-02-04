@@ -120,7 +120,7 @@ public final class ReflectionSchemeFactory implements SchemeFactory {
         if (!first.isAssignableFrom(owner)) {
             throw new IllegalSchemeException(
                     owner,
-                    "The first parameter makeArtifact the static method must be the superclass makeArtifact the current class"
+                    "The first parameter of the static method must be the superclass of the current class"
             );
         }
         var mapping = new Artifact[method.getParameterCount() - 1];
@@ -207,32 +207,32 @@ public final class ReflectionSchemeFactory implements SchemeFactory {
     public ClassScheme create(Class<?> clazz) {
         // Check class
         if (clazz.getTypeParameters().length != 0) {
-            throw new IllegalSchemeException(clazz, "Cannot create scheme makeArtifact parameterized class");
+            throw new IllegalSchemeException(clazz, "Cannot create scheme of parameterized class");
         }
         var modifiers = clazz.getModifiers();
         if (!Modifier.isPublic(modifiers)) {
-            throw new IllegalSchemeException(clazz, "Cannot create scheme makeArtifact non-public class");
+            throw new IllegalSchemeException(clazz, "Cannot create scheme of non-public class");
         }
         if (Modifier.isAbstract(modifiers)) {
-            throw new IllegalSchemeException(clazz, "Cannot create scheme makeArtifact abstract class");
+            throw new IllegalSchemeException(clazz, "Cannot create scheme of abstract class");
         }
         if (clazz.isEnum()) {
-            throw new IllegalSchemeException(clazz, "Cannot create scheme makeArtifact enum class");
+            throw new IllegalSchemeException(clazz, "Cannot create scheme of enum class");
         }
         if (clazz.isPrimitive()) {
-            throw new IllegalSchemeException(clazz, "Cannot create scheme makeArtifact primitive class");
+            throw new IllegalSchemeException(clazz, "Cannot create scheme of primitive class");
         }
         if (clazz.isArray()) {
-            throw new IllegalSchemeException(clazz, "Cannot create scheme makeArtifact array class");
+            throw new IllegalSchemeException(clazz, "Cannot create scheme of array class");
         }
         if (clazz.isAnnotation()) {
-            throw new IllegalSchemeException(clazz, "Cannot create scheme makeArtifact annotation class");
+            throw new IllegalSchemeException(clazz, "Cannot create scheme of annotation class");
         }
         if (clazz.isAnonymousClass()) {
-            throw new IllegalSchemeException(clazz, "Cannot create scheme makeArtifact anonymous class");
+            throw new IllegalSchemeException(clazz, "Cannot create scheme of anonymous class");
         }
         if (clazz.getDeclaringClass() != null && !Modifier.isStatic(modifiers)) {
-            throw new IllegalSchemeException(clazz, "Cannot create scheme makeArtifact non-static member class");
+            throw new IllegalSchemeException(clazz, "Cannot create scheme of non-static member class");
         }
         var constructor = findConstructor(clazz);
         var fields = findFields(clazz);
