@@ -74,7 +74,10 @@ public final class ReflectionSchemeFactory implements SchemeFactory {
         return new Artifact(clazz, metadata);
     }
 
-    private Artifact makeArtifact(Type type) {
+    private Artifact makeArtifact(Type type, Class<?> clazz) {
+        if (clazz.isPrimitive()) {
+            throw new IllegalTypeException("Primitive types are not supported", type);
+        }
         var ret = process(type);
         if (ret instanceof Artifact) {
             return (Artifact) ret;
@@ -85,7 +88,7 @@ public final class ReflectionSchemeFactory implements SchemeFactory {
     private void process(Parameter[] parameters, int start, Set<Artifact> artifacts, Artifact[] mapping) {
         for (var i = start; i < parameters.length; ++i) {
             var parameter = parameters[i];
-            var artifact = makeArtifact(parameter.getParameterizedType());
+            var artifact = makeArtifact(parameter.getParameterizedType(), parameter.getType());
             artifacts.add(artifact);
             mapping[i - start] = artifact;
         }
@@ -129,7 +132,7 @@ public final class ReflectionSchemeFactory implements SchemeFactory {
     }
 
     private FieldScheme create(Field field) {
-        var artifact = makeArtifact(field.getGenericType());
+        var artifact = makeArtifact(field.getGenericType(), field.getType());
         return new FieldScheme(field, artifact);
     }
 
