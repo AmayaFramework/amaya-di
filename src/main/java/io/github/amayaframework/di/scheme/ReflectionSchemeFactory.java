@@ -41,7 +41,7 @@ public final class ReflectionSchemeFactory implements SchemeFactory {
         }
         var bounds = wildcard.getUpperBounds();
         if (bounds.length != 1) {
-            throw new IllegalTypeException(type);
+            throw new IllegalTypeException("Multiple wildcards are not supported", type);
         }
         return bounds[0];
     }
