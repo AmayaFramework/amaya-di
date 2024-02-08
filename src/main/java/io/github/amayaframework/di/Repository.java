@@ -7,9 +7,9 @@ public interface Repository {
 
     boolean contains(Artifact artifact);
 
-    void add(Artifact artifact, Function0<Object> supplier);
+    boolean add(Artifact artifact, Function0<Object> supplier);
 
-    void remove(Artifact artifact);
+    boolean remove(Artifact artifact);
 
     void clear();
 }

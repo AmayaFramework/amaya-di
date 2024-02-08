@@ -3,7 +3,7 @@ package io.github.amayaframework.di.graph;
 import java.util.*;
 import java.util.function.BiConsumer;
 
-public final class HashGraph<E> implements Graph<E> {
+public class HashGraph<E> implements Graph<E> {
     private final Map<E, Set<E>> body;
 
     public HashGraph() {

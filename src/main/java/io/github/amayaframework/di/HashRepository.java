@@ -7,7 +7,7 @@ import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Supplier;
 
-public final class HashRepository implements Repository {
+public class HashRepository implements Repository {
     private final Map<Artifact, Function0<Object>> body;
 
     public HashRepository(Supplier<Map<Artifact, Function0<Object>>> supplier) {
@@ -32,19 +32,20 @@ public final class HashRepository implements Repository {
     }
 
     @Override
-    public void add(Artifact artifact, Function0<Object> supplier) {
+    public boolean add(Artifact artifact, Function0<Object> supplier) {
         Objects.requireNonNull(artifact);
         Objects.requireNonNull(supplier);
         if (body.containsKey(artifact)) {
-            return;
+            return false;
         }
         body.put(artifact, supplier);
+        return true;
     }
 
     @Override
-    public void remove(Artifact artifact) {
+    public boolean remove(Artifact artifact) {
         Objects.requireNonNull(artifact);
-        body.remove(artifact);
+        return body.remove(artifact) != null;
     }
 
     @Override

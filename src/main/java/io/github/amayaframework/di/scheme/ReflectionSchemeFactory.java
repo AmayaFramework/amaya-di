@@ -13,25 +13,24 @@ public final class ReflectionSchemeFactory implements SchemeFactory {
     private static final String REFERENCE = "L";
 
     private final Class<? extends Annotation> annotation;
-    private final ClassLoader loader;
-
-    public ReflectionSchemeFactory(Class<? extends Annotation> annotation, ClassLoader loader) {
-        this.annotation = Objects.requireNonNull(annotation);
-        this.loader = loader;
-    }
 
     public ReflectionSchemeFactory(Class<? extends Annotation> annotation) {
-        this(annotation, ReflectionSchemeFactory.class.getClassLoader());
+        this.annotation = Objects.requireNonNull(annotation);
     }
 
-    private Class<?> of(String name, int array) {
+    private static Class<?> of(Class<?> clazz, int array) {
+        var name = clazz.getTypeName();
         if (array == 0) {
-            return Exceptions.suppress(() -> Class.forName(name, false, loader));
+            return clazz;
         }
-        return Exceptions.suppress(() -> Class.forName(ARRAY.repeat(array) + REFERENCE + name + ";", false, loader));
+        return Exceptions.suppress(() -> Class.forName(
+                ARRAY.repeat(array) + REFERENCE + name + ";",
+                false,
+                clazz.getClassLoader()
+        ));
     }
 
-    private Type unpackWildcard(Type type) {
+    private static Type unpackWildcard(Type type) {
         if (!(type instanceof WildcardType)) {
             return type;
         }
@@ -46,7 +45,7 @@ public final class ReflectionSchemeFactory implements SchemeFactory {
         return bounds[0];
     }
 
-    private Object process(Type type) {
+    private static Object process(Type type) {
         type = unpackWildcard(type);
         var array = 0;
         while (type instanceof GenericArrayType) {
@@ -54,10 +53,10 @@ public final class ReflectionSchemeFactory implements SchemeFactory {
             ++array;
         }
         if (!(type instanceof ParameterizedType)) {
-            return of(type.getTypeName(), array);
+            return of((Class<?>) type, array);
         }
         var parameterized = (ParameterizedType) type;
-        var clazz = of(parameterized.getRawType().getTypeName(), array);
+        var clazz = of((Class<?>) parameterized.getRawType(), array);
         var arguments = parameterized.getActualTypeArguments();
         var metadata = new Object[arguments.length];
         var wildcards = 0;
@@ -74,7 +73,7 @@ public final class ReflectionSchemeFactory implements SchemeFactory {
         return new Artifact(clazz, metadata);
     }
 
-    private Artifact makeArtifact(Type type, Class<?> clazz) {
+    private static Artifact makeArtifact(Type type, Class<?> clazz) {
         if (clazz.isPrimitive()) {
             throw new IllegalTypeException("Primitive types are not supported", type);
         }
@@ -85,7 +84,7 @@ public final class ReflectionSchemeFactory implements SchemeFactory {
         return new Artifact((Class<?>) ret);
     }
 
-    private void process(Parameter[] parameters, int start, Set<Artifact> artifacts, Artifact[] mapping) {
+    private static void process(Parameter[] parameters, int start, Set<Artifact> artifacts, Artifact[] mapping) {
         for (var i = start; i < parameters.length; ++i) {
             var parameter = parameters[i];
             var artifact = makeArtifact(parameter.getParameterizedType(), parameter.getType());
@@ -94,11 +93,11 @@ public final class ReflectionSchemeFactory implements SchemeFactory {
         }
     }
 
-    private void process(Parameter[] parameters, Set<Artifact> artifacts, Artifact[] mapping) {
+    private static void process(Parameter[] parameters, Set<Artifact> artifacts, Artifact[] mapping) {
         process(parameters, 0, artifacts, mapping);
     }
 
-    private ConstructorScheme create(Constructor<?> constructor) {
+    private static ConstructorScheme create(Constructor<?> constructor) {
         if (constructor.getTypeParameters().length != 0) {
             throw new IllegalMemberException("Cannot use parameterized constructor", constructor);
         }
@@ -108,7 +107,7 @@ public final class ReflectionSchemeFactory implements SchemeFactory {
         return new ConstructorScheme(constructor, artifacts, mapping);
     }
 
-    private MethodScheme create(Method method) {
+    private static MethodScheme create(Method method) {
         if (method.getTypeParameters().length != 0) {
             throw new IllegalMemberException("Cannot use parameterized method", method);
         }
@@ -131,7 +130,7 @@ public final class ReflectionSchemeFactory implements SchemeFactory {
         return new MethodScheme(method, artifacts, mapping);
     }
 
-    private FieldScheme create(Field field) {
+    private static FieldScheme create(Field field) {
         var artifact = makeArtifact(field.getGenericType(), field.getType());
         return new FieldScheme(field, artifact);
     }
