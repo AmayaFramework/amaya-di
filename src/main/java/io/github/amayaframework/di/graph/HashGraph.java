@@ -11,6 +11,9 @@ import java.util.function.BiConsumer;
 public class HashGraph<E> implements Graph<E> {
     private final Map<E, Set<E>> body;
 
+    /**
+     * Constructs an empty graph.
+     */
     public HashGraph() {
         this.body = new HashMap<>();
     }
