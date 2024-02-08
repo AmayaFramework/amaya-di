@@ -2,6 +2,9 @@ package io.github.amayaframework.di.graph;
 
 import java.util.*;
 
+/**
+ * A utility class containing implementations of various operations on graphs.
+ */
 public final class GraphUtil {
     private GraphUtil() {
     }
@@ -77,7 +80,16 @@ public final class GraphUtil {
         return time;
     }
 
+    /**
+     * Searches for strongly connected components in the graph (cyclic connections).
+     *
+     * @param graph the graph in which the search will be performed
+     * @param <E>   type of nodes
+     * @return a list of lists containing found loops, or in other words, a list of strongly connected components
+     * @throws NullPointerException if graph is null
+     */
     public static <E> List<List<E>> findStronglyConnectedComponents(Graph<E> graph) {
+        Objects.requireNonNull(graph);
         var ret = new LinkedList<List<E>>();
         var nodes = graphToNodes(graph);
         var time = 0;

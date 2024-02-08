@@ -3,6 +3,11 @@ package io.github.amayaframework.di.graph;
 import java.util.*;
 import java.util.function.BiConsumer;
 
+/**
+ * {@link Graph} implementation using {@link Map} and {@link Set}. It is not thread-safe.
+ *
+ * @param <E> type of nodes
+ */
 public class HashGraph<E> implements Graph<E> {
     private final Map<E, Set<E>> body;
 
