@@ -69,6 +69,7 @@ public class HashGraph<E> implements Graph<E> {
     }
 
     @Override
+    @SuppressWarnings("SuspiciousMethodCalls")
     public boolean contains(Object o) {
         return body.containsKey(o);
     }
@@ -84,6 +85,7 @@ public class HashGraph<E> implements Graph<E> {
     }
 
     @Override
+    @SuppressWarnings("SuspiciousToArrayCall")
     public <T> T[] toArray(T[] a) {
         return body.keySet().toArray(a);
     }
