@@ -48,7 +48,11 @@ public class HashGraph<E> implements Graph<E> {
     @Override
     public void forEach(BiConsumer<E, E> consumer) {
         for (var entry : body.entrySet()) {
-            for (var adjacent : entry.getValue()) {
+            var adjacents = entry.getValue();
+            if (adjacents == null) {
+                continue;
+            }
+            for (var adjacent : adjacents) {
                 consumer.accept(entry.getKey(), adjacent);
             }
         }
@@ -95,7 +99,16 @@ public class HashGraph<E> implements Graph<E> {
 
     @Override
     public boolean remove(Object o) {
-        return body.keySet().remove(o);
+        if (!body.keySet().remove(o)) {
+            return false;
+        }
+        for (var set : body.values()) {
+            if (set == null) {
+                continue;
+            }
+            set.remove(o);
+        }
+        return true;
     }
 
     @Override
@@ -154,10 +167,12 @@ public class HashGraph<E> implements Graph<E> {
 
     @Override
     public String toString() {
-        var ret = new StringBuilder("Graph{");
+        var ret = new StringBuilder();
         forEach((from, to) -> ret.append(from).append("->").append(to).append(", "));
         var length = ret.length();
-        ret.replace(length - 2, length, "}");
-        return ret.toString();
+        if (length != 0) {
+            ret.replace(length - 2, length, "");
+        }
+        return "Graph{" + body.keySet() + "; " + ret + "}";
     }
 }
