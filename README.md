@@ -320,7 +320,7 @@ Artifact{type=class io.github.amayaframework.di.Main$Service, metadata=null}]
 
 ## Benchmark
 
-See [jmh benchmark](src/jmh/java/io/github/amayaframework/di/ServiceProviderBenchmark.java)
+See [jmh benchmark](src/jmh/java/io/github/amayaframework/di/ServiceProviderBenchmark.java).
 Running on your machine:
 
 ```

@@ -312,7 +312,7 @@ Artifact{type=class io.github.amayaframework.di.Main$Service, metadata=null}]
 
 ## Бенчмарк
 
-См. [jmh бенчмарк](src/jmh/java/io/github/amayaframework/di/ServiceProviderBenchmark.java)
+См. [jmh бенчмарк](src/jmh/java/io/github/amayaframework/di/ServiceProviderBenchmark.java).
 Запуск на вашей машине:
 
 ```
