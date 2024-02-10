@@ -375,31 +375,35 @@ Now, having the above set, the framework creates the "schemes" of the injection.
 For example, for the example above, it would look like this:
 
 ```Java
-var service1=Artifact.of(Service1.class);
-        var service2=Artifact.of(Service2.class);
-        var app=Artifact.of(App.class);
-        var service1Scheme=new ClassScheme(
-        Service1.class,
-        new ConstructorScheme(Service1.class.getConstructor(),Set.of(),new Artifact[0]),
-        Set.of(),
-        Set.of()
-        );
-        var service2Scheme=new ClassScheme(
-        Service2.class,
-        new ConstructorScheme(Service2.class.getConstructor(),Set.of(),new Artifact[0]),
-        Set.of(),
-        Set.of()
-        );
-        var appScheme=new ClassScheme(
-        App.class,
-        new ConstructorScheme(
-        App.class.getConstructor(Service1.class,Service2.class),
-        Set.of(service1,service2),
-        new Artifact[]{service1,service2}
-        ),
-        Set.of(),
-        Set.of()
-        );
+public class Main {
+  public static void main(String[] args) {
+    var service1 = Artifact.of(Service1.class);
+    var service2 = Artifact.of(Service2.class);
+    var app = Artifact.of(App.class);
+    var service1Scheme = new ClassScheme(
+            Service1.class,
+            new ConstructorScheme(Service1.class.getConstructor(), Set.of(), new Artifact[0]),
+            Set.of(),
+            Set.of()
+    );
+    var service2Scheme = new ClassScheme(
+            Service2.class,
+            new ConstructorScheme(Service2.class.getConstructor(), Set.of(), new Artifact[0]),
+            Set.of(),
+            Set.of()
+    );
+    var appScheme = new ClassScheme(
+            App.class,
+            new ConstructorScheme(
+                    App.class.getConstructor(Service1.class, Service2.class),
+                    Set.of(service1, service2),
+                    new Artifact[]{service1, service2}
+            ),
+            Set.of(),
+            Set.of()
+    );
+  }
+}
 ```
 
 In the framework, the SchemeFactory is responsible for creating the schema,

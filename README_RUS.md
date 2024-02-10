@@ -85,25 +85,25 @@ public class Main {
         System.out.println(provider.instantiate(App.class));
         System.out.println(provider.instantiate(App.class));
     }
-    
+
     public static final class Service1 {
         @Override
         public String toString() {
             return "Service1, " + hashCode();
         }
     }
-    
+
     public static final class Service2 {
         @Override
         public String toString() {
             return "Service2, " + hashCode();
         }
     }
-    
+
     public static final class App {
         final Service1 s1;
         final Service2 s2;
-        
+
         public App(Service1 s1, Service2 s2) {
             this.s1 = s1;
             this.s2 = s2;
@@ -132,6 +132,7 @@ s2=Service2, 377478451
 
 ```Java
 import io.github.amayaframework.di.CheckedProviderBuilder;
+
 import java.util.List;
 
 public class Main {
@@ -188,13 +189,17 @@ public class Main {
         System.out.println(provider.instantiate(App.class).s1);
     }
 
-    public static final class Service1 {}
+    public static final class Service1 {
+    }
 
-    public static final class Service2 {}
+    public static final class Service2 {
+    }
 
-    public static final class Service3 {}
+    public static final class Service3 {
+    }
 
-    public static final class Service4 {}
+    public static final class Service4 {
+    }
 
     public static final class App {
         @Inject
@@ -236,6 +241,7 @@ io.github.amayaframework.di.Main$Service1@1d29cf23
 
 ```Java
 import io.github.amayaframework.di.CheckedProviderBuilder;
+
 import java.util.List;
 
 public class Main {
@@ -294,11 +300,13 @@ public class Main {
     }
 
     public static final class Service {
-        public Service(App app) {}
+        public Service(App app) {
+        }
     }
 
     public static final class App {
-        public App(Service s) {}
+        public App(Service s) {
+        }
     }
 }
 ```
@@ -343,13 +351,18 @@ ServiceProviderBenchmark.benchManualInjection  avgt   25  11,586 ± 0,085  ns/op
 
 ```Java
 class Service1 {
-    public Service1() {}
+    public Service1() {
+    }
 }
+
 class Service2 {
-    public Service2() {}
+    public Service2() {
+    }
 }
+
 class App {
-    public App(Service1 s1, Service2 s2) {}
+    public App(Service1 s1, Service2 s2) {
+    }
 }
 ```
 
@@ -362,31 +375,35 @@ Service1 и Service2 будут одновременно и артефактам
 Например, для рассмотренного выше примера, это будет выглядеть так:
 
 ```Java
-var service1=Artifact.of(Service1.class);
-        var service2=Artifact.of(Service2.class);
-        var app=Artifact.of(App.class);
-        var service1Scheme=new ClassScheme(
-        Service1.class,
-        new ConstructorScheme(Service1.class.getConstructor(),Set.of(),new Artifact[0]),
-        Set.of(),
-        Set.of()
+public class Main {
+    public static void main(String[] args) {
+        var service1 = Artifact.of(Service1.class);
+        var service2 = Artifact.of(Service2.class);
+        var app = Artifact.of(App.class);
+        var service1Scheme = new ClassScheme(
+                Service1.class,
+                new ConstructorScheme(Service1.class.getConstructor(), Set.of(), new Artifact[0]),
+                Set.of(),
+                Set.of()
         );
-        var service2Scheme=new ClassScheme(
-        Service2.class,
-        new ConstructorScheme(Service2.class.getConstructor(),Set.of(),new Artifact[0]),
-        Set.of(),
-        Set.of()
+        var service2Scheme = new ClassScheme(
+                Service2.class,
+                new ConstructorScheme(Service2.class.getConstructor(), Set.of(), new Artifact[0]),
+                Set.of(),
+                Set.of()
         );
-        var appScheme=new ClassScheme(
-        App.class,
-        new ConstructorScheme(
-        App.class.getConstructor(Service1.class,Service2.class),
-        Set.of(service1,service2),
-        new Artifact[]{service1,service2}
-        ),
-        Set.of(),
-        Set.of()
+        var appScheme = new ClassScheme(
+                App.class,
+                new ConstructorScheme(
+                        App.class.getConstructor(Service1.class, Service2.class),
+                        Set.of(service1, service2),
+                        new Artifact[]{service1, service2}
+                ),
+                Set.of(),
+                Set.of()
         );
+    }
+}
 ```
 
 В фреймворке за создание схемы отвечает SchemeFactory, по умолчанию реализованная с помощью рефлективного апи.
