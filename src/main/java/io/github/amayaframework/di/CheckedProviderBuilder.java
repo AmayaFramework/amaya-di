@@ -17,19 +17,44 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.function.Function;
 
-public final class CheckedProviderBuilder extends AbstractProviderBuilder {
+/**
+ * A {@link ServiceProviderBuilder} implementation that performs static analysis of the collected set of services.
+ * Checks for all required dependencies and analyzes the dependency graph for cycles.
+ * Creates {@link ServiceProvider} according to the transaction principle, that is, until the build is successfully
+ * completed, no side effects will be applied.
+ */
+public class CheckedProviderBuilder extends AbstractProviderBuilder {
     private final SchemeFactory schemeFactory;
     private final StubFactory stubFactory;
 
+    /**
+     * Constructs {@link CheckedProviderBuilder} instance with the specified scheme and stub factories.
+     *
+     * @param schemeFactory the specified scheme factory, must be non-null
+     * @param stubFactory   the specified stub factory, must be non-null
+     */
     public CheckedProviderBuilder(SchemeFactory schemeFactory, StubFactory stubFactory) {
         this.schemeFactory = Objects.requireNonNull(schemeFactory);
         this.stubFactory = Objects.requireNonNull(stubFactory);
     }
 
+    /**
+     * Creates {@link CheckedProviderBuilder} instance
+     * with {@link ReflectionSchemeFactory} and {@link BytecodeStubFactory}, using the specified annotation as marker.
+     *
+     * @param annotation the specified annotation, must be non-null
+     * @return {@link ServiceProviderBuilder} instance
+     */
     public static ServiceProviderBuilder create(Class<? extends Annotation> annotation) {
         return new CheckedProviderBuilder(new ReflectionSchemeFactory(annotation), new BytecodeStubFactory());
     }
 
+    /**
+     * Creates {@link CheckedProviderBuilder} instance
+     * with {@link ReflectionSchemeFactory} and {@link BytecodeStubFactory}, using {@link Inject} annotation as marker.
+     *
+     * @return {@link ServiceProviderBuilder} instance
+     */
     public static ServiceProviderBuilder create() {
         return create(Inject.class);
     }
@@ -64,7 +89,7 @@ public final class CheckedProviderBuilder extends AbstractProviderBuilder {
             }
         }
         // Build repository
-        var repository = Objects.requireNonNullElse(this.repository, new HashRepository());
+        var repository = Objects.requireNonNullElse(this.repository, new RepositoryImpl());
         // Prepare weak artifacts
         var provider = new LazyProvider(repository);
         for (var entry : any.entrySet()) {
@@ -98,7 +123,7 @@ public final class CheckedProviderBuilder extends AbstractProviderBuilder {
             repository.add(artifact, supplier);
         }
         this.reset();
-        return new PlainServiceProvider(repository);
+        return new ServiceProviderImpl(repository);
     }
 
     private static final class LazyProvider implements Function<Artifact, Function0<Object>> {

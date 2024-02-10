@@ -8,15 +8,39 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 
+/**
+ * A class that provides a skeletal implementation of the {@link ServiceProviderBuilder},
+ * containing implementations of all methods, structures for subsequent analysis,
+ * and a reset mechanism to the initial state.
+ */
 public abstract class AbstractProviderBuilder implements ServiceProviderBuilder {
+
+    /**
+     * The map contains "strong" services, that is, they definitely do not have dependencies.
+     */
     protected Map<Artifact, Function0<Object>> strong;
+
+    /**
+     * A map containing "weak" services, that is, having dependencies that need to be resolved.
+     */
     protected Map<Artifact, Entry> any;
+
+    /**
+     * The {@link Repository} instance used, may be null
+     */
     protected Repository repository;
 
+    /**
+     * Constructs {@link AbstractProviderBuilder}, reset to the initial state.
+     * Does not contain any services, the repository used is set to null.
+     */
     protected AbstractProviderBuilder() {
         this.reset();
     }
 
+    /**
+     * Resets the contents of this {@link AbstractProviderBuilder} instance.
+     */
     protected void reset() {
         this.strong = new HashMap<>();
         this.any = new HashMap<>();
@@ -60,6 +84,7 @@ public abstract class AbstractProviderBuilder implements ServiceProviderBuilder 
     public <T> ServiceProviderBuilder addService(Class<T> type,
                                                  Class<? extends T> implementation,
                                                  Function1<Function0<T>, Function0<T>> wrapper) {
+        Objects.requireNonNull(type);
         return addService(new Artifact(type), implementation, wrapper);
     }
 
@@ -75,6 +100,7 @@ public abstract class AbstractProviderBuilder implements ServiceProviderBuilder 
 
     @Override
     public <T> ServiceProviderBuilder addService(Class<T> type, Function1<Function0<T>, Function0<T>> wrapper) {
+        Objects.requireNonNull(type);
         return addService(new Artifact(type), type, wrapper);
     }
 
@@ -99,11 +125,13 @@ public abstract class AbstractProviderBuilder implements ServiceProviderBuilder 
 
     @Override
     public <T> ServiceProviderBuilder addService(Class<T> type, Function0<T> supplier) {
+        Objects.requireNonNull(type);
         return addService(new Artifact(type), supplier);
     }
 
     @Override
     public ServiceProviderBuilder removeService(Artifact artifact) {
+        Objects.requireNonNull(artifact);
         strong.remove(artifact);
         any.remove(artifact);
         return this;
@@ -111,6 +139,7 @@ public abstract class AbstractProviderBuilder implements ServiceProviderBuilder 
 
     @Override
     public ServiceProviderBuilder removeService(Class<?> type) {
+        Objects.requireNonNull(type);
         return removeService(new Artifact(type));
     }
 

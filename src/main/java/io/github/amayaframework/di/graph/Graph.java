@@ -49,7 +49,7 @@ public interface Graph<E> extends Collection<E> {
     /**
      * Returns a set of nodes that are adjacent to the specified one.
      *
-     * @param node specified node
+     * @param node the specified node
      * @return null or an empty set if there are no adjacent notes, otherwise a set containing adjacent nodes
      */
     Set<E> getAdjacentNodes(E node);
@@ -57,14 +57,14 @@ public interface Graph<E> extends Collection<E> {
     /**
      * Performs the specified action for each edge contained in the graph.
      *
-     * @param consumer specified action
+     * @param consumer the specified action
      */
     void forEach(BiConsumer<E, E> consumer);
 
     /**
      * Calculates the hash code based on the contents of the graph.
      *
-     * @return calculated value
+     * @return the calculated value
      */
     int hashCode();
 

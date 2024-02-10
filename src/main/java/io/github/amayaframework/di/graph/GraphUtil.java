@@ -82,9 +82,10 @@ public final class GraphUtil {
 
     /**
      * Searches for strongly connected components in the graph (cyclic connections).
+     * Uses Tarjan's iterative algorithm.
      *
      * @param graph the graph in which the search will be performed
-     * @param <E>   type of nodes
+     * @param <E>   the type of nodes
      * @return a list of lists containing found loops, or in other words, a list of strongly connected components
      * @throws NullPointerException if graph is null
      */

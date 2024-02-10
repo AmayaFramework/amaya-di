@@ -8,12 +8,65 @@ import java.lang.reflect.*;
 import java.util.*;
 import java.util.stream.Collectors;
 
+/**
+ * A factory that creates a class schema based on information obtained through a java reflection api.
+ * The scheme is based on the following rules:
+ * <br>
+ * 1. The constructor is selected from the public ones,
+ * and this choice is made strictly unambiguously, i.e. the following cases will be incorrect:
+ * <pre>
+ *
+ *     class Service1 {
+ *         private Service1() {}
+ *     }
+ *     ...
+ *     class Service2 {
+ *         public Service2(int i) {}
+ *         public Service2() {}
+ *     }
+ * </pre>
+ * However, if the class contains several public constructors,
+ * you can specify the necessary one using a marker annotation:
+ * <pre>
+ *     class Service {
+ *         public Service(int i) {}
+ *
+ *        {@literal @}Inject
+ *         public Service() {}
+ *     }
+ * </pre>
+ * 2. The fields are selected exclusively from the virtual and public ones marked with a marker annotation.
+ * 3. Methods are selected from public ones marked with a marker annotation and containing at least 1 parameter,
+ * otherwise, even if there is an annotation, the method will be discarded.
+ * <br>
+ * If the method is static, it must match the following pattern:
+ * <pre>
+ *     class Service {
+ *         public static void setter(? super Service, Dependency d, ...) {}
+ *     }
+ * </pre>
+ * Parameterized classes and methods are not supported,
+ * and super-wildcards are not supported for statically defined generics.
+ * In other cases, type inference for wildcards will work as follows:
+ * <br>
+ * {@code ? => Object}
+ * <br>
+ * {@code ? extends Object => Object}
+ * <br>
+ * {@code ? extends Type => Type}
+ */
 public final class ReflectionSchemeFactory implements SchemeFactory {
     private static final String ARRAY = "[";
     private static final String REFERENCE = "L";
 
     private final Class<? extends Annotation> annotation;
 
+    /**
+     * Constructs a factory that will use the specified annotation as a marker
+     * to identify the dependent members of the class.
+     *
+     * @param annotation the specified annotation type
+     */
     public ReflectionSchemeFactory(Class<? extends Annotation> annotation) {
         this.annotation = Objects.requireNonNull(annotation);
     }
@@ -120,9 +173,9 @@ public final class ReflectionSchemeFactory implements SchemeFactory {
         var first = method.getParameterTypes()[0];
         var owner = method.getDeclaringClass();
         if (!first.isAssignableFrom(owner)) {
-            throw new IllegalSchemeException(
-                    owner,
-                    "The first parameter of the static method must be the superclass of the current class"
+            throw new IllegalClassException(
+                    "The first parameter of the static method must be the superclass of the current class",
+                    owner
             );
         }
         var mapping = new Artifact[method.getParameterCount() - 1];
@@ -140,7 +193,7 @@ public final class ReflectionSchemeFactory implements SchemeFactory {
         var constructors = clazz.getConstructors();
         // If there is no public constructors, then we cannot build class scheme
         if (constructors.length == 0) {
-            throw new IllegalSchemeException(clazz, "No public constructor was found");
+            throw new IllegalClassException("No public constructor was found", clazz);
         }
         // If there is 1 public constructor, just use it
         if (constructors.length == 1) {
@@ -152,10 +205,10 @@ public final class ReflectionSchemeFactory implements SchemeFactory {
                 .filter(e -> e.isAnnotationPresent(annotation))
                 .collect(Collectors.toList());
         if (found.isEmpty()) {
-            throw new IllegalSchemeException(clazz, "There are no annotated constructors");
+            throw new IllegalClassException("There are no annotated constructors", clazz);
         }
         if (found.size() != 1) {
-            throw new IllegalSchemeException(clazz, "It is impossible to select a constructor");
+            throw new IllegalClassException("It is impossible to select a constructor", clazz);
         }
         return create(found.get(0));
     }
@@ -207,34 +260,35 @@ public final class ReflectionSchemeFactory implements SchemeFactory {
 
     @Override
     public ClassScheme create(Class<?> clazz) {
+        Objects.requireNonNull(clazz);
         // Check class
         if (clazz.getTypeParameters().length != 0) {
-            throw new IllegalSchemeException(clazz, "Cannot create scheme of parameterized class");
+            throw new IllegalClassException("Cannot create scheme of parameterized class", clazz);
         }
         var modifiers = clazz.getModifiers();
         if (!Modifier.isPublic(modifiers)) {
-            throw new IllegalSchemeException(clazz, "Cannot create scheme of non-public class");
+            throw new IllegalClassException("Cannot create scheme of non-public class", clazz);
         }
         if (Modifier.isAbstract(modifiers)) {
-            throw new IllegalSchemeException(clazz, "Cannot create scheme of abstract class");
+            throw new IllegalClassException("Cannot create scheme of abstract class", clazz);
         }
         if (clazz.isEnum()) {
-            throw new IllegalSchemeException(clazz, "Cannot create scheme of enum class");
+            throw new IllegalClassException("Cannot create scheme of enum class", clazz);
         }
         if (clazz.isPrimitive()) {
-            throw new IllegalSchemeException(clazz, "Cannot create scheme of primitive class");
+            throw new IllegalClassException("Cannot create scheme of primitive class", clazz);
         }
         if (clazz.isArray()) {
-            throw new IllegalSchemeException(clazz, "Cannot create scheme of array class");
+            throw new IllegalClassException("Cannot create scheme of array class", clazz);
         }
         if (clazz.isAnnotation()) {
-            throw new IllegalSchemeException(clazz, "Cannot create scheme of annotation class");
+            throw new IllegalClassException("Cannot create scheme of annotation class", clazz);
         }
         if (clazz.isAnonymousClass()) {
-            throw new IllegalSchemeException(clazz, "Cannot create scheme of anonymous class");
+            throw new IllegalClassException("Cannot create scheme of anonymous class", clazz);
         }
         if (clazz.getDeclaringClass() != null && !Modifier.isStatic(modifiers)) {
-            throw new IllegalSchemeException(clazz, "Cannot create scheme of non-static member class");
+            throw new IllegalClassException("Cannot create scheme of non-static member class", clazz);
         }
         var constructor = findConstructor(clazz);
         var fields = findFields(clazz);

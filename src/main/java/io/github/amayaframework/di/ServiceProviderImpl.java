@@ -3,10 +3,10 @@ package io.github.amayaframework.di;
 import com.github.romanqed.jfunc.Exceptions;
 import com.github.romanqed.jfunc.Function0;
 
-final class PlainServiceProvider implements ServiceProvider {
+final class ServiceProviderImpl implements ServiceProvider {
     private final Repository repository;
 
-    PlainServiceProvider(Repository repository) {
+    ServiceProviderImpl(Repository repository) {
         this.repository = repository;
     }
 

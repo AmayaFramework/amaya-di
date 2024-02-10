@@ -7,14 +7,25 @@ import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Supplier;
 
+/**
+ * A {@link Repository} implementation using a hash map.
+ */
 public class HashRepository implements Repository {
     private final Map<Artifact, Function0<Object>> body;
 
+    /**
+     * Constructs {@link HashRepository} instance with map instance, specified by the supplier.
+     *
+     * @param supplier the specified map supplier, must be non-null
+     */
     public HashRepository(Supplier<Map<Artifact, Function0<Object>>> supplier) {
         Objects.requireNonNull(supplier);
         this.body = Objects.requireNonNull(supplier.get());
     }
 
+    /**
+     * Constructs {@link HashRepository} thread-safe instance with {@link ConcurrentHashMap}.
+     */
     public HashRepository() {
         this.body = new ConcurrentHashMap<>();
     }
@@ -32,14 +43,10 @@ public class HashRepository implements Repository {
     }
 
     @Override
-    public boolean add(Artifact artifact, Function0<Object> supplier) {
+    public void add(Artifact artifact, Function0<Object> supplier) {
         Objects.requireNonNull(artifact);
         Objects.requireNonNull(supplier);
-        if (body.containsKey(artifact)) {
-            return false;
-        }
         body.put(artifact, supplier);
-        return true;
     }
 
     @Override

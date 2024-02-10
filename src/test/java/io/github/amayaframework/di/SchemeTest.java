@@ -28,7 +28,7 @@ public class SchemeTest extends Assertions {
     }
 
     public void testNoConstructors(SchemeFactory factory) {
-        assertThrows(IllegalSchemeException.class, () -> factory.create(NoConstructors.class));
+        assertThrows(IllegalClassException.class, () -> factory.create(NoConstructors.class));
     }
 
     @Test
@@ -57,7 +57,7 @@ public class SchemeTest extends Assertions {
     }
 
     public void testManyConstructors(SchemeFactory factory) {
-        assertThrows(IllegalSchemeException.class, () -> factory.create(ManyConstructors.class));
+        assertThrows(IllegalClassException.class, () -> factory.create(ManyConstructors.class));
     }
 
     @Test
@@ -123,7 +123,7 @@ public class SchemeTest extends Assertions {
     }
 
     public void testInvalidStaticSetter(SchemeFactory factory) {
-        assertThrows(IllegalSchemeException.class, () -> factory.create(InvalidStaticSetter.class));
+        assertThrows(IllegalClassException.class, () -> factory.create(InvalidStaticSetter.class));
     }
 
     @Test
@@ -181,7 +181,7 @@ public class SchemeTest extends Assertions {
     }
 
     public void testGenericClass(SchemeFactory factory) {
-        assertThrows(IllegalSchemeException.class, () -> factory.create(GenericClass.class));
+        assertThrows(IllegalClassException.class, () -> factory.create(GenericClass.class));
     }
 
     @Test

@@ -16,6 +16,9 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.function.Function;
 
+/**
+ * A factory that creates instantiators based on proxy classes generated on the fly.
+ */
 public final class BytecodeStubFactory implements StubFactory {
     private static final String STUB = "Stub";
     private static final Type FUNCTION0 = Type.getType(Function0.class);
@@ -205,6 +208,8 @@ public final class BytecodeStubFactory implements StubFactory {
 
     @Override
     public Function0<?> create(ClassScheme scheme, Function<Artifact, Function0<Object>> provider) {
+        Objects.requireNonNull(scheme);
+        Objects.requireNonNull(provider);
         var target = scheme.getTarget();
         var name = target.getName() + STUB;
         var artifacts = scheme.getArtifacts();
