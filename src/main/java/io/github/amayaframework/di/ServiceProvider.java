@@ -30,7 +30,7 @@ public interface ServiceProvider {
      * Searches for an instantiator for the specified class.
      *
      * @param type the specified class
-     * @param <T>  <T> service type
+     * @param <T>  service type
      * @return null or empty stub, if class not found, instantiator implementation otherwise
      */
     <T> Function0<T> get(Class<T> type);

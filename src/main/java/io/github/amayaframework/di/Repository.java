@@ -17,7 +17,7 @@ public interface Repository {
      * For example,
      * <pre>
      * var func = repository.get(Artifact.of(String.class));
-     * System.out.println(func.invoke()); => "null"
+     * System.out.println(func.invoke()); =&gt; "null"
      * </pre>
      * Here func is not null, but will always return null.
      * <br>

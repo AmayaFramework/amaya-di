@@ -65,7 +65,7 @@ public final class Artifact {
      * The most preferred and safe way to create an artifact for the user.
      * Example of creating an artifact for a complex generic declaration:
      * <pre>
-     *     Map&lt;List&lt;String&gt;, List&lt;Integer&gt;[]&gt =>
+     *     Map&lt;List&lt;String&gt;, List&lt;Integer&gt;[]&gt; =&gt;
      *     Artifact.of(Map.class,
      *         Artifact.of(List.class, String.class),
      *         Artifact.of(List[].class, Integer.class)
