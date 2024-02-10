@@ -1,36 +1,36 @@
 # amaya-di [![maven-central](https://img.shields.io/maven-central/v/io.github.amayaframework/amaya-di?color=blue)](https://repo1.maven.org/maven2/io/github/amayaframework/amaya-di/)
 
-A framework responsible for monitoring and automating the dependency injection process.
+Фреймворк, отвечающий за контроль и автоматизацию процесса внедрения зависимостей.
 
-[Russian version](README_RUS.md)
+[English version](README.md)
 
-## Philosophy
+## Философия
 
-Taking into account the features of both existing implementations, as well as the JVM and the Java language in general,
-the framework was created in strict accordance with the following principles:
+Учитывая особенности как существующих реализаций, так и JVM и языка Java в целом, фреймворк создавался в строгом
+соответствии со следующими принципами:
 
-* Support only for new versions of java (11+)
-* Complete rejection of reflective calls in the process of instantiating objects
-* The minimum possible size of the framework
-* The minimum possible set of dependencies
-* Absence of transitive dependencies (i.e., when you get a framework, you get only it and
-  several service libraries necessary for its operation)
-* No dependencies outside of the jdk (no plugins, utilities, or scripts)
-* Lack of built-in integrations
-* Maximum possible flexibility to adapt the framework to support specifications of any format
-* Avoiding making difficult decisions (if something cannot be unambiguously determined in a finite time,
-  it will not be determined)
+* Поддержка только новых версий java (11+)
+* Полный отказ от рефлективных вызовов в процессе инстанцирования объектов
+* Минимально возможный размер фреймворка
+* Минимально возможный набор зависимостей
+* Отсутствие транзитивных зависимостей (т.е. получая фреймворк, вы получаете исключительно его и
+  несколько служебных библиотек, необходимых для его функционирования)
+* Отсутствие зависимостей за пределами jdk (никаких плагинов, утилит и скриптов)
+* Отсутствие встроенных интеграций
+* Максимально возможная гибкость, позволяющая адаптировать фреймворк для поддержки спецификаций любого формата
+* Избегание принятия сложных решений (если что-то нельзя однозначно определить за конечное время,
+  это не будет определено)
 
-## Getting Started
+## Начало работы
 
-To install it, you will need:
+Чтобы установить фреймворк, понадобятся:
 
 * java 11+
 * Maven/Gradle
 
-## Installing
+## Установка
 
-### Gradle dependency
+### Gradle
 
 ```Groovy
 dependencies {
@@ -38,7 +38,7 @@ dependencies {
 }
 ```
 
-### Maven dependency
+### Maven
 
 ```
 <dependency>
@@ -48,10 +48,10 @@ dependencies {
 </dependency>
 ```
 
-## Usage example
+## Примеры использования
 
-Important: the order of transferring services to the collector does NOT matter, no changes and no exceptions will occur,
-The Service Provider Builder#build method has not been called yet.
+Важно: порядок передачи сервисов в сборщик значения НЕ имеет, никакие изменения и никакие исключения не возникнут,
+пока не вызван метод ServiceProviderBuilder#build.
 
 ### Hello, world!
 
@@ -69,7 +69,7 @@ public class Main {
 }
 ```
 
-### Two services and a dependent class
+### Два сервиса и зависимый класс
 
 ```Java
 import io.github.amayaframework.di.CheckedProviderBuilder;
@@ -85,25 +85,25 @@ public class Main {
         System.out.println(provider.instantiate(App.class));
         System.out.println(provider.instantiate(App.class));
     }
-
+    
     public static final class Service1 {
         @Override
         public String toString() {
             return "Service1, " + hashCode();
         }
     }
-
+    
     public static final class Service2 {
         @Override
         public String toString() {
             return "Service2, " + hashCode();
         }
     }
-
+    
     public static final class App {
         final Service1 s1;
         final Service2 s2;
-
+        
         public App(Service1 s1, Service2 s2) {
             this.s1 = s1;
             this.s2 = s2;
@@ -117,7 +117,7 @@ public class Main {
 }
 ```
 
-This code will output:
+Этот код выведет:
 
 ```
 hash=1852584274
@@ -128,11 +128,10 @@ s1=Service1, 1952779858
 s2=Service2, 377478451
 ```
 
-### Generics
+### Зависимости с дженериками
 
 ```Java
 import io.github.amayaframework.di.CheckedProviderBuilder;
-
 import java.util.List;
 
 public class Main {
@@ -163,7 +162,7 @@ public class Main {
 }
 ```
 
-Output:
+Вывод:
 
 ```
 hash=1354011814
@@ -171,7 +170,7 @@ s1=[Hi, World]
 s2=[1, 2, 3]
 ```
 
-### Fields, methods, multiple constructors
+### Поля, методы, несколько конструкторов
 
 ```Java
 import io.github.amayaframework.di.CheckedProviderBuilder;
@@ -189,17 +188,13 @@ public class Main {
         System.out.println(provider.instantiate(App.class).s1);
     }
 
-    public static final class Service1 {
-    }
+    public static final class Service1 {}
 
-    public static final class Service2 {
-    }
+    public static final class Service2 {}
 
-    public static final class Service3 {
-    }
+    public static final class Service3 {}
 
-    public static final class Service4 {
-    }
+    public static final class Service4 {}
 
     public static final class App {
         @Inject
@@ -228,7 +223,7 @@ public class Main {
 
 ```
 
-Output:
+Вывод:
 
 ```
 Service2=io.github.amayaframework.di.Main$Service2@9660f4e
@@ -237,11 +232,10 @@ Service3=io.github.amayaframework.di.Main$Service3@27a5f880
 io.github.amayaframework.di.Main$Service1@1d29cf23
 ```
 
-### Missing dependency
+### Потерянная зависимость
 
 ```Java
 import io.github.amayaframework.di.CheckedProviderBuilder;
-
 import java.util.List;
 
 public class Main {
@@ -274,13 +268,13 @@ public class Main {
 }
 ```
 
-Output:
+Вывод:
 
 ```
 Artifact{type=interface java.util.List, metadata=[class java.lang.String]} not found
 ```
 
-### Cyclical dependency
+### Циклическая зависимость
 
 ```Java
 import io.github.amayaframework.di.CheckedProviderBuilder;
@@ -300,34 +294,32 @@ public class Main {
     }
 
     public static final class Service {
-        public Service(App app) {
-        }
+        public Service(App app) {}
     }
 
     public static final class App {
-        public App(Service s) {
-        }
+        public App(Service s) {}
     }
 }
 ```
 
-Output:
+Вывод:
 
 ```
 Found cycle: [Artifact{type=class io.github.amayaframework.di.Main$App, metadata=null}, 
 Artifact{type=class io.github.amayaframework.di.Main$Service, metadata=null}]
 ```
 
-## Benchmark
+## Бенчмарк
 
-See [jmh benchmark](src/jmh/java/io/github/amayaframework/di/ServiceProviderBenchmark.java)
-Running on your machine:
+См. [jmh бенчмарк](src/jmh/java/io/github/amayaframework/di/ServiceProviderBenchmark.java)
+Запуск на вашей машине:
 
 ```
 gradle jmh
 ```
 
-Results:
+Результаты:
 
 ```
 # JMH version: 1.36
@@ -339,40 +331,35 @@ ServiceProviderBenchmark.benchAmayaInjection   avgt   25  17,586 ± 0,240  ns/op
 ServiceProviderBenchmark.benchManualInjection  avgt   25  11,586 ± 0,085  ns/op
 ```
 
-## Structure and possibilities for expansion
+## Структура и возможности для расширения
 
-The framework actually consists of three replaceable modules: descriptive, intermediate and facade.
+Фреймворк фактически состоит из трёх заменяемых модулей: описательного, промежуточного и фасадного.
 
-### Descriptive module
+### Описательный модуль
 
-By a convenient analogy with maven, the framework treats all dependencies as some kind of artifacts containing type
-information and additional metadata. Dependent classes are treated as manifest schemas that require assembly.
-For example, in the following example
+По удобной аналогии с maven, фреймворк рассматривает все зависимости как некие артефакты, содержащие информацию о типе
+и дополнительные метаданные. Зависимые классы же рассматриваются как схемы-манифесты, требующие сборки.
+Например, в следующем примере
 
 ```Java
 class Service1 {
-    public Service1() {
-    }
+    public Service1() {}
 }
-
 class Service2 {
-    public Service2() {
-    }
+    public Service2() {}
 }
-
 class App {
-    public App(Service1 s1, Service2 s2) {
-    }
+    public App(Service1 s1, Service2 s2) {}
 }
 ```
 
-Service1 and Service2 will be both artifacts (like App dependencies) and specific implementations of these artifacts.
-Thanks to this approach, it became possible to separate the process of building a "plan" for instantiating a class from
-the process of solving dependencies directly.
-In amaya-di, the latter is performed using another entity called Repository,
-which matches the artifact and its implementation.
-Now, having the above set, the framework creates the "schemes" of the injection.
-For example, for the example above, it would look like this:
+Service1 и Service2 будут одновременно и артефактами (как зависимости App), и конкретными реализациями этих артефактов.
+Благодаря такому подходу стало возможно отделить процесс построения "плана" инстанцирования класса от непосредственно
+процесса решения зависимостей.
+В amaya-di последний выполняется при помощи ещё одной сущности, названной репозиторий (Repository), ставящей в
+соответствие артефакт и его реализацию.
+Теперь, имея вышеописанный набор, фреймворк создаёт "схемы" инжекта.
+Например, для рассмотренного выше примера, это будет выглядеть так:
 
 ```Java
 var service1=Artifact.of(Service1.class);
@@ -402,39 +389,37 @@ var service1=Artifact.of(Service1.class);
         );
 ```
 
-In the framework, the SchemeFactory is responsible for creating the schema,
-which is implemented by default using a reflective api.
+В фреймворке за создание схемы отвечает SchemeFactory, по умолчанию реализованная с помощью рефлективного апи.
 
-### Intermediate module
+### Промежуточный модуль
 
-Now, obviously, after building the injection scheme, it is necessary to get implementations of "stubs" that perform
-the work of creating an instance of an object of the required class and filling it with all the required dependencies
-according to the scheme.
-Most frameworks use reflection at this point, but amaya-di, as stated above, although it provides scope for independent
-implementation, uses proxy class generation by default.
+Теперь, очевидно, после построения схемы инжекта, необходимо получить реализации "заглушек", выполняющих работу по
+созданию экземпляра объекта требуемого класса и заполнению его всеми требуемыми зависимостями по схеме.
+Большинство фреймворков на этом моменте используют рефлексию, однако amaya-di, как было заявлено выше,
+хоть и предоставляет простор для самостоятельной реализации, по умолчанию использует генерацию прокси-классов.
 
-In the framework, StubFactory is responsible for generating stabs.
+В фреймворке за генерацию стабов отвечает StubFactory.
 
-### Facade module
+### Фасадный модуль
 
-Finally, after filling the repository with generated stabs, some important checks (such as the absence of cycles or
-lost dependencies), the framework provides the user with a simple interface for building a service provider and
-its further use.
+Наконец, после заполнения репозитория сгенерированными стабами, некоторых важных проверок (вроде отсутствия циклов или
+потерянных зависимостей), фреймворк предоставляет пользователю простой интерфейс для построения поставщика сервисов и
+его дальнейшего использования.
 
-## Built With
+## Используемые зависимости
 
-* [Gradle](https://gradle.org) - Dependency management
-* [ASM](http://asm.ow2.io) - Generation of proxy classes
-* [jeflect](https://github.com/RomanQed/jeflect) - Defining classes from bytecode, utilities for ASM
-* [jfunc](https://github.com/RomanQed/jfunc) - "Lazy" containers, functional interfaces, utilities
+* [Gradle](https://gradle.org) - Управление зависимостями
+* [ASM](https://asm.ow2.io) - Генерация прокси-классов
+* [jeflect](https://github.com/RomanQed/jeflect) - Загрузка классов из байт-кода, утилиты для ASM
+* [jfunc](https://github.com/RomanQed/jfunc) - "Ленивые" контейнеры, функциональные интерфейсы, утилиты
 
-## Authors
+## Авторы
 
-* **RomanQed** - *Main work* - [RomanQed](https://github.com/RomanQed)
+* **RomanQed** - *Основная работа* - [RomanQed](https://github.com/RomanQed)
 
-See also the list of [contributors](https://github.com/AmayaFramework/amaya-di/contributors) who participated
-in this project.
+Загляните также в список [участников](https://github.com/AmayaFramework/amaya-di/contributors), которые внесли вклад
+в этот проект.
 
-## License
+## Лицензия
 
-This project is licensed under the Apache License Version 2.0 - see the [LICENSE](LICENSE) file for details
+Этот проект лицензирован под Apache License Version 2.0 - см. [LICENSE](LICENSE) файл для подробностей

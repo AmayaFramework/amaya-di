@@ -2,6 +2,7 @@ plugins {
     id 'java-library'
     id 'maven-publish'
     id 'signing'
+    id 'me.champeau.jmh' version '0.7.1'
 }
 
 java {
@@ -24,6 +25,10 @@ dependencies {
     // Tests
     testImplementation group: 'org.junit.jupiter', name: 'junit-jupiter-api', version: '5.10.0'
     testRuntimeOnly group: 'org.junit.jupiter', name: 'junit-jupiter-engine', version: '5.10.0'
+    // Benchmarks
+    jmhImplementation group: 'org.openjdk.jmh', name: 'jmh-core', version: '1.35'
+    jmhImplementation group: 'org.openjdk.jmh', name: 'jmh-generator-annprocess', version: '1.35'
+    // Dependencies
     api group: 'com.github.romanqed', name: 'jeflect', version: '1.1.2L'
 }
 
@@ -51,8 +56,9 @@ publishing {
             // Configure pom
             pom {
                 name.set(archivesBaseName)
-                description.set('The framework responsible for injecting dependencies. ' +
-                        'Implemented without using reflection in runtime.')
+                description.set(
+                        'A framework responsible for monitoring and automating the dependency injection process.'
+                )
                 url.set('https://github.com/AmayaFramework/amaya-di')
 
                 organization {
