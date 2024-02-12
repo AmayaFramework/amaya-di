@@ -71,13 +71,16 @@ public final class ReflectionSchemeFactory implements SchemeFactory {
         this.annotation = Objects.requireNonNull(annotation);
     }
 
-    private static Class<?> of(Class<?> clazz, int array) {
-        var name = clazz.getTypeName();
+    private static Class<?> of(Type type, int array) {
+        if (!(type instanceof Class)) {
+            throw new IllegalTypeException(type);
+        }
+        var clazz = (Class<?>) type;
         if (array == 0) {
             return clazz;
         }
         return Exceptions.suppress(() -> Class.forName(
-                ARRAY.repeat(array) + REFERENCE + name + ";",
+                ARRAY.repeat(array) + REFERENCE + clazz.getTypeName() + ";",
                 false,
                 clazz.getClassLoader()
         ));
@@ -106,10 +109,10 @@ public final class ReflectionSchemeFactory implements SchemeFactory {
             ++array;
         }
         if (!(type instanceof ParameterizedType)) {
-            return of((Class<?>) type, array);
+            return of(type, array);
         }
         var parameterized = (ParameterizedType) type;
-        var clazz = of((Class<?>) parameterized.getRawType(), array);
+        var clazz = of(parameterized.getRawType(), array);
         var arguments = parameterized.getActualTypeArguments();
         var metadata = new Object[arguments.length];
         var wildcards = 0;
