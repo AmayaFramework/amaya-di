@@ -265,9 +265,6 @@ public final class ReflectionSchemeFactory implements SchemeFactory {
     public ClassScheme create(Class<?> clazz) {
         Objects.requireNonNull(clazz);
         // Check class
-        if (clazz.getTypeParameters().length != 0) {
-            throw new IllegalClassException("Cannot create scheme of parameterized class", clazz);
-        }
         var modifiers = clazz.getModifiers();
         if (!Modifier.isPublic(modifiers)) {
             throw new IllegalClassException("Cannot create scheme of non-public class", clazz);
