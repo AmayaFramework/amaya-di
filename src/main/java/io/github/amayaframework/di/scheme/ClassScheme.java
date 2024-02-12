@@ -29,17 +29,14 @@ public final class ClassScheme extends AbstractScheme<Class<?>> {
                        Set<FieldScheme> fieldSchemes,
                        Set<MethodScheme> methodSchemes) {
         super(clazz);
-        this.constructorScheme = constructorScheme;
+        this.constructorScheme = Objects.requireNonNull(constructorScheme);
         this.fieldSchemes = Collections.unmodifiableSet(Objects.requireNonNull(fieldSchemes));
         this.methodSchemes = Collections.unmodifiableSet(Objects.requireNonNull(methodSchemes));
         this.artifacts = Collections.unmodifiableSet(collectArtifacts());
     }
 
     private Set<Artifact> collectArtifacts() {
-        var ret = new HashSet<Artifact>();
-        if (constructorScheme != null) {
-            ret.addAll(constructorScheme.artifacts);
-        }
+        var ret = new HashSet<>(constructorScheme.artifacts);
         for (var scheme : fieldSchemes) {
             ret.add(scheme.artifact);
         }
