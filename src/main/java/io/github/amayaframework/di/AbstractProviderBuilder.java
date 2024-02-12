@@ -83,11 +83,15 @@ public abstract class AbstractProviderBuilder implements ServiceProviderBuilder 
 
     @Override
     public ServiceProviderBuilder addSingleton(Artifact artifact, Class<?> implementation) {
+        // Log debug policy info
+        logger.debug("Use singleton policy");
         return addService(artifact, implementation, LazyFunction0::new);
     }
 
     @Override
     public ServiceProviderBuilder addTransient(Artifact artifact, Class<?> implementation) {
+        // Log debug policy info
+        logger.debug("Use transient policy");
         return addService(artifact, implementation, Function1.identity());
     }
 
@@ -100,11 +104,15 @@ public abstract class AbstractProviderBuilder implements ServiceProviderBuilder 
 
     @Override
     public <T> ServiceProviderBuilder addSingleton(Class<T> type, Class<? extends T> implementation) {
+        // Log debug policy info
+        logger.debug("Use singleton policy");
         return addService(type, implementation, LazyFunction0::new);
     }
 
     @Override
     public <T> ServiceProviderBuilder addTransient(Class<T> type, Class<? extends T> implementation) {
+        // Log debug policy info
+        logger.debug("Use transient policy");
         return addService(type, implementation, Function1.identity());
     }
 
@@ -115,11 +123,15 @@ public abstract class AbstractProviderBuilder implements ServiceProviderBuilder 
 
     @Override
     public ServiceProviderBuilder addSingleton(Class<?> type) {
+        // Log debug policy info
+        logger.debug("Use singleton policy");
         return addService(type, LazyFunction0::new);
     }
 
     @Override
     public ServiceProviderBuilder addTransient(Class<?> type) {
+        // Log debug policy info
+        logger.debug("Use transient policy");
         return addService(type, Function1.identity());
     }
 
