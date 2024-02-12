@@ -432,7 +432,7 @@ public class Main {
 
 ## Авторы
 
-* **RomanQed** - *Основная работа* - [RomanQed](https://github.com/RomanQed)
+* [RomanQed](https://github.com/RomanQed) - *Основная работа*
 
 Загляните также в список [участников](https://github.com/AmayaFramework/amaya-di/contributors), которые внесли вклад
 в этот проект.

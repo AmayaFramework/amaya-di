@@ -3,6 +3,7 @@ open module io.github.amayaframework.di {
     requires com.github.romanqed.jfunc;
     requires com.github.romanqed.jeflect;
     requires org.objectweb.asm;
+    requires org.slf4j;
     // Exports
     exports io.github.amayaframework.di;
     exports io.github.amayaframework.di.scheme;

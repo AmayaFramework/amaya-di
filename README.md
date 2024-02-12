@@ -376,33 +376,33 @@ For example, for the example above, it would look like this:
 
 ```Java
 public class Main {
-  public static void main(String[] args) {
-    var service1 = Artifact.of(Service1.class);
-    var service2 = Artifact.of(Service2.class);
-    var app = Artifact.of(App.class);
-    var service1Scheme = new ClassScheme(
-            Service1.class,
-            new ConstructorScheme(Service1.class.getConstructor(), Set.of(), new Artifact[0]),
-            Set.of(),
-            Set.of()
-    );
-    var service2Scheme = new ClassScheme(
-            Service2.class,
-            new ConstructorScheme(Service2.class.getConstructor(), Set.of(), new Artifact[0]),
-            Set.of(),
-            Set.of()
-    );
-    var appScheme = new ClassScheme(
-            App.class,
-            new ConstructorScheme(
-                    App.class.getConstructor(Service1.class, Service2.class),
-                    Set.of(service1, service2),
-                    new Artifact[]{service1, service2}
-            ),
-            Set.of(),
-            Set.of()
-    );
-  }
+    public static void main(String[] args) {
+        var service1 = Artifact.of(Service1.class);
+        var service2 = Artifact.of(Service2.class);
+        var app = Artifact.of(App.class);
+        var service1Scheme = new ClassScheme(
+                Service1.class,
+                new ConstructorScheme(Service1.class.getConstructor(), Set.of(), new Artifact[0]),
+                Set.of(),
+                Set.of()
+        );
+        var service2Scheme = new ClassScheme(
+                Service2.class,
+                new ConstructorScheme(Service2.class.getConstructor(), Set.of(), new Artifact[0]),
+                Set.of(),
+                Set.of()
+        );
+        var appScheme = new ClassScheme(
+                App.class,
+                new ConstructorScheme(
+                        App.class.getConstructor(Service1.class, Service2.class),
+                        Set.of(service1, service2),
+                        new Artifact[]{service1, service2}
+                ),
+                Set.of(),
+                Set.of()
+        );
+    }
 }
 ```
 
@@ -434,7 +434,7 @@ its further use.
 
 ## Authors
 
-* **RomanQed** - *Main work* - [RomanQed](https://github.com/RomanQed)
+* [RomanQed](https://github.com/RomanQed) - *Main work*
 
 See also the list of [contributors](https://github.com/AmayaFramework/amaya-di/contributors) who participated
 in this project.
