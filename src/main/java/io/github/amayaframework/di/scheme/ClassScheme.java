@@ -20,7 +20,7 @@ public final class ClassScheme extends AbstractScheme<Class<?>> {
      * Constructs class scheme for specified class and schemes for its members.
      *
      * @param clazz             the specified class, must be non-null
-     * @param constructorScheme the constructor scheme, must be non-null
+     * @param constructorScheme the constructor scheme, may be null
      * @param fieldSchemes      the set of field schemes, must be non-null
      * @param methodSchemes     the set of method schemes, must be non-null
      */
@@ -29,7 +29,7 @@ public final class ClassScheme extends AbstractScheme<Class<?>> {
                        Set<FieldScheme> fieldSchemes,
                        Set<MethodScheme> methodSchemes) {
         super(clazz);
-        this.constructorScheme = Objects.requireNonNull(constructorScheme);
+        this.constructorScheme = constructorScheme;
         this.fieldSchemes = Collections.unmodifiableSet(Objects.requireNonNull(fieldSchemes));
         this.methodSchemes = Collections.unmodifiableSet(Objects.requireNonNull(methodSchemes));
         this.artifacts = Collections.unmodifiableSet(collectArtifacts());
