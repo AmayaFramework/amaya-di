@@ -433,6 +433,7 @@ public class Main {
 ## Авторы
 
 * **RomanQed** - *Основная работа* - [RomanQed](https://github.com/RomanQed)
+* **1qwaka** - *Ведущий мудрец, специалист по культурному просвещению* - [1qwaka](https://youtu.be/dQw4w9WgXcQ?si=SotpnlHMmAPkX5wk)
 
 Загляните также в список [участников](https://github.com/AmayaFramework/amaya-di/contributors), которые внесли вклад
 в этот проект.
