@@ -50,8 +50,8 @@ dependencies {
 
 ## Usage example
 
-Important: the order of transferring services to the collector does NOT matter, no changes and no exceptions will occur,
-the ServiceProviderBuilder#build method has not been called yet.
+Important: the order of transferring services to the builder does NOT matter, no changes and no exceptions will occur,
+the ServiceProviderBuilder#build() method has not been called yet.
 
 ### Hello, world!
 
