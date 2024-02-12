@@ -73,7 +73,7 @@ public final class ReflectionSchemeFactory implements SchemeFactory {
 
     private static Class<?> of(Type type, int array) {
         if (!(type instanceof Class)) {
-            throw new IllegalTypeException(type);
+            throw new IllegalTypeException("It is not possible to use a statically non-removable type", type);
         }
         var clazz = (Class<?>) type;
         if (array == 0) {
