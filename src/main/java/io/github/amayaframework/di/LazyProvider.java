@@ -31,6 +31,9 @@ public class LazyProvider implements ArtifactProvider {
     public void finish() {
         for (var entry : body.entrySet()) {
             var artifact = entry.getKey();
+            if (repository.contains(artifact)) {
+                continue;
+            }
             var supplier = Exceptions.suppress(entry.getValue());
             repository.add(artifact, supplier);
         }
