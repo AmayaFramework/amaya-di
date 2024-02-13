@@ -180,13 +180,13 @@ public class SchemeTest extends Assertions {
         testGenerics(REFLECTION_FACTORY);
     }
 
-    public void testGenericClass(SchemeFactory factory) {
-        assertThrows(IllegalClassException.class, () -> factory.create(GenericClass.class));
+    public void testGenericConstructor(SchemeFactory factory) {
+        assertThrows(IllegalMemberException.class, () -> factory.create(GenericConstructor.class));
     }
 
     @Test
-    public void testReflectionGenericClass() {
-        testGenericClass(REFLECTION_FACTORY);
+    public void testReflectionGenericConstructor() {
+        testGenericConstructor(REFLECTION_FACTORY);
     }
 
     public void testGenericMethod(SchemeFactory factory) {
@@ -350,7 +350,9 @@ public class SchemeTest extends Assertions {
         public List<? extends List<? extends List<? extends String[]>>[][]> g5;
     }
 
-    public static final class GenericClass<T> {
+    public static final class GenericConstructor {
+        public <T> GenericConstructor(T t) {
+        }
     }
 
     public static final class GenericMethod {
