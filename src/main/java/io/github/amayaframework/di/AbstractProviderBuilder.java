@@ -47,6 +47,10 @@ public abstract class AbstractProviderBuilder implements ServiceProviderBuilder 
         this.repository = null;
     }
 
+    protected boolean resolve(Artifact artifact) {
+        return strong.containsKey(artifact) || any.containsKey(artifact);
+    }
+
     @Override
     public ServiceProviderBuilder setRepository(Repository repository) {
         this.repository = repository;

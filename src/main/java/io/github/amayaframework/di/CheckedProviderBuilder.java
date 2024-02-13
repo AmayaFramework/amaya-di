@@ -83,33 +83,6 @@ public class CheckedProviderBuilder extends AbstractProviderBuilder {
         return ret;
     }
 
-    protected void validateGraph(Graph<Artifact> graph) {
-        var components = GraphUtil.findStronglyConnectedComponents(graph);
-        for (var component : components) {
-            if (component.size() > 1) {
-                throw new CycleFoundException(component);
-            }
-        }
-    }
-
-    protected void validateArtifacts(Iterable<ClassScheme> schemes, Repository repository) {
-        for (var scheme : schemes) {
-            var artifacts = scheme.getArtifacts();
-            for (var artifact : artifacts) {
-                if (repository.contains(artifact)) {
-                    continue;
-                }
-                if (strong.containsKey(artifact)) {
-                    continue;
-                }
-                if (any.containsKey(artifact)) {
-                    continue;
-                }
-                throw new ArtifactNotFoundException(artifact);
-            }
-        }
-    }
-
     @SuppressWarnings("unchecked")
     protected void buildArtifacts(Map<Class<?>, ClassScheme> schemes, LazyProvider provider) {
         for (var entry : any.entrySet()) {
@@ -127,11 +100,27 @@ public class CheckedProviderBuilder extends AbstractProviderBuilder {
         // Build dependency graph
         var graph = makeGraph(schemes);
         // Find for strongly connected components
-        validateGraph(graph);
+        var components = GraphUtil.findStronglyConnectedComponents(graph);
+        for (var component : components) {
+            if (component.size() > 1) {
+                throw new CycleFoundException(component);
+            }
+        }
         // Build repository
         var repository = Objects.requireNonNullElse(this.repository, new RepositoryImpl());
         // Validate missing artifacts
-        validateArtifacts(schemes.values(), repository);
+        for (var scheme : schemes.values()) {
+            var artifacts = scheme.getArtifacts();
+            for (var artifact : artifacts) {
+                if (repository.contains(artifact)) {
+                    continue;
+                }
+                if (resolve(artifact)) {
+                    continue;
+                }
+                throw new ArtifactNotFoundException(artifact);
+            }
+        }
         // Prepare weak artifacts
         var provider = new LazyProvider(repository);
         buildArtifacts(schemes, provider);
