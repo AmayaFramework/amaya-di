@@ -6,7 +6,6 @@ import com.github.romanqed.jfunc.Function0;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
-import java.util.function.BiConsumer;
 
 public class LazyProvider implements ArtifactProvider {
     private final Repository repository;
@@ -29,8 +28,13 @@ public class LazyProvider implements ArtifactProvider {
         return body.remove(artifact) != null;
     }
 
-    public void forEach(BiConsumer<Artifact, Function0<Function0<Object>>> consumer) {
-        body.forEach(consumer);
+    public void finish() {
+        for (var entry : body.entrySet()) {
+            var artifact = entry.getKey();
+            var supplier = Exceptions.suppress(entry.getValue());
+            repository.add(artifact, supplier);
+        }
+        body.clear();
     }
 
     @Override

@@ -1,6 +1,5 @@
 package io.github.amayaframework.di;
 
-import com.github.romanqed.jfunc.Exceptions;
 import com.github.romanqed.jfunc.Function0;
 import io.github.amayaframework.di.graph.Graph;
 import io.github.amayaframework.di.graph.GraphUtil;
@@ -139,7 +138,7 @@ public class CheckedProviderBuilder extends AbstractProviderBuilder {
         // Add strong artifacts
         strong.forEach(repository::add);
         // Fire all delayed stub creations
-        provider.forEach((artifact, task) -> repository.add(artifact, Exceptions.suppress(task)));
+        provider.finish();
         reset();
         return new ServiceProviderImpl(repository);
     }
