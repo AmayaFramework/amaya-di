@@ -17,7 +17,7 @@ import java.util.Objects;
  */
 public abstract class AbstractProviderBuilder implements ServiceProviderBuilder {
     /**
-     * The logger used to output debugging information.
+     * The logger used to output debug information.
      */
     protected final Logger logger;
 
