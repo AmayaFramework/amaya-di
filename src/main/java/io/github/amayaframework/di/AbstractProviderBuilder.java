@@ -3,8 +3,6 @@ package io.github.amayaframework.di;
 import com.github.romanqed.jfunc.Function0;
 import com.github.romanqed.jfunc.Function1;
 import com.github.romanqed.jfunc.LazyFunction0;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -16,10 +14,6 @@ import java.util.Objects;
  * and a reset mechanism to the initial state.
  */
 public abstract class AbstractProviderBuilder implements ServiceProviderBuilder {
-    /**
-     * The logger used to output debug information.
-     */
-    protected final Logger logger;
 
     /**
      * The map contains "strong" services, that is, they definitely do not have dependencies.
@@ -41,7 +35,6 @@ public abstract class AbstractProviderBuilder implements ServiceProviderBuilder 
      * Does not contain any services, the repository used is set to null.
      */
     protected AbstractProviderBuilder() {
-        this.logger = LoggerFactory.getLogger(getClass());
         this.reset();
     }
 
@@ -57,8 +50,6 @@ public abstract class AbstractProviderBuilder implements ServiceProviderBuilder 
     @Override
     public ServiceProviderBuilder setRepository(Repository repository) {
         this.repository = repository;
-        // Log debug info
-        logger.debug("The repository is set to {}", repository);
         return this;
     }
 
@@ -76,22 +67,16 @@ public abstract class AbstractProviderBuilder implements ServiceProviderBuilder 
             throw new IllegalArgumentException("The implementation is not a child class of the artifact type");
         }
         any.put(artifact, Entry.of(implementation, wrapper));
-        // Log debug info
-        logger.debug("Added a service with artifact: {}, implementation: {}", artifact, implementation);
         return this;
     }
 
     @Override
     public ServiceProviderBuilder addSingleton(Artifact artifact, Class<?> implementation) {
-        // Log debug policy info
-        logger.debug("Adding a service with a singleton policy");
         return addService(artifact, implementation, LazyFunction0::new);
     }
 
     @Override
     public ServiceProviderBuilder addTransient(Artifact artifact, Class<?> implementation) {
-        // Log debug policy info
-        logger.debug("Adding a service with a transient policy");
         return addService(artifact, implementation, Function1.identity());
     }
 
@@ -104,15 +89,11 @@ public abstract class AbstractProviderBuilder implements ServiceProviderBuilder 
 
     @Override
     public <T> ServiceProviderBuilder addSingleton(Class<T> type, Class<? extends T> implementation) {
-        // Log debug policy info
-        logger.debug("Adding a service with a singleton policy");
         return addService(type, implementation, LazyFunction0::new);
     }
 
     @Override
     public <T> ServiceProviderBuilder addTransient(Class<T> type, Class<? extends T> implementation) {
-        // Log debug policy info
-        logger.debug("Adding a service with a transient policy");
         return addService(type, implementation, Function1.identity());
     }
 
@@ -123,15 +104,11 @@ public abstract class AbstractProviderBuilder implements ServiceProviderBuilder 
 
     @Override
     public ServiceProviderBuilder addSingleton(Class<?> type) {
-        // Log debug policy info
-        logger.debug("Adding a service with a singleton policy");
         return addService(type, LazyFunction0::new);
     }
 
     @Override
     public ServiceProviderBuilder addTransient(Class<?> type) {
-        // Log debug policy info
-        logger.debug("Adding a service with a transient policy");
         return addService(type, Function1.identity());
     }
 
@@ -141,8 +118,6 @@ public abstract class AbstractProviderBuilder implements ServiceProviderBuilder 
         Objects.requireNonNull(artifact);
         Objects.requireNonNull(supplier);
         strong.put(artifact, (Function0<Object>) supplier);
-        // Log debug info
-        logger.debug("Added a strong service with artifact: {}", artifact);
         return this;
     }
 
@@ -156,8 +131,6 @@ public abstract class AbstractProviderBuilder implements ServiceProviderBuilder 
         Objects.requireNonNull(artifact);
         strong.remove(artifact);
         any.remove(artifact);
-        // Log debug info
-        logger.debug("Removed service with artifact: {}", artifact);
         return this;
     }
 

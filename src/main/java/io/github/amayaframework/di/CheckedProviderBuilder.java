@@ -2,7 +2,6 @@ package io.github.amayaframework.di;
 
 import com.github.romanqed.jfunc.Exceptions;
 import com.github.romanqed.jfunc.Function0;
-import io.github.amayaframework.di.graph.Graph;
 import io.github.amayaframework.di.graph.GraphUtil;
 import io.github.amayaframework.di.graph.HashGraph;
 import io.github.amayaframework.di.scheme.ClassScheme;
@@ -60,25 +59,6 @@ public class CheckedProviderBuilder extends AbstractProviderBuilder {
         return create(Inject.class);
     }
 
-    private void print(Graph<Artifact> graph) {
-        logger.debug("A dependency graph is built");
-        logger.debug("Nodes:");
-        for (var node : graph) {
-            logger.debug(
-                    "Type: {}, Metadata: {}, Hash: {}",
-                    node.getType().getSimpleName(),
-                    node.getMetadata(),
-                    node.hashCode()
-            );
-        }
-        logger.debug("Edges:");
-        graph.forEach((from, to) -> logger.debug(
-                "{}@{} -> {}@{}",
-                from.getType().getSimpleName(), from.hashCode(),
-                to.getType().getSimpleName(), to.hashCode()
-        ));
-    }
-
     @Override
     @SuppressWarnings("unchecked")
     public ServiceProvider build() {
@@ -100,10 +80,6 @@ public class CheckedProviderBuilder extends AbstractProviderBuilder {
                 }
                 graph.addEdge(artifact, e);
             });
-        }
-        // Log dependency graph
-        if (logger.isDebugEnabled()) {
-            print(graph);
         }
         // Find strongly connected components
         var components = GraphUtil.findStronglyConnectedComponents(graph);
