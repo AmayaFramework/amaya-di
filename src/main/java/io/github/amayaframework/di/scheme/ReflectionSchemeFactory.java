@@ -45,7 +45,7 @@ import java.util.stream.Collectors;
  *         public static void setter(? super Service, Dependency d, ...) {}
  *     }
  * </pre>
- * Parameterized classes and methods are not supported,
+ * Parameterized constructors and methods are not supported,
  * and super-wildcards are not supported for statically defined generics.
  * In other cases, type inference for wildcards will work as follows:
  * <br>
