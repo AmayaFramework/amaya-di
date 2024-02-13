@@ -7,28 +7,58 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 
+/**
+ * A lazy implementation of the {@link ArtifactProvider}, which allows you to organize the chain of building artifacts.
+ */
 public class LazyProvider implements ArtifactProvider {
     private final Repository repository;
     private final Map<Artifact, Function0<Function0<Object>>> body;
 
+    /**
+     * Constructs {@link LazyProvider} with the specified repository.
+     *
+     * @param repository the specified repository
+     */
     public LazyProvider(Repository repository) {
         this.repository = Objects.requireNonNull(repository);
         this.body = new HashMap<>();
     }
 
-    public void add(Artifact artifact, Function0<Function0<Object>> provider) {
-        body.put(artifact, provider);
+    /**
+     * Adds the deferred task of creating an artifact implementation.
+     *
+     * @param artifact the specified artifact
+     * @param task     the specified task
+     */
+    public void add(Artifact artifact, Function0<Function0<Object>> task) {
+        body.put(artifact, task);
     }
 
+    /**
+     * Checks whether the provider contains a deferred task for the specified artifact.
+     *
+     * @param artifact the specified artifact
+     * @return true, if contains, false otherwise
+     */
     public boolean contains(Artifact artifact) {
         return body.containsKey(artifact);
     }
 
+    /**
+     * Removes the deferred task associated with the specified artifact.
+     *
+     * @param artifact the specified artifact
+     * @return true if the task was removed, false otherwise
+     */
     public boolean remove(Artifact artifact) {
         return body.remove(artifact) != null;
     }
 
-    public void finish() {
+    /**
+     * Starts a chain of deferred tasks, committing changes to the repository.
+     * All called tasks are removed.
+     */
+    public void commit() {
         for (var entry : body.entrySet()) {
             var artifact = entry.getKey();
             if (repository.contains(artifact)) {

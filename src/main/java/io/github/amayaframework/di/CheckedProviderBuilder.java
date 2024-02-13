@@ -127,7 +127,7 @@ public class CheckedProviderBuilder extends AbstractProviderBuilder {
         // Add strong artifacts
         strong.forEach(repository::add);
         // Fire all delayed stub creations
-        provider.finish();
+        provider.commit();
         reset();
         return new ServiceProviderImpl(repository);
     }

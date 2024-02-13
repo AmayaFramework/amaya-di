@@ -47,6 +47,12 @@ public abstract class AbstractProviderBuilder implements ServiceProviderBuilder 
         this.repository = null;
     }
 
+    /**
+     * Determines whether an artifact implementation exists.
+     *
+     * @param artifact the specified artifact
+     * @return true, if exists, false otherwise
+     */
     protected boolean resolve(Artifact artifact) {
         return strong.containsKey(artifact) || any.containsKey(artifact);
     }

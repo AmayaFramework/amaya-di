@@ -26,14 +26,29 @@ public final class BytecodeStubFactory implements StubFactory {
 
     private final ObjectFactory<Function0<?>> factory;
 
+    /**
+     * Constructs {@link BytecodeStubFactory} with the specified {@link ObjectFactory} instance,
+     * which will be used to load and instantiate the bytecode of proxy classes.
+     *
+     * @param factory the specified factory, must be non-null
+     */
     public BytecodeStubFactory(ObjectFactory<Function0<?>> factory) {
-        this.factory = factory;
+        this.factory = Objects.requireNonNull(factory);
     }
 
+    /**
+     * Constructs {@link BytecodeStubFactory} with the {@link DefineObjectFactory} using
+     * the specified {@link DefineLoader}.
+     *
+     * @param loader the specified loader, must be non-null
+     */
     public BytecodeStubFactory(DefineLoader loader) {
         this.factory = new DefineObjectFactory<>(loader);
     }
 
+    /**
+     * Constructs {@link BytecodeStubFactory} with {@link DefineClassLoader}.
+     */
     public BytecodeStubFactory() {
         this(new DefineClassLoader());
     }
