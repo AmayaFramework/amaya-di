@@ -164,6 +164,7 @@ public interface ServiceProviderBuilder {
      * this {@link ServiceProviderBuilder} instance to its original state,
      * making it ready for reuse.
      * If the build was not completed due to an error, no third-party effects will be applied.
+     * Important: if an error occurred while filling in the repository, the changes made will not be undone.
      *
      * @return {@link ServiceProvider} instance
      * @throws ArtifactNotFoundException if the dependency of the service used has not been resolved (optional)

@@ -45,7 +45,7 @@ import java.util.stream.Collectors;
  *         public static void setter(? super Service, Dependency d, ...) {}
  *     }
  * </pre>
- * Parameterized classes and methods are not supported,
+ * Parameterized constructors and methods are not supported,
  * and super-wildcards are not supported for statically defined generics.
  * In other cases, type inference for wildcards will work as follows:
  * <br>
@@ -71,13 +71,16 @@ public final class ReflectionSchemeFactory implements SchemeFactory {
         this.annotation = Objects.requireNonNull(annotation);
     }
 
-    private static Class<?> of(Class<?> clazz, int array) {
-        var name = clazz.getTypeName();
+    private static Class<?> of(Type type, int array) {
+        if (!(type instanceof Class)) {
+            throw new IllegalTypeException("It is not possible to use a statically non-removable type", type);
+        }
+        var clazz = (Class<?>) type;
         if (array == 0) {
             return clazz;
         }
         return Exceptions.suppress(() -> Class.forName(
-                ARRAY.repeat(array) + REFERENCE + name + ";",
+                ARRAY.repeat(array) + REFERENCE + clazz.getTypeName() + ";",
                 false,
                 clazz.getClassLoader()
         ));
@@ -106,10 +109,10 @@ public final class ReflectionSchemeFactory implements SchemeFactory {
             ++array;
         }
         if (!(type instanceof ParameterizedType)) {
-            return of((Class<?>) type, array);
+            return of(type, array);
         }
         var parameterized = (ParameterizedType) type;
-        var clazz = of((Class<?>) parameterized.getRawType(), array);
+        var clazz = of(parameterized.getRawType(), array);
         var arguments = parameterized.getActualTypeArguments();
         var metadata = new Object[arguments.length];
         var wildcards = 0;
@@ -262,9 +265,6 @@ public final class ReflectionSchemeFactory implements SchemeFactory {
     public ClassScheme create(Class<?> clazz) {
         Objects.requireNonNull(clazz);
         // Check class
-        if (clazz.getTypeParameters().length != 0) {
-            throw new IllegalClassException("Cannot create scheme of parameterized class", clazz);
-        }
         var modifiers = clazz.getModifiers();
         if (!Modifier.isPublic(modifiers)) {
             throw new IllegalClassException("Cannot create scheme of non-public class", clazz);

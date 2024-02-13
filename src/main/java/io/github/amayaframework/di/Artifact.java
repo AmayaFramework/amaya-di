@@ -36,7 +36,7 @@ public final class Artifact {
      * @param metadata the specified metadata, may be null
      */
     public Artifact(Class<?> type, Object[] metadata) {
-        this.type = type;
+        this.type = Objects.requireNonNull(type);
         this.metadata = metadata;
     }
 
@@ -56,7 +56,7 @@ public final class Artifact {
      * @param type the specified class, must be non-null
      */
     public Artifact(Class<?> type) {
-        this.type = type;
+        this.type = Objects.requireNonNull(type);
         this.metadata = null;
     }
 
@@ -77,7 +77,6 @@ public final class Artifact {
      * @return {@link Artifact} instance
      */
     public static Artifact of(Class<?> type, Object... metadata) {
-        Objects.requireNonNull(type);
         return new Artifact(type, metadata);
     }
 
@@ -89,7 +88,6 @@ public final class Artifact {
      * @return {@link Artifact} instance
      */
     public static Artifact of(Class<?> type) {
-        Objects.requireNonNull(type);
         return new Artifact(type);
     }
 

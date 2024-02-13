@@ -20,7 +20,7 @@ public final class ClassScheme extends AbstractScheme<Class<?>> {
      * Constructs class scheme for specified class and schemes for its members.
      *
      * @param clazz             the specified class, must be non-null
-     * @param constructorScheme the constructor scheme, must be non-null
+     * @param constructorScheme the constructor scheme, may be null
      * @param fieldSchemes      the set of field schemes, must be non-null
      * @param methodSchemes     the set of method schemes, must be non-null
      */
@@ -36,10 +36,7 @@ public final class ClassScheme extends AbstractScheme<Class<?>> {
     }
 
     private Set<Artifact> collectArtifacts() {
-        var ret = new HashSet<Artifact>();
-        if (constructorScheme != null) {
-            ret.addAll(constructorScheme.artifacts);
-        }
+        var ret = new HashSet<>(constructorScheme.artifacts);
         for (var scheme : fieldSchemes) {
             ret.add(scheme.artifact);
         }

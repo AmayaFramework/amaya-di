@@ -47,6 +47,16 @@ public abstract class AbstractProviderBuilder implements ServiceProviderBuilder 
         this.repository = null;
     }
 
+    /**
+     * Determines whether an artifact implementation exists.
+     *
+     * @param artifact the specified artifact
+     * @return true, if exists, false otherwise
+     */
+    protected boolean resolve(Artifact artifact) {
+        return strong.containsKey(artifact) || any.containsKey(artifact);
+    }
+
     @Override
     public ServiceProviderBuilder setRepository(Repository repository) {
         this.repository = repository;
@@ -84,7 +94,6 @@ public abstract class AbstractProviderBuilder implements ServiceProviderBuilder 
     public <T> ServiceProviderBuilder addService(Class<T> type,
                                                  Class<? extends T> implementation,
                                                  Function1<Function0<T>, Function0<T>> wrapper) {
-        Objects.requireNonNull(type);
         return addService(new Artifact(type), implementation, wrapper);
     }
 
@@ -100,7 +109,6 @@ public abstract class AbstractProviderBuilder implements ServiceProviderBuilder 
 
     @Override
     public <T> ServiceProviderBuilder addService(Class<T> type, Function1<Function0<T>, Function0<T>> wrapper) {
-        Objects.requireNonNull(type);
         return addService(new Artifact(type), type, wrapper);
     }
 
@@ -125,7 +133,6 @@ public abstract class AbstractProviderBuilder implements ServiceProviderBuilder 
 
     @Override
     public <T> ServiceProviderBuilder addService(Class<T> type, Function0<T> supplier) {
-        Objects.requireNonNull(type);
         return addService(new Artifact(type), supplier);
     }
 
@@ -139,7 +146,6 @@ public abstract class AbstractProviderBuilder implements ServiceProviderBuilder 
 
     @Override
     public ServiceProviderBuilder removeService(Class<?> type) {
-        Objects.requireNonNull(type);
         return removeService(new Artifact(type));
     }
 

@@ -402,6 +402,7 @@ public class Main {
                 Set.of(),
                 Set.of()
         );
+        ...
     }
 }
 ```
@@ -432,8 +433,8 @@ public class Main {
 
 ## Авторы
 
-* **RomanQed** - *Основная работа* - [RomanQed](https://github.com/RomanQed)
-* **1qwaka** - *Ведущий мудрец, специалист по культурному просвещению* - [1qwaka](https://youtu.be/dQw4w9WgXcQ?si=SotpnlHMmAPkX5wk)
+* [RomanQed](https://github.com/RomanQed) - *Основная работа*
+* [1qwaka](https://github.com/1qwaka) - *Ведущий идеолог, мудрец, специалист по культурному просвещению*
 
 Загляните также в список [участников](https://github.com/AmayaFramework/amaya-di/contributors), которые внесли вклад
 в этот проект.

@@ -1,7 +1,7 @@
 package io.github.amayaframework.di;
 
-import com.github.romanqed.jfunc.Exceptions;
 import com.github.romanqed.jfunc.Function0;
+import io.github.amayaframework.di.graph.Graph;
 import io.github.amayaframework.di.graph.GraphUtil;
 import io.github.amayaframework.di.graph.HashGraph;
 import io.github.amayaframework.di.scheme.ClassScheme;
@@ -15,7 +15,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.function.Function;
 
 /**
  * A {@link ServiceProviderBuilder} implementation that performs static analysis of the collected set of services.
@@ -59,18 +58,8 @@ public class CheckedProviderBuilder extends AbstractProviderBuilder {
         return create(Inject.class);
     }
 
-    @Override
-    @SuppressWarnings("unchecked")
-    public ServiceProvider build() {
-        // Build class schemes
-        var schemes = new HashMap<Class<?>, ClassScheme>();
-        for (var entry : any.values()) {
-            var type = entry.implementation;
-            var scheme = schemeFactory.create(type);
-            schemes.put(type, scheme);
-        }
-        // Build dependency graph
-        var graph = new HashGraph<Artifact>();
+    protected Graph<Artifact> makeGraph(Map<Class<?>, ClassScheme> schemes) {
+        var ret = new HashGraph<Artifact>();
         for (var entry : any.entrySet()) {
             var artifact = entry.getKey();
             var artifacts = schemes.get(entry.getValue().implementation).getArtifacts();
@@ -78,10 +67,39 @@ public class CheckedProviderBuilder extends AbstractProviderBuilder {
                 if (artifact.equals(e)) {
                     throw new CycleFoundException(List.of(e));
                 }
-                graph.addEdge(artifact, e);
+                ret.addEdge(artifact, e);
             });
         }
-        // Find strongly connected components
+        return ret;
+    }
+
+    protected Map<Class<?>, ClassScheme> makeSchemes() {
+        var ret = new HashMap<Class<?>, ClassScheme>();
+        for (var entry : any.values()) {
+            var type = entry.implementation;
+            var scheme = schemeFactory.create(type);
+            ret.put(type, scheme);
+        }
+        return ret;
+    }
+
+    @SuppressWarnings("unchecked")
+    protected void buildArtifacts(Map<Class<?>, ClassScheme> schemes, LazyProvider provider) {
+        for (var entry : any.entrySet()) {
+            var artifact = entry.getKey();
+            var scheme = schemes.get(entry.getValue().implementation);
+            var wrapper = entry.getValue().wrapper;
+            provider.add(artifact, () -> (Function0<Object>) wrapper.invoke(stubFactory.create(scheme, provider)));
+        }
+    }
+
+    @Override
+    public ServiceProvider build() {
+        // Build class schemes
+        var schemes = makeSchemes();
+        // Build dependency graph
+        var graph = makeGraph(schemes);
+        // Find for strongly connected components
         var components = GraphUtil.findStronglyConnectedComponents(graph);
         for (var component : components) {
             if (component.size() > 1) {
@@ -90,69 +108,27 @@ public class CheckedProviderBuilder extends AbstractProviderBuilder {
         }
         // Build repository
         var repository = Objects.requireNonNullElse(this.repository, new RepositoryImpl());
-        // Prepare weak artifacts
-        var provider = new LazyProvider(repository);
-        for (var entry : any.entrySet()) {
-            var artifact = entry.getKey();
-            var scheme = schemes.get(entry.getValue().implementation);
-            var wrapper = entry.getValue().wrapper;
-            provider.provide(artifact, () -> (Function0<Object>) wrapper.invoke(stubFactory.create(scheme, provider)));
-        }
-        // Validate dependencies
+        // Validate missing artifacts
         for (var scheme : schemes.values()) {
             var artifacts = scheme.getArtifacts();
             for (var artifact : artifacts) {
                 if (repository.contains(artifact)) {
                     continue;
                 }
-                if (strong.containsKey(artifact)) {
-                    continue;
-                }
-                if (provider.body.containsKey(artifact)) {
+                if (resolve(artifact)) {
                     continue;
                 }
                 throw new ArtifactNotFoundException(artifact);
             }
         }
+        // Prepare weak artifacts
+        var provider = new LazyProvider(repository);
+        buildArtifacts(schemes, provider);
         // Add strong artifacts
         strong.forEach(repository::add);
         // Fire all delayed stub creations
-        for (var entry : provider.body.entrySet()) {
-            var artifact = entry.getKey();
-            var supplier = Exceptions.suppress(entry.getValue());
-            repository.add(artifact, supplier);
-        }
-        this.reset();
+        provider.commit();
+        reset();
         return new ServiceProviderImpl(repository);
-    }
-
-    private static final class LazyProvider implements Function<Artifact, Function0<Object>> {
-        private final Map<Artifact, Function0<Function0<Object>>> body;
-        private final Repository repository;
-
-        private LazyProvider(Repository repository) {
-            this.body = new HashMap<>();
-            this.repository = repository;
-        }
-
-        private void provide(Artifact artifact, Function0<Function0<Object>> provided) {
-            body.put(artifact, provided);
-        }
-
-        @Override
-        public Function0<Object> apply(Artifact artifact) {
-            var ret = repository.get(artifact);
-            if (ret != null) {
-                return ret;
-            }
-            var provided = body.get(artifact);
-            if (provided == null) {
-                return null;
-            }
-            var function = Exceptions.suppress(provided);
-            repository.add(artifact, function);
-            // It is important to request the artifact again from the repository so that it can apply the wrapper.
-            return repository.get(artifact);
-        }
     }
 }
