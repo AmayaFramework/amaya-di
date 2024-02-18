@@ -87,8 +87,9 @@ public class CheckedProviderBuilder extends AbstractProviderBuilder {
     protected void buildArtifacts(Map<Class<?>, ClassScheme> schemes, LazyProvider provider) {
         for (var entry : any.entrySet()) {
             var artifact = entry.getKey();
-            var scheme = schemes.get(entry.getValue().implementation);
-            var wrapper = entry.getValue().wrapper;
+            var value = entry.getValue();
+            var scheme = schemes.get(value.implementation);
+            var wrapper = value.wrapper;
             provider.add(artifact, () -> (Function0<Object>) wrapper.invoke(stubFactory.create(scheme, provider)));
         }
     }
