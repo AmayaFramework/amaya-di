@@ -149,6 +149,32 @@ public abstract class AbstractProviderBuilder implements ServiceProviderBuilder 
         return removeService(new Artifact(type));
     }
 
+    /**
+     * Builds a ready-to-use {@link ServiceProvider} implementation.
+     * Override this method instead of {@link ServiceProviderBuilder#build()},
+     * so as not to worry about resetting the builder to its original state.
+     * Can handle checked exceptions.
+     *
+     * @return {@link ServiceProvider} instance
+     * @throws Throwable if any problems occurs
+     */
+    protected abstract ServiceProvider checkedBuild() throws Throwable;
+
+    @Override
+    public ServiceProvider build() {
+        try {
+            var ret = checkedBuild();
+            reset();
+            return ret;
+        } catch (Error | RuntimeException e) {
+            reset();
+            throw e;
+        } catch (Throwable e) {
+            reset();
+            throw new RuntimeException(e);
+        }
+    }
+
     protected static final class Entry {
         Class<?> implementation;
         Function1<Function0<?>, Function0<?>> wrapper;

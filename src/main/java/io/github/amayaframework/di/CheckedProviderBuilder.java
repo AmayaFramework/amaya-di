@@ -95,7 +95,7 @@ public class CheckedProviderBuilder extends AbstractProviderBuilder {
     }
 
     @Override
-    public ServiceProvider build() {
+    protected ServiceProvider checkedBuild() {
         // Build class schemes
         var schemes = makeSchemes();
         // Build dependency graph
@@ -129,7 +129,6 @@ public class CheckedProviderBuilder extends AbstractProviderBuilder {
         strong.forEach(repository::add);
         // Fire all delayed stub creations
         provider.commit();
-        reset();
         return new ServiceProviderImpl(repository);
     }
 }
