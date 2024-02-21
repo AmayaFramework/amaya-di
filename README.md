@@ -72,12 +72,12 @@ public class Main {
 ### Hello, world!, but now with class
 
 ```Java
-import io.github.amayaframework.di.CheckedProviderBuilder;
+import io.github.amayaframework.di.Builders;
 
 public class Main {
     public static void main(String[] args) {
-        var provider = CheckedProviderBuilder
-                .create()
+        var provider = Builders
+                .createChecked()
                 .addTransient(HelloWorld.class)
                 .build();
         System.out.println(provider.instantiate(HelloWorld.class));
