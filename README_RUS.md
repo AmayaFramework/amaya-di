@@ -69,6 +69,30 @@ public class Main {
 }
 ```
 
+### Hello, world!, но теперь с классом
+
+```Java
+import io.github.amayaframework.di.CheckedProviderBuilder;
+
+public class Main {
+    public static void main(String[] args) {
+        var provider = CheckedProviderBuilder
+                .create()
+                .addTransient(HelloWorld.class)
+                .build();
+        System.out.println(provider.instantiate(HelloWorld.class));
+    }
+
+    public static final class HelloWorld {
+
+        @Override
+        public String toString() {
+            return "Hello, world!";
+        }
+    }
+}
+```
+
 ### Два сервиса и зависимый класс
 
 ```Java
