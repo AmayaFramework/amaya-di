@@ -93,7 +93,8 @@ public class CheckedProviderBuilder extends AbstractProviderBuilder {
         }
     }
 
-    private ServiceProvider uncheckedBuild() {
+    @Override
+    protected ServiceProvider checkedBuild() {
         // Build class schemes
         var schemes = makeSchemes();
         // Build dependency graph
@@ -127,20 +128,6 @@ public class CheckedProviderBuilder extends AbstractProviderBuilder {
         strong.forEach(repository::add);
         // Fire all delayed stub creations
         provider.commit();
-        reset();
         return new ServiceProviderImpl(repository);
-    }
-
-    @Override
-    public ServiceProvider build() {
-        try {
-            return uncheckedBuild();
-        } catch (Error | RuntimeException e) {
-            reset();
-            throw e;
-        } catch (Throwable e) {
-            reset();
-            throw new RuntimeException(e);
-        }
     }
 }
