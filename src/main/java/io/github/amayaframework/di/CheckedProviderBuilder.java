@@ -93,8 +93,7 @@ public class CheckedProviderBuilder extends AbstractProviderBuilder {
         }
     }
 
-    @Override
-    public ServiceProvider build() {
+    private ServiceProvider uncheckedBuild() {
         // Build class schemes
         var schemes = makeSchemes();
         // Build dependency graph
@@ -130,5 +129,18 @@ public class CheckedProviderBuilder extends AbstractProviderBuilder {
         provider.commit();
         reset();
         return new ServiceProviderImpl(repository);
+    }
+
+    @Override
+    public ServiceProvider build() {
+        try {
+            return uncheckedBuild();
+        } catch (Error | RuntimeException e) {
+            reset();
+            throw e;
+        } catch (Throwable e) {
+            reset();
+            throw new RuntimeException(e);
+        }
     }
 }
