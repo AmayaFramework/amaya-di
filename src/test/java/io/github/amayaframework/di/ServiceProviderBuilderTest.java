@@ -3,6 +3,8 @@ package io.github.amayaframework.di;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
+import java.util.Objects;
+
 public class ServiceProviderBuilderTest extends Assertions {
     private static final ServiceProviderBuilder CHECKED_BUILDER = Builders.createChecked();
     private static final ManualProviderBuilder MANUAL_BUILDER = Builders.createManual();
@@ -75,13 +77,64 @@ public class ServiceProviderBuilderTest extends Assertions {
         assertNotNull(provider.instantiate(ManualApp.class));
     }
 
+    public void testMutualExclusion(ServiceProviderBuilder builder) {
+        var provider = builder
+                .addTransient(App.class)
+                .addService(Service.class, () -> null)
+                .addTransient(Service.class)
+                .build();
+        assertNotNull(provider.instantiate(App.class));
+    }
+
+    @Test
+    public void testCheckedMutualExclusion() {
+        testMutualExclusion(CHECKED_BUILDER);
+    }
+
+    public void testMutualExclusion(ManualProviderBuilder builder) {
+        var provider = builder
+                .addTransient(App.class)
+                .addService(Service.class, () -> null)
+                .addManual(Service.class, v -> () -> null)
+                .addTransient(Service.class)
+                .build();
+        assertNotNull(provider.instantiate(App.class));
+    }
+
+    @Test
+    public void testManualMutualExclusion() {
+        testMutualExclusion(MANUAL_BUILDER);
+    }
+
+    public void testRemoval(ServiceProviderBuilder builder) {
+        assertThrows(ArtifactNotFoundException.class, () -> builder
+                .addTransient(App.class)
+                .addTransient(Service.class)
+                .addService(Service.class, () -> null)
+                .removeService(Service.class)
+                .build());
+    }
+
+    @Test
+    public void testCheckedRemoval() {
+        testRemoval(CHECKED_BUILDER);
+    }
+
+    @Test
+    public void testManualRemoval() {
+        testRemoval(MANUAL_BUILDER);
+    }
+
     public static final class Service2 {
         public Service2(Service s) {
+            Objects.requireNonNull(s);
         }
     }
 
     public static final class ManualApp {
         public ManualApp(Service s, Service2 s2) {
+            Objects.requireNonNull(s);
+            Objects.requireNonNull(s2);
         }
     }
 
@@ -92,7 +145,7 @@ public class ServiceProviderBuilderTest extends Assertions {
         final Service service;
 
         public App(Service service) {
-            this.service = service;
+            this.service = Objects.requireNonNull(service);
         }
     }
 
