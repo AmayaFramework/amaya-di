@@ -2,171 +2,88 @@ package io.github.amayaframework.di;
 
 import com.github.romanqed.jfunc.Function0;
 import com.github.romanqed.jfunc.Function1;
-import io.github.amayaframework.di.scheme.ClassScheme;
-import io.github.amayaframework.di.scheme.ReflectionSchemeFactory;
-import io.github.amayaframework.di.scheme.SchemeFactory;
-import io.github.amayaframework.di.stub.BytecodeStubFactory;
-import io.github.amayaframework.di.stub.StubFactory;
 
-import java.lang.annotation.Annotation;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Objects;
-
-public class ManualProviderBuilder extends CheckedProviderBuilder {
-    protected Map<Artifact, Function1<ArtifactProvider, Function0<?>>> manual;
+/**
+ * An interface describing an abstract {@link ServiceProvider} builder with
+ * the ability to manually build dependencies.
+ */
+public interface ManualProviderBuilder extends ServiceProviderBuilder {
 
     /**
-     * Constructs {@link ManualProviderBuilder} instance with the specified scheme and stub factories.
+     * Adds an artifact implementation provided by the specified function.
+     * <br>
+     * IMPORTANT: the result of a function call is not checked,
+     * if a critical situation occurs during its operation, it will not be processed in any way
+     * (i.e., the function itself must control the absence of artifacts, cyclic dependencies, etc.).
+     * <br>
+     * Use this function only if you know what you are doing!
      *
-     * @param schemeFactory the specified scheme factory, must be non-null
-     * @param stubFactory   the specified stub factory, must be non-null
+     * @param artifact the specified artifact, must be non-null
+     * @param function the specified function, must be non-null
+     * @return this {@link ManualProviderBuilder} instance
      */
-    public ManualProviderBuilder(SchemeFactory schemeFactory, StubFactory stubFactory) {
-        super(schemeFactory, stubFactory);
-    }
+    ManualProviderBuilder addManual(Artifact artifact, Function1<ArtifactProvider, Function0<?>> function);
 
     /**
-     * Creates {@link ManualProviderBuilder} instance
-     * with {@link ReflectionSchemeFactory} and {@link BytecodeStubFactory}, using the specified annotation as marker.
+     * Adds a type implementation provided by the specified function.
+     * <br>
+     * IMPORTANT: the result of a function call is not checked,
+     * if a critical situation occurs during its operation, it will not be processed in any way
+     * (i.e., the function itself must control the absence of artifacts, cyclic dependencies, etc.).
+     * <br>
+     * Use this function only if you know what you are doing!
      *
-     * @param annotation the specified annotation, must be non-null
-     * @return {@link ManualProviderBuilder} instance
+     * @param type     the specified type, must be non-null
+     * @param function the specified function, must be non-null
+     * @param <T>      the service type
+     * @return this {@link ManualProviderBuilder} instance
      */
-    public static ManualProviderBuilder create(Class<? extends Annotation> annotation) {
-        return new ManualProviderBuilder(new ReflectionSchemeFactory(annotation), new BytecodeStubFactory());
-    }
-
-    /**
-     * Creates {@link ManualProviderBuilder} instance
-     * with {@link ReflectionSchemeFactory} and {@link BytecodeStubFactory}, using {@link Inject} annotation as marker.
-     *
-     * @return {@link ManualProviderBuilder} instance
-     */
-    public static ManualProviderBuilder create() {
-        return create(Inject.class);
-    }
-
-    @Override
-    protected void reset() {
-        super.reset();
-        this.manual = new HashMap<>();
-    }
-
-    @Override
-    protected boolean resolve(Artifact artifact) {
-        return manual.containsKey(artifact) || super.resolve(artifact);
-    }
-
-    @Override
-    @SuppressWarnings("unchecked")
-    protected void buildArtifacts(Map<Class<?>, ClassScheme> schemes, LazyProvider provider) {
-        super.buildArtifacts(schemes, provider);
-        for (var entry : manual.entrySet()) {
-            var artifact = entry.getKey();
-            var builder = entry.getValue();
-            provider.add(artifact, () -> (Function0<Object>) builder.invoke(provider));
-        }
-    }
-
-    public ManualProviderBuilder addManual(Artifact artifact, Function1<ArtifactProvider, Function0<?>> builder) {
-        Objects.requireNonNull(artifact);
-        Objects.requireNonNull(builder);
-        manual.put(artifact, builder);
-        return this;
-    }
-
-    @SuppressWarnings("unchecked")
-    public <T> ManualProviderBuilder addManual(Class<T> type, Function1<ArtifactProvider, Function0<T>> builder) {
-        return addManual(new Artifact(type), (Function1<ArtifactProvider, Function0<?>>) (Function1<?, ?>) builder);
-    }
+    <T> ManualProviderBuilder addManual(Class<T> type, Function1<ArtifactProvider, Function0<T>> function);
 
     // Override parent methods to provide proper flow api
     @Override
-    public ManualProviderBuilder setRepository(Repository repository) {
-        super.setRepository(repository);
-        return this;
-    }
+    ManualProviderBuilder setRepository(Repository repository);
 
     @Override
-    public <T> ManualProviderBuilder addService(Artifact artifact,
-                                                Class<? extends T> implementation,
-                                                Function1<Function0<T>, Function0<T>> wrapper) {
-        super.addService(artifact, implementation, wrapper);
-        return this;
-    }
+    <T> ManualProviderBuilder addService(Artifact artifact,
+                                         Class<? extends T> implementation,
+                                         Function1<Function0<T>, Function0<T>> wrapper);
 
     @Override
-    public ManualProviderBuilder addSingleton(Artifact artifact, Class<?> implementation) {
-        super.addSingleton(artifact, implementation);
-        return this;
-    }
+    ManualProviderBuilder addSingleton(Artifact artifact, Class<?> implementation);
 
     @Override
-    public ManualProviderBuilder addTransient(Artifact artifact, Class<?> implementation) {
-        super.addTransient(artifact, implementation);
-        return this;
-    }
+    ManualProviderBuilder addTransient(Artifact artifact, Class<?> implementation);
 
     @Override
-    public <T> ManualProviderBuilder addService(Class<T> type,
-                                                Class<? extends T> implementation,
-                                                Function1<Function0<T>, Function0<T>> wrapper) {
-        super.addService(type, implementation, wrapper);
-        return this;
-    }
+    <T> ManualProviderBuilder addService(Class<T> type,
+                                         Class<? extends T> implementation,
+                                         Function1<Function0<T>, Function0<T>> wrapper);
 
     @Override
-    public <T> ManualProviderBuilder addSingleton(Class<T> type, Class<? extends T> implementation) {
-        super.addSingleton(type, implementation);
-        return this;
-    }
+    <T> ManualProviderBuilder addSingleton(Class<T> type, Class<? extends T> implementation);
 
     @Override
-    public <T> ManualProviderBuilder addTransient(Class<T> type, Class<? extends T> implementation) {
-        super.addTransient(type, implementation);
-        return this;
-    }
+    <T> ManualProviderBuilder addTransient(Class<T> type, Class<? extends T> implementation);
 
     @Override
-    public <T> ManualProviderBuilder addService(Class<T> type, Function1<Function0<T>, Function0<T>> wrapper) {
-        super.addService(type, wrapper);
-        return this;
-    }
+    <T> ManualProviderBuilder addService(Class<T> type, Function1<Function0<T>, Function0<T>> wrapper);
 
     @Override
-    public ManualProviderBuilder addSingleton(Class<?> type) {
-        super.addSingleton(type);
-        return this;
-    }
+    ManualProviderBuilder addSingleton(Class<?> type);
 
     @Override
-    public ManualProviderBuilder addTransient(Class<?> type) {
-        super.addTransient(type);
-        return this;
-    }
+    ManualProviderBuilder addTransient(Class<?> type);
 
     @Override
-    public ManualProviderBuilder addService(Artifact artifact, Function0<?> supplier) {
-        super.addService(artifact, supplier);
-        return this;
-    }
+    ManualProviderBuilder addService(Artifact artifact, Function0<?> supplier);
 
     @Override
-    public <T> ManualProviderBuilder addService(Class<T> type, Function0<T> supplier) {
-        super.addService(type, supplier);
-        return this;
-    }
+    <T> ManualProviderBuilder addService(Class<T> type, Function0<T> supplier);
 
     @Override
-    public ManualProviderBuilder removeService(Artifact artifact) {
-        super.removeService(artifact);
-        return this;
-    }
+    ManualProviderBuilder removeService(Artifact artifact);
 
     @Override
-    public ManualProviderBuilder removeService(Class<?> type) {
-        super.removeService(type);
-        return this;
-    }
+    ManualProviderBuilder removeService(Class<?> type);
 }

@@ -42,7 +42,7 @@ public class CheckedProviderBuilder extends AbstractProviderBuilder {
      * with {@link ReflectionSchemeFactory} and {@link BytecodeStubFactory}, using the specified annotation as marker.
      *
      * @param annotation the specified annotation, must be non-null
-     * @return {@link ServiceProviderBuilder} instance
+     * @return the {@link ServiceProviderBuilder} instance
      */
     public static ServiceProviderBuilder create(Class<? extends Annotation> annotation) {
         return new CheckedProviderBuilder(new ReflectionSchemeFactory(annotation), new BytecodeStubFactory());
@@ -52,7 +52,7 @@ public class CheckedProviderBuilder extends AbstractProviderBuilder {
      * Creates {@link CheckedProviderBuilder} instance
      * with {@link ReflectionSchemeFactory} and {@link BytecodeStubFactory}, using {@link Inject} annotation as marker.
      *
-     * @return {@link ServiceProviderBuilder} instance
+     * @return the {@link ServiceProviderBuilder} instance
      */
     public static ServiceProviderBuilder create() {
         return create(Inject.class);
