@@ -71,12 +71,12 @@ public abstract class AbstractProviderBuilder implements ServiceProviderBuilder 
         Objects.requireNonNull(artifact);
         Objects.requireNonNull(implementation);
         Objects.requireNonNull(wrapper);
-        strong.remove(artifact);
         // Check if the implementation is a child class of an artifact type
         var parent = artifact.getType();
         if (!parent.isAssignableFrom(implementation)) {
             throw new IllegalArgumentException("The implementation is not a child class of the artifact type");
         }
+        strong.remove(artifact);
         any.put(artifact, Entry.of(implementation, wrapper));
         return this;
     }
