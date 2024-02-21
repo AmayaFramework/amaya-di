@@ -56,12 +56,12 @@ the ServiceProviderBuilder#build() method has not been called yet.
 ### Hello, world!
 
 ```Java
-import io.github.amayaframework.di.CheckedProviderBuilder;
+import io.github.amayaframework.di.Builders;
 
 public class Main {
     public static void main(String[] args) {
-        var provider = CheckedProviderBuilder
-                .create()
+        var provider = Builders
+                .createChecked()
                 .addService(String.class, () -> "Hello, world!")
                 .build();
         System.out.println(provider.instantiate(String.class));
@@ -72,12 +72,12 @@ public class Main {
 ### Two services and a dependent class
 
 ```Java
-import io.github.amayaframework.di.CheckedProviderBuilder;
+import io.github.amayaframework.di.Builders;
 
 public class Main {
     public static void main(String[] args) {
-        var provider = CheckedProviderBuilder
-                .create()
+        var provider = Builders
+                .createChecked()
                 .addTransient(Service1.class)
                 .addSingleton(Service2.class)
                 .addTransient(App.class)
@@ -131,14 +131,14 @@ s2=Service2, 377478451
 ### Generics
 
 ```Java
-import io.github.amayaframework.di.CheckedProviderBuilder;
+import io.github.amayaframework.di.Builders;
 
 import java.util.List;
 
 public class Main {
     public static void main(String[] args) {
-        var provider = CheckedProviderBuilder
-                .create()
+        var provider = Builders
+                .createChecked()
                 .addService(Artifact.of(List.class, String.class), () -> List.of("Hi", "World"))
                 .addService(Artifact.of(List.class, Integer.class), () -> List.of(1, 2, 3))
                 .addTransient(App.class)
@@ -174,12 +174,12 @@ s2=[1, 2, 3]
 ### Fields, methods, multiple constructors
 
 ```Java
-import io.github.amayaframework.di.CheckedProviderBuilder;
+import io.github.amayaframework.di.Builders;
 
 public class Main {
     public static void main(String[] args) {
-        var provider = CheckedProviderBuilder
-                .create()
+        var provider = Builders
+                .createChecked()
                 .addTransient(Service1.class)
                 .addTransient(Service2.class)
                 .addTransient(Service3.class)
@@ -240,15 +240,15 @@ io.github.amayaframework.di.Main$Service1@1d29cf23
 ### Missing dependency
 
 ```Java
-import io.github.amayaframework.di.CheckedProviderBuilder;
+import io.github.amayaframework.di.Builders;
 
 import java.util.List;
 
 public class Main {
     public static void main(String[] args) {
         try {
-            var provider = CheckedProviderBuilder
-                    .create()
+            var provider = Builders
+                    .createChecked()
                     .addTransient(App.class)
                     .build();
             System.out.println(provider.instantiate(App.class));
@@ -283,13 +283,13 @@ Artifact{type=interface java.util.List, metadata=[class java.lang.String]} not f
 ### Cyclical dependency
 
 ```Java
-import io.github.amayaframework.di.CheckedProviderBuilder;
+import io.github.amayaframework.di.Builders;
 
 public class Main {
     public static void main(String[] args) {
         try {
-            var provider = CheckedProviderBuilder
-                    .create()
+            var provider = Builders
+                    .createChecked()
                     .addTransient(Service.class)
                     .addTransient(App.class)
                     .build();
