@@ -76,6 +76,7 @@ public abstract class AbstractProviderBuilder implements ServiceProviderBuilder 
         if (!parent.isAssignableFrom(implementation)) {
             throw new IllegalArgumentException("The implementation is not a child class of the artifact type");
         }
+        strong.remove(artifact);
         any.put(artifact, Entry.of(implementation, wrapper));
         return this;
     }
@@ -127,6 +128,7 @@ public abstract class AbstractProviderBuilder implements ServiceProviderBuilder 
     public ServiceProviderBuilder addService(Artifact artifact, Function0<?> supplier) {
         Objects.requireNonNull(artifact);
         Objects.requireNonNull(supplier);
+        any.remove(artifact);
         strong.put(artifact, (Function0<Object>) supplier);
         return this;
     }
@@ -147,6 +149,32 @@ public abstract class AbstractProviderBuilder implements ServiceProviderBuilder 
     @Override
     public ServiceProviderBuilder removeService(Class<?> type) {
         return removeService(new Artifact(type));
+    }
+
+    /**
+     * Builds a ready-to-use {@link ServiceProvider} implementation.
+     * Override this method instead of {@link ServiceProviderBuilder#build()},
+     * so as not to worry about resetting the builder to its original state.
+     * Can handle checked exceptions.
+     *
+     * @return {@link ServiceProvider} instance
+     * @throws Throwable if any problems occurs
+     */
+    protected abstract ServiceProvider checkedBuild() throws Throwable;
+
+    @Override
+    public ServiceProvider build() {
+        try {
+            var ret = checkedBuild();
+            reset();
+            return ret;
+        } catch (Error | RuntimeException e) {
+            reset();
+            throw e;
+        } catch (Throwable e) {
+            reset();
+            throw new RuntimeException(e);
+        }
     }
 
     protected static final class Entry {

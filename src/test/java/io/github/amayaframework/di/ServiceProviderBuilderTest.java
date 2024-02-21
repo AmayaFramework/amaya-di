@@ -3,8 +3,11 @@ package io.github.amayaframework.di;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
+import java.util.Objects;
+
 public class ServiceProviderBuilderTest extends Assertions {
-    private static final ServiceProviderBuilder CHECKED_BUILDER = CheckedProviderBuilder.create();
+    private static final ServiceProviderBuilder CHECKED_BUILDER = Builders.createChecked();
+    private static final ManualProviderBuilder MANUAL_BUILDER = Builders.createManual();
 
     public void testCorrect(ServiceProviderBuilder builder) {
         var provider = builder
@@ -23,6 +26,11 @@ public class ServiceProviderBuilderTest extends Assertions {
         testCorrect(CHECKED_BUILDER);
     }
 
+    @Test
+    public void testManualCorrect() {
+        testCorrect(MANUAL_BUILDER);
+    }
+
     public void testMissingDependency(ServiceProviderBuilder builder) {
         assertThrows(ArtifactNotFoundException.class, () -> builder
                 .addTransient(App.class)
@@ -32,6 +40,11 @@ public class ServiceProviderBuilderTest extends Assertions {
     @Test
     public void testCheckedMissingDependency() {
         testMissingDependency(CHECKED_BUILDER);
+    }
+
+    @Test
+    public void testManualMissingDependency() {
+        testMissingDependency(MANUAL_BUILDER);
     }
 
     public void testCycle(ServiceProviderBuilder builder) {
@@ -46,6 +59,85 @@ public class ServiceProviderBuilderTest extends Assertions {
         testCycle(CHECKED_BUILDER);
     }
 
+    @Test
+    public void testManualCycle() {
+        testCycle(MANUAL_BUILDER);
+    }
+
+    @Test
+    public void testManual() {
+        var provider = MANUAL_BUILDER
+                .addTransient(Service.class)
+                .addTransient(ManualApp.class)
+                .addManual(Service2.class, sub -> {
+                    var s = sub.apply(Service.class);
+                    return () -> new Service2(s.invoke());
+                })
+                .build();
+        assertNotNull(provider.instantiate(ManualApp.class));
+    }
+
+    public void testMutualExclusion(ServiceProviderBuilder builder) {
+        var provider = builder
+                .addTransient(App.class)
+                .addService(Service.class, () -> null)
+                .addTransient(Service.class)
+                .build();
+        assertNotNull(provider.instantiate(App.class));
+    }
+
+    @Test
+    public void testCheckedMutualExclusion() {
+        testMutualExclusion(CHECKED_BUILDER);
+    }
+
+    public void testMutualExclusion(ManualProviderBuilder builder) {
+        var provider = builder
+                .addTransient(App.class)
+                .addService(Service.class, () -> null)
+                .addManual(Service.class, v -> () -> null)
+                .addTransient(Service.class)
+                .build();
+        assertNotNull(provider.instantiate(App.class));
+    }
+
+    @Test
+    public void testManualMutualExclusion() {
+        testMutualExclusion(MANUAL_BUILDER);
+    }
+
+    public void testRemoval(ServiceProviderBuilder builder) {
+        assertThrows(ArtifactNotFoundException.class, () -> builder
+                .addTransient(App.class)
+                .addTransient(Service.class)
+                .addService(Service.class, () -> null)
+                .removeService(Service.class)
+                .build());
+    }
+
+    @Test
+    public void testCheckedRemoval() {
+        testRemoval(CHECKED_BUILDER);
+    }
+
+    @Test
+    public void testManualRemoval() {
+        testRemoval(MANUAL_BUILDER);
+    }
+
+    public static final class Service2 {
+        public Service2(Service s) {
+            Objects.requireNonNull(s);
+        }
+    }
+
+    public static final class ManualApp {
+        public ManualApp(Service s, Service2 s2) {
+            Objects.requireNonNull(s);
+            Objects.requireNonNull(s2);
+        }
+    }
+
     public static final class Service {
     }
 
@@ -53,7 +145,7 @@ public class ServiceProviderBuilderTest extends Assertions {
         final Service service;
 
         public App(Service service) {
-            this.service = service;
+            this.service = Objects.requireNonNull(service);
         }
     }
 

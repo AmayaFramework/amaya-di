@@ -42,7 +42,7 @@ public class CheckedProviderBuilder extends AbstractProviderBuilder {
      * with {@link ReflectionSchemeFactory} and {@link BytecodeStubFactory}, using the specified annotation as marker.
      *
      * @param annotation the specified annotation, must be non-null
-     * @return {@link ServiceProviderBuilder} instance
+     * @return the {@link ServiceProviderBuilder} instance
      */
     public static ServiceProviderBuilder create(Class<? extends Annotation> annotation) {
         return new CheckedProviderBuilder(new ReflectionSchemeFactory(annotation), new BytecodeStubFactory());
@@ -52,7 +52,7 @@ public class CheckedProviderBuilder extends AbstractProviderBuilder {
      * Creates {@link CheckedProviderBuilder} instance
      * with {@link ReflectionSchemeFactory} and {@link BytecodeStubFactory}, using {@link Inject} annotation as marker.
      *
-     * @return {@link ServiceProviderBuilder} instance
+     * @return the {@link ServiceProviderBuilder} instance
      */
     public static ServiceProviderBuilder create() {
         return create(Inject.class);
@@ -87,13 +87,15 @@ public class CheckedProviderBuilder extends AbstractProviderBuilder {
     protected void buildArtifacts(Map<Class<?>, ClassScheme> schemes, LazyProvider provider) {
         for (var entry : any.entrySet()) {
             var artifact = entry.getKey();
-            var scheme = schemes.get(entry.getValue().implementation);
-            var wrapper = entry.getValue().wrapper;
+            var value = entry.getValue();
+            var scheme = schemes.get(value.implementation);
+            var wrapper = value.wrapper;
             provider.add(artifact, () -> (Function0<Object>) wrapper.invoke(stubFactory.create(scheme, provider)));
         }
     }
 
-    private ServiceProvider uncheckedBuild() {
+    @Override
+    protected ServiceProvider checkedBuild() {
         // Build class schemes
         var schemes = makeSchemes();
         // Build dependency graph
@@ -127,20 +129,6 @@ public class CheckedProviderBuilder extends AbstractProviderBuilder {
         strong.forEach(repository::add);
         // Fire all delayed stub creations
         provider.commit();
-        reset();
         return new ServiceProviderImpl(repository);
-    }
-
-    @Override
-    public ServiceProvider build() {
-        try {
-            return uncheckedBuild();
-        } catch (Error | RuntimeException e) {
-            reset();
-            throw e;
-        } catch (Throwable e) {
-            reset();
-            throw new RuntimeException(e);
-        }
     }
 }
