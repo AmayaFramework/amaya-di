@@ -1,3 +1,5 @@
+import java.text.SimpleDateFormat
+
 plugins {
     id 'java-library'
     id 'maven-publish'
@@ -29,7 +31,7 @@ dependencies {
     jmhImplementation group: 'org.openjdk.jmh', name: 'jmh-core', version: '1.35'
     jmhImplementation group: 'org.openjdk.jmh', name: 'jmh-generator-annprocess', version: '1.35'
     // Dependencies
-    api group: 'com.github.romanqed', name: 'jeflect', version: '1.1.2L'
+    api group: 'com.github.romanqed', name: 'jeflect', version: '1.1.4L'
 }
 
 test {
@@ -37,8 +39,29 @@ test {
 }
 
 jar {
-    from sourceSets.main.output
-    from sourceSets.main.allJava
+    manifest {
+        var date = new Date()
+        var javaVersion = System.getProperty("java.version")
+        var vmVendor = System.getProperty("java.vm.vendor")
+        var vmVersion = System.getProperty("java.vm.version")
+
+        attributes(
+                'Created-By': String.format("%s (%s %s)", javaVersion, vmVendor, vmVersion),
+                'Gradle-Version': "Gradle $gradle.gradleVersion",
+                'Build-Date': new SimpleDateFormat("yyyy-MM-dd").format(date),
+                'Build-Time': new SimpleDateFormat("HH:mm:ss.SSSZ").format(date),
+                'Built-By': 'Roman Bakaldin',
+                'Bundle-Name': 'Amaya Dependency Injection',
+                'Bundle-Version': archiveVersion,
+                'Bundle-SymbolicName': archivesBaseName,
+                'Implementation-Title': archivesBaseName,
+                'Implementation-Vendor': 'github.com/amayaframework',
+                'Implementation-Version': archiveVersion,
+                'Specification-Title': archivesBaseName,
+                'Specification-Vendor': 'github.com/amayaframework',
+                'Specification-Version': archiveVersion
+        )
+    }
 }
 
 signing {
