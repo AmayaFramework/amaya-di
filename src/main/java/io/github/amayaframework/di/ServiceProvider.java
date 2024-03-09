@@ -8,6 +8,13 @@ import com.github.romanqed.jfunc.Function0;
 public interface ServiceProvider {
 
     /**
+     * Returns the repository used by this {@link ServiceProvider} instance.
+     *
+     * @return {@link Repository} instance
+     */
+    Repository getRepository();
+
+    /**
      * Searches for an instantiator for the specified artifact.
      *
      * @param artifact the specified artifact
