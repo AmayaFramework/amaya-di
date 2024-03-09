@@ -30,6 +30,13 @@ public interface Repository {
     Function0<Object> get(Artifact artifact);
 
     /**
+     * Returns all artifacts currently stored in the repository.
+     *
+     * @return {@link Iterable} instance contains stored artifacts
+     */
+    Iterable<Artifact> getAll();
+
+    /**
      * Checks whether the repository contains an instantiator for the specified artifact.
      *
      * @param artifact the specified artifact, must be non-null

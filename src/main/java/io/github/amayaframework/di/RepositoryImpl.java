@@ -2,6 +2,7 @@ package io.github.amayaframework.di;
 
 import com.github.romanqed.jfunc.Function0;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -15,6 +16,11 @@ final class RepositoryImpl implements Repository {
     @Override
     public Function0<Object> get(Artifact artifact) {
         return body.get(artifact);
+    }
+
+    @Override
+    public Iterable<Artifact> getAll() {
+        return Collections.unmodifiableCollection(body.keySet());
     }
 
     @Override

@@ -2,6 +2,7 @@ package io.github.amayaframework.di;
 
 import com.github.romanqed.jfunc.Function0;
 
+import java.util.Collections;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
@@ -34,6 +35,11 @@ public class HashRepository implements Repository {
     public Function0<Object> get(Artifact artifact) {
         Objects.requireNonNull(artifact);
         return body.get(artifact);
+    }
+
+    @Override
+    public Iterable<Artifact> getAll() {
+        return Collections.unmodifiableCollection(body.keySet());
     }
 
     @Override

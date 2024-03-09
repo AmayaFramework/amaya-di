@@ -11,6 +11,11 @@ final class ServiceProviderImpl implements ServiceProvider {
     }
 
     @Override
+    public Repository getRepository() {
+        return repository;
+    }
+
+    @Override
     @SuppressWarnings("unchecked")
     public <T> Function0<T> get(Artifact artifact) {
         return (Function0<T>) repository.get(artifact);
