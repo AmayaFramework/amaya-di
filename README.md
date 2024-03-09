@@ -25,7 +25,7 @@ the framework was created in strict accordance with the following principles:
 
 To install it, you will need:
 
-* java 11+
+* Java 11+
 * Maven/Gradle
 
 ## Installing
