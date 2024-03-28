@@ -1,7 +1,7 @@
 package io.github.amayaframework.di.scheme;
 
-import com.github.romanqed.jfunc.Exceptions;
 import io.github.amayaframework.di.Artifact;
+import io.github.amayaframework.di.ArtifactFactory;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.*;
@@ -56,104 +56,35 @@ import java.util.stream.Collectors;
  * {@code ? extends Type => Type}
  */
 public final class ReflectionSchemeFactory implements SchemeFactory {
-    private static final String ARRAY = "[";
-    private static final String REFERENCE = "L";
-
+    private final ArtifactFactory factory;
     private final Class<? extends Annotation> annotation;
 
     /**
-     * Constructs a factory that will use the specified annotation as a marker
-     * to identify the dependent members of the class.
+     * Constructs a factory that will use the specified artifact factory and
+     * annotation as a marker to identify the dependent members of the class.
      *
-     * @param annotation the specified annotation type
+     * @param factory    the specified artifact factory, must be non-null
+     * @param annotation the specified annotation type, must be non-null
      */
-    public ReflectionSchemeFactory(Class<? extends Annotation> annotation) {
+    public ReflectionSchemeFactory(ArtifactFactory factory, Class<? extends Annotation> annotation) {
+        this.factory = Objects.requireNonNull(factory);
         this.annotation = Objects.requireNonNull(annotation);
     }
 
-    private static Class<?> of(Type type, int array) {
-        if (!(type instanceof Class)) {
-            throw new IllegalTypeException("It is not possible to use a statically non-removable type", type);
-        }
-        var clazz = (Class<?>) type;
-        if (array == 0) {
-            return clazz;
-        }
-        return Exceptions.suppress(() -> Class.forName(
-                ARRAY.repeat(array) + REFERENCE + clazz.getTypeName() + ";",
-                false,
-                clazz.getClassLoader()
-        ));
-    }
-
-    private static Type unpackWildcard(Type type) {
-        if (!(type instanceof WildcardType)) {
-            return type;
-        }
-        var wildcard = (WildcardType) type;
-        if (wildcard.getLowerBounds().length != 0) {
-            throw new IllegalTypeException("Super wildcards are not supported", type);
-        }
-        var bounds = wildcard.getUpperBounds();
-        if (bounds.length != 1) {
-            throw new IllegalTypeException("Multiple wildcards are not supported", type);
-        }
-        return bounds[0];
-    }
-
-    private static Object process(Type type) {
-        type = unpackWildcard(type);
-        var array = 0;
-        while (type instanceof GenericArrayType) {
-            type = ((GenericArrayType) type).getGenericComponentType();
-            ++array;
-        }
-        if (!(type instanceof ParameterizedType)) {
-            return of(type, array);
-        }
-        var parameterized = (ParameterizedType) type;
-        var clazz = of(parameterized.getRawType(), array);
-        var arguments = parameterized.getActualTypeArguments();
-        var metadata = new Object[arguments.length];
-        var wildcards = 0;
-        for (var i = 0; i < arguments.length; ++i) {
-            var object = process(arguments[i]);
-            if (object == Object.class) {
-                ++wildcards;
-            }
-            metadata[i] = object;
-        }
-        if (metadata.length == wildcards) {
-            return clazz;
-        }
-        return new Artifact(clazz, metadata);
-    }
-
-    private static Artifact makeArtifact(Type type, Class<?> clazz) {
-        if (clazz.isPrimitive()) {
-            throw new IllegalTypeException("Primitive types are not supported", type);
-        }
-        var ret = process(type);
-        if (ret instanceof Artifact) {
-            return (Artifact) ret;
-        }
-        return new Artifact((Class<?>) ret);
-    }
-
-    private static void process(Parameter[] parameters, int start, Set<Artifact> artifacts, Artifact[] mapping) {
+    private void process(Parameter[] parameters, int start, Set<Artifact> artifacts, Artifact[] mapping) {
         for (var i = start; i < parameters.length; ++i) {
             var parameter = parameters[i];
-            var artifact = makeArtifact(parameter.getParameterizedType(), parameter.getType());
+            var artifact = factory.create(parameter.getParameterizedType());
             artifacts.add(artifact);
             mapping[i - start] = artifact;
         }
     }
 
-    private static void process(Parameter[] parameters, Set<Artifact> artifacts, Artifact[] mapping) {
+    private void process(Parameter[] parameters, Set<Artifact> artifacts, Artifact[] mapping) {
         process(parameters, 0, artifacts, mapping);
     }
 
-    private static ConstructorScheme create(Constructor<?> constructor) {
+    private ConstructorScheme create(Constructor<?> constructor) {
         if (constructor.getTypeParameters().length != 0) {
             throw new IllegalMemberException("Cannot use parameterized constructor", constructor);
         }
@@ -163,7 +94,7 @@ public final class ReflectionSchemeFactory implements SchemeFactory {
         return new ConstructorScheme(constructor, artifacts, mapping);
     }
 
-    private static MethodScheme create(Method method) {
+    private MethodScheme create(Method method) {
         if (method.getTypeParameters().length != 0) {
             throw new IllegalMemberException("Cannot use parameterized method", method);
         }
@@ -186,8 +117,8 @@ public final class ReflectionSchemeFactory implements SchemeFactory {
         return new MethodScheme(method, artifacts, mapping);
     }
 
-    private static FieldScheme create(Field field) {
-        var artifact = makeArtifact(field.getGenericType(), field.getType());
+    private FieldScheme create(Field field) {
+        var artifact = factory.create(field.getGenericType());
         return new FieldScheme(field, artifact);
     }
 

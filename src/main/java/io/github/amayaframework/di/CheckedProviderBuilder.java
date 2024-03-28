@@ -5,12 +5,9 @@ import io.github.amayaframework.di.graph.Graph;
 import io.github.amayaframework.di.graph.GraphUtil;
 import io.github.amayaframework.di.graph.HashGraph;
 import io.github.amayaframework.di.scheme.ClassScheme;
-import io.github.amayaframework.di.scheme.ReflectionSchemeFactory;
 import io.github.amayaframework.di.scheme.SchemeFactory;
-import io.github.amayaframework.di.stub.BytecodeStubFactory;
 import io.github.amayaframework.di.stub.StubFactory;
 
-import java.lang.annotation.Annotation;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -35,27 +32,6 @@ public class CheckedProviderBuilder extends AbstractProviderBuilder {
     public CheckedProviderBuilder(SchemeFactory schemeFactory, StubFactory stubFactory) {
         this.schemeFactory = Objects.requireNonNull(schemeFactory);
         this.stubFactory = Objects.requireNonNull(stubFactory);
-    }
-
-    /**
-     * Creates {@link CheckedProviderBuilder} instance
-     * with {@link ReflectionSchemeFactory} and {@link BytecodeStubFactory}, using the specified annotation as marker.
-     *
-     * @param annotation the specified annotation, must be non-null
-     * @return the {@link ServiceProviderBuilder} instance
-     */
-    public static ServiceProviderBuilder create(Class<? extends Annotation> annotation) {
-        return new CheckedProviderBuilder(new ReflectionSchemeFactory(annotation), new BytecodeStubFactory());
-    }
-
-    /**
-     * Creates {@link CheckedProviderBuilder} instance
-     * with {@link ReflectionSchemeFactory} and {@link BytecodeStubFactory}, using {@link Inject} annotation as marker.
-     *
-     * @return the {@link ServiceProviderBuilder} instance
-     */
-    public static ServiceProviderBuilder create() {
-        return create(Inject.class);
     }
 
     protected Graph<Artifact> makeGraph(Map<Class<?>, ClassScheme> schemes) {

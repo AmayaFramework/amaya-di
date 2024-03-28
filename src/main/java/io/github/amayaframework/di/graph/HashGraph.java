@@ -93,7 +93,6 @@ public class HashGraph<E> implements Graph<E> {
     }
 
     @Override
-    @SuppressWarnings("SuspiciousToArrayCall")
     public <T> T[] toArray(T[] a) {
         return body.keySet().toArray(a);
     }

@@ -9,7 +9,10 @@ import java.util.Set;
 import java.util.function.BiConsumer;
 
 public class SchemeTest extends Assertions {
-    private static final SchemeFactory REFLECTION_FACTORY = new ReflectionSchemeFactory(Inject.class);
+    private static final SchemeFactory REFLECTION_FACTORY = new ReflectionSchemeFactory(
+            new ReflectionArtifactFactory(),
+            Inject.class
+    );
 
     public void testEmptyClass(SchemeFactory factory) {
         var scheme = factory.create(Empty.class);

@@ -26,7 +26,7 @@ public class ServiceProviderTest extends Assertions {
 
     @Test
     public void testCheckedProvider() {
-        testProvider(CheckedProviderBuilder.create());
+        testProvider(Builders.createChecked());
     }
 
     public static final class Service1 {
