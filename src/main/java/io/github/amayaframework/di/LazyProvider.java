@@ -62,12 +62,12 @@ public class LazyProvider implements TypeProvider {
      */
     public void commit() {
         for (var entry : body.entrySet()) {
-            var artifact = entry.getKey();
-            if (repository.contains(artifact)) {
+            var type = entry.getKey();
+            if (repository.contains(type)) {
                 continue;
             }
             var supplier = Exceptions.suppress(entry.getValue());
-            repository.add(artifact, supplier);
+            repository.add(type, supplier);
         }
         body.clear();
     }

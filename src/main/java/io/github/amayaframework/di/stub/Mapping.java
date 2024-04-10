@@ -6,12 +6,12 @@ import java.util.Map;
 import java.util.Set;
 
 final class Mapping {
-    final Map<Type, String> artifacts;
+    final Map<Type, String> types;
     final Map<String, Type> fields;
     final String[] order;
 
-    private Mapping(Map<Type, String> artifacts, Map<String, Type> fields, String[] order) {
-        this.artifacts = artifacts;
+    private Mapping(Map<Type, String> types, Map<String, Type> fields, String[] order) {
+        this.types = types;
         this.fields = fields;
         this.order = order;
     }
@@ -21,10 +21,10 @@ final class Mapping {
         var to = new HashMap<String, Type>();
         var order = new String[types.size()];
         var count = 0;
-        for (var artifact : types) {
+        for (var type : types) {
             var field = Integer.toString(count);
-            from.put(artifact, field);
-            to.put(field, artifact);
+            from.put(type, field);
+            to.put(field, type);
             order[count] = field;
             ++count;
         }

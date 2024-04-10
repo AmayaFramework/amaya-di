@@ -35,18 +35,18 @@ public class ManualCheckedProviderBuilder extends CheckedProviderBuilder impleme
     }
 
     @Override
-    protected boolean canResolve(Type artifact) {
-        return manual.containsKey(artifact) || super.canResolve(artifact);
+    protected boolean canResolve(Type type) {
+        return manual.containsKey(type) || super.canResolve(type);
     }
 
     @Override
     @SuppressWarnings("unchecked")
-    protected void buildArtifacts(Map<Class<?>, ClassScheme> schemes, LazyProvider provider) {
-        super.buildArtifacts(schemes, provider);
+    protected void buildTypes(Map<Class<?>, ClassScheme> schemes, LazyProvider provider) {
+        super.buildTypes(schemes, provider);
         for (var entry : manual.entrySet()) {
-            var artifact = entry.getKey();
+            var type = entry.getKey();
             var builder = entry.getValue();
-            provider.add(artifact, () -> (Function0<Object>) builder.invoke(provider));
+            provider.add(type, () -> (Function0<Object>) builder.invoke(provider));
         }
     }
 

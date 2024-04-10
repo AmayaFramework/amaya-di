@@ -126,12 +126,12 @@ public final class BytecodeStubFactory implements StubFactory {
     private static void generateInvokeMethod(ClassWriter writer,
                                              String name,
                                              ClassScheme scheme,
-                                             Map<java.lang.reflect.Type, String> artifacts) {
+                                             Map<java.lang.reflect.Type, String> types) {
         // Prepare schemes
         var constructor = scheme.getConstructorScheme();
         var fields = scheme.getFieldSchemes();
         var methods = scheme.getMethodSchemes();
-        var type = scheme.getTarget();
+        var raw = scheme.getTarget();
         // Declare method signature
         var visitor = writer.visitMethod(
                 Opcodes.ACC_PUBLIC | Opcodes.ACC_FINAL,
@@ -142,22 +142,22 @@ public final class BytecodeStubFactory implements StubFactory {
         );
         visitor.visitCode();
         // Create instance of target class
-        visitor.visitTypeInsn(Opcodes.NEW, Type.getInternalName(type));
+        visitor.visitTypeInsn(Opcodes.NEW, Type.getInternalName(raw));
         visitor.visitInsn(Opcodes.DUP);
         // Invoke constructor by scheme
-        processExecutable(visitor, name, constructor.getMapping(), artifacts);
+        processExecutable(visitor, name, constructor.getMapping(), types);
         AsmUtil.invoke(visitor, constructor.getTarget());
         // Process field schemes
         for (var field : fields) {
             // ref.<field> = (ArtifactType) this.<artifact>.invoke();
             visitor.visitInsn(Opcodes.DUP);
             var target = field.getTarget();
-            var artifact = field.getType();
-            var source = artifacts.get(artifact);
-            loadType(visitor, name, source, artifact);
+            var type = field.getType();
+            var source = types.get(type);
+            loadType(visitor, name, source, type);
             visitor.visitFieldInsn(
                     Opcodes.PUTFIELD,
-                    Type.getInternalName(type),
+                    Type.getInternalName(raw),
                     target.getName(),
                     Type.getDescriptor(target.getType())
             );
@@ -165,7 +165,7 @@ public final class BytecodeStubFactory implements StubFactory {
         // Process method schemes
         for (var method : methods) {
             visitor.visitInsn(Opcodes.DUP);
-            processExecutable(visitor, name, method.getMapping(), artifacts);
+            processExecutable(visitor, name, method.getMapping(), types);
             AsmUtil.invoke(visitor, method.getTarget());
         }
         // Return constructed instance
@@ -201,7 +201,7 @@ public final class BytecodeStubFactory implements StubFactory {
         // Generate constructor
         generateConstructor(writer, name, mapping.order);
         // Generate invoke method
-        generateInvokeMethod(writer, name, scheme, mapping.artifacts);
+        generateInvokeMethod(writer, name, scheme, mapping.types);
         // Close writer
         writer.visitEnd();
         // Return bytecode

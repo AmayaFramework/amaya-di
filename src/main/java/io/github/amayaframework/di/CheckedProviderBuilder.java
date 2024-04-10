@@ -61,7 +61,7 @@ public class CheckedProviderBuilder extends AbstractProviderBuilder {
     }
 
     @SuppressWarnings("unchecked")
-    protected void buildArtifacts(Map<Class<?>, ClassScheme> schemes, LazyProvider provider) {
+    protected void buildTypes(Map<Class<?>, ClassScheme> schemes, LazyProvider provider) {
         for (var entry : any.entrySet()) {
             var type = entry.getKey();
             var value = entry.getValue();
@@ -88,21 +88,21 @@ public class CheckedProviderBuilder extends AbstractProviderBuilder {
         var repository = Objects.requireNonNullElse(this.repository, new RepositoryImpl());
         // Validate missing artifacts
         for (var scheme : schemes.values()) {
-            var artifacts = scheme.getTypes();
-            for (var artifact : artifacts) {
-                if (repository.contains(artifact)) {
+            var types = scheme.getTypes();
+            for (var type : types) {
+                if (repository.contains(type)) {
                     continue;
                 }
-                if (canResolve(artifact)) {
+                if (canResolve(type)) {
                     continue;
                 }
-                throw new TypeNotFoundException(artifact);
+                throw new TypeNotFoundException(type);
             }
         }
-        // Prepare weak artifacts
+        // Prepare weak types
         var provider = new LazyProvider(repository);
-        buildArtifacts(schemes, provider);
-        // Add strong artifacts
+        buildTypes(schemes, provider);
+        // Add strong types
         strong.forEach(repository::add);
         // Fire all delayed stub creations
         provider.commit();

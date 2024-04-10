@@ -45,7 +45,7 @@ public class StubTest extends Assertions {
             if (a3.equals(a)) {
                 return () -> "3";
             }
-            throw new IllegalArgumentException("Unknown artifact");
+            throw new IllegalArgumentException("Unknown type");
         });
         var object = (TestClass) stub.invoke();
         assertAll(
