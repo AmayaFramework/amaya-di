@@ -5,7 +5,9 @@ import com.github.romanqed.jfunc.Function1;
 import io.github.amayaframework.di.scheme.ClassScheme;
 import io.github.amayaframework.di.scheme.SchemeFactory;
 import io.github.amayaframework.di.stub.StubFactory;
+import io.github.amayaframework.di.stub.TypeProvider;
 
+import java.lang.reflect.Type;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -14,7 +16,7 @@ import java.util.Objects;
  * A {@link ManualProviderBuilder} implementation based on {@link CheckedProviderBuilder}.
  */
 public class ManualCheckedProviderBuilder extends CheckedProviderBuilder implements ManualProviderBuilder {
-    protected Map<Artifact, Function1<ArtifactProvider, Function0<?>>> manual;
+    protected Map<Type, Function1<TypeProvider, Function0<?>>> manual;
 
     /**
      * Constructs {@link ManualCheckedProviderBuilder} instance with the specified scheme and stub factories.
@@ -33,8 +35,8 @@ public class ManualCheckedProviderBuilder extends CheckedProviderBuilder impleme
     }
 
     @Override
-    protected boolean resolve(Artifact artifact) {
-        return manual.containsKey(artifact) || super.resolve(artifact);
+    protected boolean canResolve(Type artifact) {
+        return manual.containsKey(artifact) || super.canResolve(artifact);
     }
 
     @Override
@@ -49,21 +51,14 @@ public class ManualCheckedProviderBuilder extends CheckedProviderBuilder impleme
     }
 
     @Override
-    public ManualProviderBuilder addManual(Artifact artifact,
-                                           Function1<ArtifactProvider, Function0<?>> function) {
-        Objects.requireNonNull(artifact);
+    public ManualProviderBuilder addManual(Type type,
+                                           Function1<TypeProvider, Function0<?>> function) {
+        Objects.requireNonNull(type);
         Objects.requireNonNull(function);
-        any.remove(artifact);
-        strong.remove(artifact);
-        manual.put(artifact, function);
+        any.remove(type);
+        strong.remove(type);
+        manual.put(type, function);
         return this;
-    }
-
-    @Override
-    @SuppressWarnings("unchecked")
-    public <T> ManualProviderBuilder addManual(Class<T> type,
-                                               Function1<ArtifactProvider, Function0<T>> function) {
-        return addManual(new Artifact(type), (Function1<ArtifactProvider, Function0<?>>) (Function1<?, ?>) function);
     }
 
     // Override parent methods to provide proper flow api
@@ -74,31 +69,32 @@ public class ManualCheckedProviderBuilder extends CheckedProviderBuilder impleme
     }
 
     @Override
-    public <T> ManualProviderBuilder addService(Artifact artifact,
+    public <T> ManualProviderBuilder addService(Type type,
                                                 Class<? extends T> implementation,
-                                                Function1<Function0<T>, Function0<T>> wrapper) {
-        super.addService(artifact, implementation, wrapper);
-        manual.remove(artifact);
+                                                ServiceWrapper<T> wrapper) {
+        super.addService(type, implementation, wrapper);
+        manual.remove(type);
         return this;
     }
 
     @Override
-    public ManualProviderBuilder addSingleton(Artifact artifact, Class<?> implementation) {
-        super.addSingleton(artifact, implementation);
+    public ManualProviderBuilder addSingleton(Type type, Class<?> implementation) {
+        super.addSingleton(type, implementation);
         return this;
     }
 
     @Override
-    public ManualProviderBuilder addTransient(Artifact artifact, Class<?> implementation) {
-        super.addTransient(artifact, implementation);
+    public ManualProviderBuilder addTransient(Type type, Class<?> implementation) {
+        super.addTransient(type, implementation);
         return this;
     }
 
     @Override
     public <T> ManualProviderBuilder addService(Class<T> type,
                                                 Class<? extends T> implementation,
-                                                Function1<Function0<T>, Function0<T>> wrapper) {
+                                                ServiceWrapper<T> wrapper) {
         super.addService(type, implementation, wrapper);
+        manual.remove(type);
         return this;
     }
 
@@ -115,7 +111,7 @@ public class ManualCheckedProviderBuilder extends CheckedProviderBuilder impleme
     }
 
     @Override
-    public <T> ManualProviderBuilder addService(Class<T> type, Function1<Function0<T>, Function0<T>> wrapper) {
+    public <T> ManualProviderBuilder addService(Class<T> type, ServiceWrapper<T> wrapper) {
         super.addService(type, wrapper);
         return this;
     }
@@ -133,28 +129,16 @@ public class ManualCheckedProviderBuilder extends CheckedProviderBuilder impleme
     }
 
     @Override
-    public ManualProviderBuilder addService(Artifact artifact, Function0<?> supplier) {
-        super.addService(artifact, supplier);
-        manual.remove(artifact);
-        return this;
-    }
-
-    @Override
-    public <T> ManualProviderBuilder addService(Class<T> type, Function0<T> supplier) {
+    public ManualProviderBuilder addService(Type type, Function0<?> supplier) {
         super.addService(type, supplier);
+        manual.remove(type);
         return this;
     }
 
     @Override
-    public ManualProviderBuilder removeService(Artifact artifact) {
-        super.removeService(artifact);
-        manual.remove(artifact);
-        return this;
-    }
-
-    @Override
-    public ManualProviderBuilder removeService(Class<?> type) {
+    public ManualProviderBuilder removeService(Type type) {
         super.removeService(type);
+        manual.remove(type);
         return this;
     }
 }

@@ -1,24 +1,23 @@
 package io.github.amayaframework.di;
 
+import com.github.romanqed.jtype.Types;
 import io.github.amayaframework.di.scheme.*;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
+import java.lang.reflect.Type;
 import java.util.List;
 import java.util.Set;
 import java.util.function.BiConsumer;
 
 public class SchemeTest extends Assertions {
-    private static final SchemeFactory REFLECTION_FACTORY = new ReflectionSchemeFactory(
-            new ReflectionArtifactFactory(),
-            Inject.class
-    );
+    private static final SchemeFactory REFLECTION_FACTORY = new ReflectionSchemeFactory(Inject.class);
 
     public void testEmptyClass(SchemeFactory factory) {
         var scheme = factory.create(Empty.class);
         assertAll(
                 () -> assertEquals(Empty.class, scheme.getTarget()),
-                () -> assertTrue(scheme.getArtifacts().isEmpty()),
+                () -> assertTrue(scheme.getTypes().isEmpty()),
                 () -> assertTrue(scheme.getFieldSchemes().isEmpty()),
                 () -> assertTrue(scheme.getMethodSchemes().isEmpty()),
                 () -> assertEquals(Empty.class.getConstructor(), scheme.getConstructorScheme().getTarget())
@@ -43,14 +42,14 @@ public class SchemeTest extends Assertions {
         var scheme = factory.create(OneConstructor.class);
         assertAll(
                 () -> assertEquals(OneConstructor.class, scheme.getTarget()),
-                () -> assertEquals(scheme.getArtifacts().size(), 1),
+                () -> assertEquals(scheme.getTypes().size(), 1),
                 () -> assertTrue(scheme.getFieldSchemes().isEmpty()),
                 () -> assertTrue(scheme.getMethodSchemes().isEmpty()),
                 () -> assertEquals(
                         OneConstructor.class.getConstructor(Object.class),
                         scheme.getConstructorScheme().getTarget()
                 ),
-                () -> assertEquals(Set.of(new Artifact(Object.class)), scheme.getConstructorScheme().getArtifacts())
+                () -> assertEquals(Set.of(Object.class), scheme.getConstructorScheme().getTypes())
         );
     }
 
@@ -72,14 +71,14 @@ public class SchemeTest extends Assertions {
         var scheme = factory.create(AnnotatedConstructor.class);
         assertAll(
                 () -> assertEquals(AnnotatedConstructor.class, scheme.getTarget()),
-                () -> assertEquals(scheme.getArtifacts().size(), 1),
+                () -> assertEquals(scheme.getTypes().size(), 1),
                 () -> assertTrue(scheme.getFieldSchemes().isEmpty()),
                 () -> assertTrue(scheme.getMethodSchemes().isEmpty()),
                 () -> assertEquals(
                         AnnotatedConstructor.class.getConstructor(Object.class),
                         scheme.getConstructorScheme().getTarget()
                 ),
-                () -> assertEquals(Set.of(new Artifact(Object.class)), scheme.getConstructorScheme().getArtifacts())
+                () -> assertEquals(Set.of(Object.class), scheme.getConstructorScheme().getTypes())
         );
     }
 
@@ -90,11 +89,11 @@ public class SchemeTest extends Assertions {
 
     public void testFields(SchemeFactory factory) throws NoSuchFieldException {
         var scheme = factory.create(Fields.class);
-        var artifact = new Artifact(Object.class);
-        var schemes = Set.of(new FieldScheme(Fields.class.getField("f1"), artifact));
+        var type = Object.class;
+        var schemes = Set.of(new FieldScheme(Fields.class.getField("f1"), type));
         assertAll(
                 () -> assertEquals(Fields.class, scheme.getTarget()),
-                () -> assertEquals(Set.of(artifact), scheme.getArtifacts()),
+                () -> assertEquals(Set.of(type), scheme.getTypes()),
                 () -> assertEquals(schemes, scheme.getFieldSchemes())
         );
     }
@@ -106,16 +105,16 @@ public class SchemeTest extends Assertions {
 
     public void testMethods(SchemeFactory factory) throws NoSuchMethodException {
         var scheme = factory.create(Methods.class);
-        var artifact = new Artifact(Object.class);
-        var artifacts = Set.of(artifact);
-        var mapping = new Artifact[]{artifact};
+        var type = (Type) Object.class;
+        var types = Set.of(type);
+        var mapping = new Type[]{type};
         var schemes = Set.of(
-                new MethodScheme(Methods.class.getMethod("psm2", Methods.class, Object.class), artifacts, mapping),
-                new MethodScheme(Methods.class.getMethod("pm2", Object.class), artifacts, mapping)
+                new MethodScheme(Methods.class.getMethod("psm2", Methods.class, Object.class), types, mapping),
+                new MethodScheme(Methods.class.getMethod("pm2", Object.class), types, mapping)
         );
         assertAll(
                 () -> assertEquals(Methods.class, scheme.getTarget()),
-                () -> assertEquals(artifacts, scheme.getArtifacts()),
+                () -> assertEquals(types, scheme.getTypes()),
                 () -> assertEquals(schemes, scheme.getMethodSchemes())
         );
     }
@@ -136,14 +135,14 @@ public class SchemeTest extends Assertions {
 
     public void testWildcards(SchemeFactory factory) {
         var scheme = factory.create(Wildcards.class);
-        var artifacts = Set.of(
-                new Artifact(List.class),
-                new Artifact(BiConsumer.class),
-                new Artifact(List.class, String.class)
+        var types = Set.of(
+                Types.of(List.class, Object.class),
+                Types.of(BiConsumer.class, Object.class, Object.class),
+                Types.of(List.class, String.class)
         );
         assertAll(
                 () -> assertEquals(Wildcards.class, scheme.getTarget()),
-                () -> assertEquals(artifacts, scheme.getArtifacts())
+                () -> assertEquals(types, scheme.getTypes())
         );
     }
 
@@ -152,29 +151,20 @@ public class SchemeTest extends Assertions {
         testWildcards(REFLECTION_FACTORY);
     }
 
-    public void testSuperWildcard(SchemeFactory factory) {
-        assertThrows(IllegalTypeException.class, () -> factory.create(InvalidWildcard.class));
-    }
-
-    @Test
-    public void testReflectionSuperWildcard() {
-        testSuperWildcard(REFLECTION_FACTORY);
-    }
-
     public void testGenerics(SchemeFactory factory) {
         var scheme = factory.create(Generics.class);
-        var artifacts = Set.of(
-                new Artifact(List.class, String.class),
-                Artifact.of(BiConsumer.class,
-                        new Artifact(List.class, new Artifact(List.class, String.class)),
-                        new Artifact(List.class, String.class)),
-                new Artifact(List.class, String[].class),
-                new Artifact(List.class, new Artifact(List[].class, String.class)),
-                new Artifact(List.class, new Artifact(List[][].class, new Artifact(List.class, String[].class)))
+        var types = Set.of(
+                Types.of(List.class, String.class),
+                Types.of(BiConsumer.class,
+                        Types.of(List.class, Types.of(List.class, String.class)),
+                        Types.of(List.class, String.class)),
+                Types.of(List.class, String[].class),
+                Types.of(List.class, Types.of(Types.of(List.class, String.class))),
+                Types.of(List.class, Types.of(Types.of(List.class, Types.of(List.class, String[].class)), 2))
         );
         assertAll(
                 () -> assertEquals(Generics.class, scheme.getTarget()),
-                () -> assertEquals(artifacts, scheme.getArtifacts())
+                () -> assertEquals(types, scheme.getTypes())
         );
     }
 

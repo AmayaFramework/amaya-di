@@ -8,6 +8,7 @@ import io.github.amayaframework.di.scheme.ClassScheme;
 import io.github.amayaframework.di.scheme.SchemeFactory;
 import io.github.amayaframework.di.stub.StubFactory;
 
+import java.lang.reflect.Type;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -34,16 +35,16 @@ public class CheckedProviderBuilder extends AbstractProviderBuilder {
         this.stubFactory = Objects.requireNonNull(stubFactory);
     }
 
-    protected Graph<Artifact> makeGraph(Map<Class<?>, ClassScheme> schemes) {
-        var ret = new HashGraph<Artifact>();
+    protected Graph<Type> makeGraph(Map<Class<?>, ClassScheme> schemes) {
+        var ret = new HashGraph<Type>();
         for (var entry : any.entrySet()) {
-            var artifact = entry.getKey();
-            var artifacts = schemes.get(entry.getValue().implementation).getArtifacts();
-            artifacts.forEach(e -> {
-                if (artifact.equals(e)) {
+            var type = entry.getKey();
+            var types = schemes.get(entry.getValue().implementation).getTypes();
+            types.forEach(e -> {
+                if (type.equals(e)) {
                     throw new CycleFoundException(List.of(e));
                 }
-                ret.addEdge(artifact, e);
+                ret.addEdge(type, e);
             });
         }
         return ret;
@@ -62,11 +63,11 @@ public class CheckedProviderBuilder extends AbstractProviderBuilder {
     @SuppressWarnings("unchecked")
     protected void buildArtifacts(Map<Class<?>, ClassScheme> schemes, LazyProvider provider) {
         for (var entry : any.entrySet()) {
-            var artifact = entry.getKey();
+            var type = entry.getKey();
             var value = entry.getValue();
             var scheme = schemes.get(value.implementation);
             var wrapper = value.wrapper;
-            provider.add(artifact, () -> (Function0<Object>) wrapper.invoke(stubFactory.create(scheme, provider)));
+            provider.add(type, () -> (Function0<Object>) wrapper.invoke(stubFactory.create(scheme, provider)));
         }
     }
 
@@ -87,15 +88,15 @@ public class CheckedProviderBuilder extends AbstractProviderBuilder {
         var repository = Objects.requireNonNullElse(this.repository, new RepositoryImpl());
         // Validate missing artifacts
         for (var scheme : schemes.values()) {
-            var artifacts = scheme.getArtifacts();
+            var artifacts = scheme.getTypes();
             for (var artifact : artifacts) {
                 if (repository.contains(artifact)) {
                     continue;
                 }
-                if (resolve(artifact)) {
+                if (canResolve(artifact)) {
                     continue;
                 }
-                throw new ArtifactNotFoundException(artifact);
+                throw new TypeNotFoundException(artifact);
             }
         }
         // Prepare weak artifacts

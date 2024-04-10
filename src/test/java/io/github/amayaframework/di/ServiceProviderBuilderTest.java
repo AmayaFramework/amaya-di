@@ -32,7 +32,7 @@ public class ServiceProviderBuilderTest extends Assertions {
     }
 
     public void testMissingDependency(ServiceProviderBuilder builder) {
-        assertThrows(ArtifactNotFoundException.class, () -> builder
+        assertThrows(TypeNotFoundException.class, () -> builder
                 .addTransient(App.class)
                 .build());
     }
@@ -107,7 +107,7 @@ public class ServiceProviderBuilderTest extends Assertions {
     }
 
     public void testRemoval(ServiceProviderBuilder builder) {
-        assertThrows(ArtifactNotFoundException.class, () -> builder
+        assertThrows(TypeNotFoundException.class, () -> builder
                 .addTransient(App.class)
                 .addTransient(Service.class)
                 .addService(Service.class, () -> null)

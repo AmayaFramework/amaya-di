@@ -1,7 +1,8 @@
 package io.github.amayaframework.di;
 
 import com.github.romanqed.jfunc.Function0;
-import com.github.romanqed.jfunc.Function1;
+
+import java.lang.reflect.Type;
 
 /**
  * An interface describing an abstract {@link ServiceProvider} builder.
@@ -21,39 +22,37 @@ public interface ServiceProviderBuilder {
     ServiceProviderBuilder setRepository(Repository repository);
 
     /**
-     * Adds a service by its class, which is an implementation of the specified artifact.
+     * Adds a service by its class, which is an implementation of the specified type.
      *
-     * @param artifact       the specified artifact, must be non-null
-     * @param implementation the specified implementation class, must extend the artifact type and be non-null
+     * @param type           the specified type, must be non-null
+     * @param implementation the specified implementation class, must extend the type type and be non-null
      * @param wrapper        the wrapper function that will be applied to the created instantiator, must be non-null
      * @param <T>            the service type
      * @return this {@link ServiceProviderBuilder} instance
      */
-    <T> ServiceProviderBuilder addService(Artifact artifact,
-                                          Class<? extends T> implementation,
-                                          Function1<Function0<T>, Function0<T>> wrapper);
+    <T> ServiceProviderBuilder addService(Type type, Class<? extends T> implementation, ServiceWrapper<T> wrapper);
 
     /**
-     * Adds a singleton service by its class, which is an implementation of the specified artifact.
+     * Adds a singleton service by its class, which is an implementation of the specified type.
      * Singleton implies a dependency resolution policy in which each service request will return the same instance.
      * It is guaranteed that the implementation of the policy is thread-safe.
      *
-     * @param artifact       the specified artifact, must be non-null
-     * @param implementation the specified implementation class, must extend the artifact type and be non-null
+     * @param type           the specified type, must be non-null
+     * @param implementation the specified implementation class, must extend the type type and be non-null
      * @return this {@link ServiceProviderBuilder} instance
      */
-    ServiceProviderBuilder addSingleton(Artifact artifact, Class<?> implementation);
+    ServiceProviderBuilder addSingleton(Type type, Class<?> implementation);
 
     /**
-     * Adds a transient service by its class, which is an implementation of the specified artifact.
+     * Adds a transient service by its class, which is an implementation of the specified type.
      * Transient implies a dependency resolution policy in which each service request will return a new instance.
      * It is guaranteed that the implementation of the policy is thread-safe.
      *
-     * @param artifact       the specified artifact, must be non-null
-     * @param implementation the specified implementation class, must extend the artifact type and be non-null
+     * @param type           the specified type, must be non-null
+     * @param implementation the specified implementation class, must extend the type type and be non-null
      * @return this {@link ServiceProviderBuilder} instance
      */
-    ServiceProviderBuilder addTransient(Artifact artifact, Class<?> implementation);
+    ServiceProviderBuilder addTransient(Type type, Class<?> implementation);
 
     /**
      * Adds a service by its class, which is an implementation of the specified class.
@@ -64,9 +63,7 @@ public interface ServiceProviderBuilder {
      * @param <T>            the service type
      * @return this {@link ServiceProviderBuilder} instance
      */
-    <T> ServiceProviderBuilder addService(Class<T> type,
-                                          Class<? extends T> implementation,
-                                          Function1<Function0<T>, Function0<T>> wrapper);
+    <T> ServiceProviderBuilder addService(Class<T> type, Class<? extends T> implementation, ServiceWrapper<T> wrapper);
 
     /**
      * Adds a singleton service by its class, which is an implementation of the specified class.
@@ -75,7 +72,6 @@ public interface ServiceProviderBuilder {
      *
      * @param type           the specified class, must be non-null
      * @param implementation the specified implementation class, must extend the service type and be non-null
-     * @param <T>            the service type
      * @return this {@link ServiceProviderBuilder} instance
      */
     <T> ServiceProviderBuilder addSingleton(Class<T> type, Class<? extends T> implementation);
@@ -87,7 +83,6 @@ public interface ServiceProviderBuilder {
      *
      * @param type           the specified class, must be non-null
      * @param implementation the specified implementation class, must extend the service type and be non-null
-     * @param <T>            the service type
      * @return this {@link ServiceProviderBuilder} instance
      */
     <T> ServiceProviderBuilder addTransient(Class<T> type, Class<? extends T> implementation);
@@ -100,7 +95,7 @@ public interface ServiceProviderBuilder {
      * @param <T>     the service type
      * @return this {@link ServiceProviderBuilder} instance
      */
-    <T> ServiceProviderBuilder addService(Class<T> type, Function1<Function0<T>, Function0<T>> wrapper);
+    <T> ServiceProviderBuilder addService(Class<T> type, ServiceWrapper<T> wrapper);
 
     /**
      * Adds a singleton service by its class,
@@ -125,31 +120,13 @@ public interface ServiceProviderBuilder {
     ServiceProviderBuilder addTransient(Class<?> type);
 
     /**
-     * Adds a service by its instantiator, which creates instances of the specified artifact.
+     * Adds a service by its instantiator, which creates instances of the specified type.
      *
-     * @param artifact the specified artifact, must be non-null
+     * @param type     the specified type, must be non-null
      * @param supplier the specified instantiator, must be non-null
      * @return this {@link ServiceProviderBuilder} instance
      */
-    ServiceProviderBuilder addService(Artifact artifact, Function0<?> supplier);
-
-    /**
-     * Adds a service by its instantiator, which creates instances of the specified class.
-     *
-     * @param type     the specified class, must be non-null
-     * @param supplier the specified instantiator, must be non-null
-     * @param <T>      the service type
-     * @return this {@link ServiceProviderBuilder} instance
-     */
-    <T> ServiceProviderBuilder addService(Class<T> type, Function0<T> supplier);
-
-    /**
-     * Removes the service that implements the specified artifact.
-     *
-     * @param artifact the specified artifact, must be non-null
-     * @return this {@link ServiceProviderBuilder} instance
-     */
-    ServiceProviderBuilder removeService(Artifact artifact);
+    ServiceProviderBuilder addService(Type type, Function0<?> supplier);
 
     /**
      * Removes the service that implements the specified type.
@@ -157,7 +134,7 @@ public interface ServiceProviderBuilder {
      * @param type the specified type, must be non-null
      * @return this {@link ServiceProviderBuilder} instance
      */
-    ServiceProviderBuilder removeService(Class<?> type);
+    ServiceProviderBuilder removeService(Type type);
 
     /**
      * Builds a ready-to-use {@link ServiceProvider} implementation and resets
@@ -167,8 +144,8 @@ public interface ServiceProviderBuilder {
      * Important: if an error occurred while filling in the repository, the changes made will not be undone.
      *
      * @return {@link ServiceProvider} instance
-     * @throws ArtifactNotFoundException if the dependency of the service used has not been resolved (optional)
-     * @throws CycleFoundException       if a cyclic dependence is detected (optional)
+     * @throws TypeNotFoundException if the dependency of the service used has not been resolved (optional)
+     * @throws CycleFoundException   if a cyclic dependence is detected (optional)
      */
     ServiceProvider build();
 }

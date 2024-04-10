@@ -1,108 +1,147 @@
 package io.github.amayaframework.di.scheme;
 
-import io.github.amayaframework.di.Artifact;
-import io.github.amayaframework.di.ArtifactFactory;
+import com.github.romanqed.jtype.IllegalTypeException;
+import com.github.romanqed.jtype.TaggedType;
+import com.github.romanqed.jtype.Types;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.*;
 import java.util.*;
 import java.util.stream.Collectors;
 
-/**
- * A factory that creates a class schema based on information obtained through a java reflection api.
- * The scheme is based on the following rules:
- * <br>
- * 1. The constructor is selected from the public ones,
- * and this choice is made strictly unambiguously, i.e. the following cases will be incorrect:
- * <pre>
- *
- *     class Service1 {
- *         private Service1() {}
- *     }
- *     ...
- *     class Service2 {
- *         public Service2(int i) {}
- *         public Service2() {}
- *     }
- * </pre>
- * However, if the class contains several public constructors,
- * you can specify the necessary one using a marker annotation:
- * <pre>
- *     class Service {
- *         public Service(int i) {}
- *
- *        {@literal @}Inject
- *         public Service() {}
- *     }
- * </pre>
- * 2. The fields are selected exclusively from the virtual and public ones marked with a marker annotation.
- * 3. Methods are selected from public ones marked with a marker annotation and containing at least 1 parameter,
- * otherwise, even if there is an annotation, the method will be discarded.
- * <br>
- * If the method is static, it must match the following pattern:
- * <pre>
- *     class Service {
- *         public static void setter(? super Service, Dependency d, ...) {}
- *     }
- * </pre>
- * Parameterized constructors and methods are not supported,
- * and super-wildcards are not supported for statically defined generics.
- * In other cases, type inference for wildcards will work as follows:
- * <br>
- * {@code ? => Object}
- * <br>
- * {@code ? extends Object => Object}
- * <br>
- * {@code ? extends Type => Type}
- */
+///**
+// * A factory that creates a class schema based on information obtained through a java reflection api.
+// * The scheme is based on the following rules:
+// * <br>
+// * 1. The constructor is selected from the public ones,
+// * and this choice is made strictly unambiguously, i.e. the following cases will be incorrect:
+// * <pre>
+// *
+// *     class Service1 {
+// *         private Service1() {}
+// *     }
+// *     ...
+// *     class Service2 {
+// *         public Service2(int i) {}
+// *         public Service2() {}
+// *     }
+// * </pre>
+// * However, if the class contains several public constructors,
+// * you can specify the necessary one using a marker annotation:
+// * <pre>
+// *     class Service {
+// *         public Service(int i) {}
+// *
+// *        {@literal @}Inject
+// *         public Service() {}
+// *     }
+// * </pre>
+// * 2. The fields are selected exclusively from the virtual and public ones marked with a marker annotation.
+// * 3. Methods are selected from public ones marked with a marker annotation and containing at least 1 parameter,
+// * otherwise, even if there is an annotation, the method will be discarded.
+// * <br>
+// * If the method is static, it must match the following pattern:
+// * <pre>
+// *     class Service {
+// *         public static void setter(? super Service, Dependency d, ...) {}
+// *     }
+// * </pre>
+// * Parameterized constructors and methods are not supported,
+// * and super-wildcards are not supported for statically defined generics.
+// * In other cases, type inference for wildcards will work as follows:
+// * <br>
+// * {@code ? => Object}
+// * <br>
+// * {@code ? extends Object => Object}
+// * <br>
+// * {@code ? extends Type => Type}
+// */
 public final class ReflectionSchemeFactory implements SchemeFactory {
-    private final ArtifactFactory factory;
     private final Class<? extends Annotation> annotation;
 
     /**
      * Constructs a factory that will use the specified artifact factory and
      * annotation as a marker to identify the dependent members of the class.
      *
-     * @param factory    the specified artifact factory, must be non-null
      * @param annotation the specified annotation type, must be non-null
      */
-    public ReflectionSchemeFactory(ArtifactFactory factory, Class<? extends Annotation> annotation) {
-        this.factory = Objects.requireNonNull(factory);
+    public ReflectionSchemeFactory(Class<? extends Annotation> annotation) {
         this.annotation = Objects.requireNonNull(annotation);
     }
 
-    private void process(Parameter[] parameters, int start, Set<Artifact> artifacts, Artifact[] mapping) {
+    private static Type process(Type type) {
+        // null -> null
+        if (type == null) {
+            return null;
+        }
+        // class -> class
+        if (type instanceof Class) {
+            return type;
+        }
+        // process(Owner).RawType<process(T1), process(T2), ...>
+        if (type instanceof ParameterizedType) {
+            var parameterized = (ParameterizedType) type;
+            var arguments = parameterized.getActualTypeArguments();
+            var length = arguments.length;
+            var parameters = new Type[length];
+            for (var i = 0; i < length; ++i) {
+                parameters[i] = process(arguments[i]);
+            }
+            return Types.ofOwned(
+                    process(parameterized.getOwnerType()),
+                    parameterized.getRawType(),
+                    parameters
+            );
+        }
+        // process(Type)[][][]...
+        if (type instanceof GenericArrayType) {
+            var array = (GenericArrayType) type;
+            return Types.of(process(array.getGenericComponentType()));
+        }
+        // Turn wildcards to its upper bounds
+        if (type instanceof WildcardType) {
+            return process(((WildcardType) type).getUpperBounds()[0]);
+        }
+        // process(type):tag1:tag2:...
+        if (type instanceof TaggedType) {
+            var tagged = (TaggedType) type;
+            return Types.of(process(tagged.getRawType()), tagged.getTags());
+        }
+        throw new IllegalTypeException("Unexpected type implementation", type);
+    }
+
+    private static void process(Parameter[] parameters, int start, Set<Type> types, Type[] mapping) {
         for (var i = start; i < parameters.length; ++i) {
-            var parameter = parameters[i];
-            var artifact = factory.create(parameter.getParameterizedType());
-            artifacts.add(artifact);
-            mapping[i - start] = artifact;
+            var type = parameters[i].getParameterizedType();
+            var processed = process(type);
+            types.add(processed);
+            mapping[i - start] = processed;
         }
     }
 
-    private void process(Parameter[] parameters, Set<Artifact> artifacts, Artifact[] mapping) {
-        process(parameters, 0, artifacts, mapping);
+    private static void process(Parameter[] parameters, Set<Type> types, Type[] mapping) {
+        process(parameters, 0, types, mapping);
     }
 
-    private ConstructorScheme create(Constructor<?> constructor) {
+    private static ConstructorScheme create(Constructor<?> constructor) {
         if (constructor.getTypeParameters().length != 0) {
             throw new IllegalMemberException("Cannot use parameterized constructor", constructor);
         }
-        var artifacts = new HashSet<Artifact>();
-        var mapping = new Artifact[constructor.getParameterCount()];
-        process(constructor.getParameters(), artifacts, mapping);
-        return new ConstructorScheme(constructor, artifacts, mapping);
+        var types = new HashSet<Type>();
+        var mapping = new Type[constructor.getParameterCount()];
+        process(constructor.getParameters(), types, mapping);
+        return new ConstructorScheme(constructor, types, mapping);
     }
 
-    private MethodScheme create(Method method) {
+    private static MethodScheme create(Method method) {
         if (method.getTypeParameters().length != 0) {
             throw new IllegalMemberException("Cannot use parameterized method", method);
         }
-        var artifacts = new HashSet<Artifact>();
+        var types = new HashSet<Type>();
         if (!Modifier.isStatic(method.getModifiers())) {
-            var mapping = new Artifact[method.getParameterCount()];
-            process(method.getParameters(), artifacts, mapping);
-            return new MethodScheme(method, artifacts, mapping);
+            var mapping = new Type[method.getParameterCount()];
+            process(method.getParameters(), types, mapping);
+            return new MethodScheme(method, types, mapping);
         }
         var first = method.getParameterTypes()[0];
         var owner = method.getDeclaringClass();
@@ -112,14 +151,9 @@ public final class ReflectionSchemeFactory implements SchemeFactory {
                     owner
             );
         }
-        var mapping = new Artifact[method.getParameterCount() - 1];
-        process(method.getParameters(), 1, artifacts, mapping);
-        return new MethodScheme(method, artifacts, mapping);
-    }
-
-    private FieldScheme create(Field field) {
-        var artifact = factory.create(field.getGenericType());
-        return new FieldScheme(field, artifact);
+        var mapping = new Type[method.getParameterCount() - 1];
+        process(method.getParameters(), 1, types, mapping);
+        return new MethodScheme(method, types, mapping);
     }
 
     private ConstructorScheme findConstructor(Class<?> clazz) {
@@ -162,7 +196,7 @@ public final class ReflectionSchemeFactory implements SchemeFactory {
             return Collections.emptySet();
         }
         var ret = new HashSet<FieldScheme>();
-        fields.forEach(field -> ret.add(create(field)));
+        fields.forEach(field -> ret.add(new FieldScheme(field, process(field.getGenericType()))));
         return ret;
     }
 

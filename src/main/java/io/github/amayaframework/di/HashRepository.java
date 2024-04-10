@@ -2,6 +2,7 @@ package io.github.amayaframework.di;
 
 import com.github.romanqed.jfunc.Function0;
 
+import java.lang.reflect.Type;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Objects;
@@ -12,14 +13,14 @@ import java.util.function.Supplier;
  * A {@link Repository} implementation using a hash map.
  */
 public class HashRepository implements Repository {
-    private final Map<Artifact, Function0<Object>> body;
+    private final Map<Type, Function0<Object>> body;
 
     /**
      * Constructs {@link HashRepository} instance with map instance, specified by the supplier.
      *
      * @param supplier the specified map supplier, must be non-null
      */
-    public HashRepository(Supplier<Map<Artifact, Function0<Object>>> supplier) {
+    public HashRepository(Supplier<Map<Type, Function0<Object>>> supplier) {
         Objects.requireNonNull(supplier);
         this.body = Objects.requireNonNull(supplier.get());
     }
@@ -32,33 +33,33 @@ public class HashRepository implements Repository {
     }
 
     @Override
-    public Function0<Object> get(Artifact artifact) {
-        Objects.requireNonNull(artifact);
-        return body.get(artifact);
+    public Function0<Object> get(Type type) {
+        Objects.requireNonNull(type);
+        return body.get(type);
     }
 
     @Override
-    public Iterable<Artifact> getAll() {
+    public Iterable<Type> getAll() {
         return Collections.unmodifiableCollection(body.keySet());
     }
 
     @Override
-    public boolean contains(Artifact artifact) {
-        Objects.requireNonNull(artifact);
-        return body.containsKey(artifact);
+    public boolean contains(Type type) {
+        Objects.requireNonNull(type);
+        return body.containsKey(type);
     }
 
     @Override
-    public void add(Artifact artifact, Function0<Object> supplier) {
-        Objects.requireNonNull(artifact);
+    public void add(Type type, Function0<Object> supplier) {
+        Objects.requireNonNull(type);
         Objects.requireNonNull(supplier);
-        body.put(artifact, supplier);
+        body.put(type, supplier);
     }
 
     @Override
-    public boolean remove(Artifact artifact) {
-        Objects.requireNonNull(artifact);
-        return body.remove(artifact) != null;
+    public boolean remove(Type type) {
+        Objects.requireNonNull(type);
+        return body.remove(type) != null;
     }
 
     @Override

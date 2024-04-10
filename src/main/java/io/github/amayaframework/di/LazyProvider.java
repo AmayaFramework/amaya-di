@@ -2,17 +2,19 @@ package io.github.amayaframework.di;
 
 import com.github.romanqed.jfunc.Exceptions;
 import com.github.romanqed.jfunc.Function0;
+import io.github.amayaframework.di.stub.TypeProvider;
 
+import java.lang.reflect.Type;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 
 /**
- * A lazy implementation of the {@link ArtifactProvider}, which allows you to organize the chain of building artifacts.
+ * A lazy implementation of the {@link TypeProvider}, which allows you to organize the chain of building artifacts.
  */
-public class LazyProvider implements ArtifactProvider {
+public class LazyProvider implements TypeProvider {
     private final Repository repository;
-    private final Map<Artifact, Function0<Function0<Object>>> body;
+    private final Map<Type, Function0<Function0<Object>>> body;
 
     /**
      * Constructs {@link LazyProvider} with the specified repository.
@@ -27,31 +29,31 @@ public class LazyProvider implements ArtifactProvider {
     /**
      * Adds the deferred task of creating an artifact implementation.
      *
-     * @param artifact the specified artifact
-     * @param task     the specified task
+     * @param type the specified artifact
+     * @param task the specified task
      */
-    public void add(Artifact artifact, Function0<Function0<Object>> task) {
-        body.put(artifact, task);
+    public void add(Type type, Function0<Function0<Object>> task) {
+        body.put(type, task);
     }
 
     /**
      * Checks whether the provider contains a deferred task for the specified artifact.
      *
-     * @param artifact the specified artifact
+     * @param type the specified artifact
      * @return true, if contains, false otherwise
      */
-    public boolean contains(Artifact artifact) {
-        return body.containsKey(artifact);
+    public boolean contains(Type type) {
+        return body.containsKey(type);
     }
 
     /**
      * Removes the deferred task associated with the specified artifact.
      *
-     * @param artifact the specified artifact
+     * @param type the specified artifact
      * @return true if the task was removed, false otherwise
      */
-    public boolean remove(Artifact artifact) {
-        return body.remove(artifact) != null;
+    public boolean remove(Type type) {
+        return body.remove(type) != null;
     }
 
     /**
@@ -71,18 +73,18 @@ public class LazyProvider implements ArtifactProvider {
     }
 
     @Override
-    public Function0<Object> apply(Artifact artifact) {
-        var ret = repository.get(artifact);
+    public Function0<Object> apply(Type type) {
+        var ret = repository.get(type);
         if (ret != null) {
             return ret;
         }
-        var provided = body.get(artifact);
+        var provided = body.get(type);
         if (provided == null) {
             return null;
         }
         var function = Exceptions.suppress(provided);
-        repository.add(artifact, function);
+        repository.add(type, function);
         // It is important to request the artifact again from the repository so that it can apply the wrapper.
-        return repository.get(artifact);
+        return repository.get(type);
     }
 }

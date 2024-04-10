@@ -3,7 +3,9 @@ package io.github.amayaframework.di;
 import com.github.romanqed.jfunc.Function0;
 import com.github.romanqed.jfunc.Function1;
 import com.github.romanqed.jfunc.LazyFunction0;
+import com.github.romanqed.jtype.TypeUtil;
 
+import java.lang.reflect.Type;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -18,12 +20,12 @@ public abstract class AbstractProviderBuilder implements ServiceProviderBuilder 
     /**
      * The map contains "strong" services, that is, they definitely do not have dependencies.
      */
-    protected Map<Artifact, Function0<Object>> strong;
+    protected Map<Type, Function0<Object>> strong;
 
     /**
      * A map containing "weak" services, that is, having dependencies that need to be resolved.
      */
-    protected Map<Artifact, Entry> any;
+    protected Map<Type, Entry> any;
 
     /**
      * The {@link Repository} instance used, may be null
@@ -47,14 +49,14 @@ public abstract class AbstractProviderBuilder implements ServiceProviderBuilder 
         this.repository = null;
     }
 
-    /**
-     * Determines whether an artifact implementation exists.
-     *
-     * @param artifact the specified artifact
-     * @return true, if exists, false otherwise
-     */
-    protected boolean resolve(Artifact artifact) {
-        return strong.containsKey(artifact) || any.containsKey(artifact);
+    //    /**
+//     * Determines whether an type implementation exists.
+//     *
+//     * @param type the specified type
+//     * @return true, if exists, false otherwise
+//     */
+    protected boolean canResolve(Type type) {
+        return strong.containsKey(type) || any.containsKey(type);
     }
 
     @Override
@@ -64,38 +66,48 @@ public abstract class AbstractProviderBuilder implements ServiceProviderBuilder 
     }
 
     @Override
-    public <T> ServiceProviderBuilder addService(Artifact artifact,
+    public <T> ServiceProviderBuilder addService(Type type,
                                                  Class<? extends T> implementation,
-                                                 Function1<Function0<T>, Function0<T>> wrapper) {
+                                                 ServiceWrapper<T> wrapper) {
         // Non-null checks
-        Objects.requireNonNull(artifact);
+        Objects.requireNonNull(type);
         Objects.requireNonNull(implementation);
         Objects.requireNonNull(wrapper);
-        // Check if the implementation is a child class of an artifact type
-        var parent = artifact.getType();
+        // Check if the implementation is a child class of an type type
+        var parent = TypeUtil.getRawType(type);
         if (!parent.isAssignableFrom(implementation)) {
-            throw new IllegalArgumentException("The implementation is not a child class of the artifact type");
+            throw new IllegalArgumentException("The implementation is not a child class of the type type");
         }
-        strong.remove(artifact);
-        any.put(artifact, Entry.of(implementation, wrapper));
+        strong.remove(type);
+        any.put(type, Entry.of(implementation, wrapper));
         return this;
     }
 
     @Override
-    public ServiceProviderBuilder addSingleton(Artifact artifact, Class<?> implementation) {
-        return addService(artifact, implementation, LazyFunction0::new);
+    public ServiceProviderBuilder addSingleton(Type type, Class<?> implementation) {
+        return addService(type, implementation, LazyFunction0::new);
     }
 
     @Override
-    public ServiceProviderBuilder addTransient(Artifact artifact, Class<?> implementation) {
-        return addService(artifact, implementation, Function1.identity());
+    public ServiceProviderBuilder addTransient(Type type, Class<?> implementation) {
+        return addService(type, implementation, s -> s);
     }
 
     @Override
     public <T> ServiceProviderBuilder addService(Class<T> type,
                                                  Class<? extends T> implementation,
-                                                 Function1<Function0<T>, Function0<T>> wrapper) {
-        return addService(new Artifact(type), implementation, wrapper);
+                                                 ServiceWrapper<T> wrapper) {
+        // Non-null checks
+        Objects.requireNonNull(type);
+        Objects.requireNonNull(implementation);
+        Objects.requireNonNull(wrapper);
+        // Check if the implementation is a child class of an type type
+        if (!type.isAssignableFrom(implementation)) {
+            throw new IllegalArgumentException("The implementation is not a child class of the type type");
+        }
+        strong.remove(type);
+        any.put(type, Entry.of(implementation, wrapper));
+        return this;
     }
 
     @Override
@@ -105,12 +117,12 @@ public abstract class AbstractProviderBuilder implements ServiceProviderBuilder 
 
     @Override
     public <T> ServiceProviderBuilder addTransient(Class<T> type, Class<? extends T> implementation) {
-        return addService(type, implementation, Function1.identity());
+        return addService(type, implementation, s -> s);
     }
 
     @Override
-    public <T> ServiceProviderBuilder addService(Class<T> type, Function1<Function0<T>, Function0<T>> wrapper) {
-        return addService(new Artifact(type), type, wrapper);
+    public <T> ServiceProviderBuilder addService(Class<T> type, ServiceWrapper<T> wrapper) {
+        return addService(type, type, wrapper);
     }
 
     @Override
@@ -120,35 +132,25 @@ public abstract class AbstractProviderBuilder implements ServiceProviderBuilder 
 
     @Override
     public ServiceProviderBuilder addTransient(Class<?> type) {
-        return addService(type, Function1.identity());
+        return addService(type, s -> s);
     }
 
     @Override
     @SuppressWarnings("unchecked")
-    public ServiceProviderBuilder addService(Artifact artifact, Function0<?> supplier) {
-        Objects.requireNonNull(artifact);
+    public ServiceProviderBuilder addService(Type type, Function0<?> supplier) {
+        Objects.requireNonNull(type);
         Objects.requireNonNull(supplier);
-        any.remove(artifact);
-        strong.put(artifact, (Function0<Object>) supplier);
+        any.remove(type);
+        strong.put(type, (Function0<Object>) supplier);
         return this;
     }
 
     @Override
-    public <T> ServiceProviderBuilder addService(Class<T> type, Function0<T> supplier) {
-        return addService(new Artifact(type), supplier);
-    }
-
-    @Override
-    public ServiceProviderBuilder removeService(Artifact artifact) {
-        Objects.requireNonNull(artifact);
-        strong.remove(artifact);
-        any.remove(artifact);
+    public ServiceProviderBuilder removeService(Type type) {
+        Objects.requireNonNull(type);
+        strong.remove(type);
+        any.remove(type);
         return this;
-    }
-
-    @Override
-    public ServiceProviderBuilder removeService(Class<?> type) {
-        return removeService(new Artifact(type));
     }
 
     /**

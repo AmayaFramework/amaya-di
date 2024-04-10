@@ -12,8 +12,7 @@ import java.lang.annotation.Annotation;
  * and {@link ManualProviderBuilder} implementations included in the current version of the framework.
  */
 public final class Builders {
-    private static final ArtifactFactory ARTIFACT_FACTORY = new ReflectionArtifactFactory();
-    private static final SchemeFactory REFLECTION_FACTORY = new ReflectionSchemeFactory(ARTIFACT_FACTORY, Inject.class);
+    private static final SchemeFactory REFLECTION_FACTORY = new ReflectionSchemeFactory(Inject.class);
     private static final StubFactory BYTECODE_FACTORY = new BytecodeStubFactory();
 
     private Builders() {
@@ -38,7 +37,7 @@ public final class Builders {
      * @return the {@link ServiceProviderBuilder} instance
      */
     public static ServiceProviderBuilder createChecked(Class<? extends Annotation> annotation) {
-        return createChecked(new ReflectionSchemeFactory(ARTIFACT_FACTORY, annotation), BYTECODE_FACTORY);
+        return createChecked(new ReflectionSchemeFactory(annotation), BYTECODE_FACTORY);
     }
 
     /**
@@ -70,7 +69,7 @@ public final class Builders {
      * @return the {@link ManualProviderBuilder} instance
      */
     public static ManualProviderBuilder createManual(Class<? extends Annotation> annotation) {
-        return createManual(new ReflectionSchemeFactory(ARTIFACT_FACTORY, annotation), BYTECODE_FACTORY);
+        return createManual(new ReflectionSchemeFactory(annotation), BYTECODE_FACTORY);
     }
 
     /**

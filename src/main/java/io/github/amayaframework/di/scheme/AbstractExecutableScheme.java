@@ -1,8 +1,7 @@
 package io.github.amayaframework.di.scheme;
 
-import io.github.amayaframework.di.Artifact;
-
 import java.lang.reflect.Executable;
+import java.lang.reflect.Type;
 import java.util.Collections;
 import java.util.Objects;
 import java.util.Set;
@@ -10,22 +9,22 @@ import java.util.Set;
 abstract class AbstractExecutableScheme<T extends Executable>
         extends AbstractScheme<T>
         implements ExecutableScheme<T> {
-    protected final Set<Artifact> artifacts;
-    protected final Artifact[] mapping;
+    protected final Set<Type> types;
+    protected final Type[] mapping;
 
-    protected AbstractExecutableScheme(T target, Set<Artifact> artifacts, Artifact[] mapping) {
+    protected AbstractExecutableScheme(T target, Set<Type> types, Type[] mapping) {
         super(target);
-        this.artifacts = Collections.unmodifiableSet(Objects.requireNonNull(artifacts));
+        this.types = Collections.unmodifiableSet(Objects.requireNonNull(types));
         this.mapping = Objects.requireNonNull(mapping);
     }
 
     @Override
-    public Set<Artifact> getArtifacts() {
-        return artifacts;
+    public Set<Type> getTypes() {
+        return types;
     }
 
     @Override
-    public Artifact[] getMapping() {
+    public Type[] getMapping() {
         return mapping.clone();
     }
 }

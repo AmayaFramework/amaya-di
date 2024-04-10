@@ -1,7 +1,6 @@
 package io.github.amayaframework.di.scheme;
 
-import io.github.amayaframework.di.Artifact;
-
+import java.lang.reflect.Type;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Objects;
@@ -14,7 +13,7 @@ public final class ClassScheme extends AbstractScheme<Class<?>> {
     private final Set<MethodScheme> methodSchemes;
     private final Set<FieldScheme> fieldSchemes;
     private final ConstructorScheme constructorScheme;
-    private final Set<Artifact> artifacts;
+    private final Set<Type> types;
 
     /**
      * Constructs class scheme for specified class and schemes for its members.
@@ -32,16 +31,16 @@ public final class ClassScheme extends AbstractScheme<Class<?>> {
         this.constructorScheme = Objects.requireNonNull(constructorScheme);
         this.fieldSchemes = Collections.unmodifiableSet(Objects.requireNonNull(fieldSchemes));
         this.methodSchemes = Collections.unmodifiableSet(Objects.requireNonNull(methodSchemes));
-        this.artifacts = Collections.unmodifiableSet(collectArtifacts());
+        this.types = Collections.unmodifiableSet(collectTypes());
     }
 
-    private Set<Artifact> collectArtifacts() {
-        var ret = new HashSet<>(constructorScheme.artifacts);
+    private Set<Type> collectTypes() {
+        var ret = new HashSet<>(constructorScheme.types);
         for (var scheme : fieldSchemes) {
-            ret.add(scheme.artifact);
+            ret.add(scheme.type);
         }
         for (var scheme : methodSchemes) {
-            ret.addAll(scheme.artifacts);
+            ret.addAll(scheme.types);
         }
         return ret;
     }
@@ -79,17 +78,12 @@ public final class ClassScheme extends AbstractScheme<Class<?>> {
      * @return the set of artifacts
      */
     @Override
-    public Set<Artifact> getArtifacts() {
-        return artifacts;
+    public Set<Type> getTypes() {
+        return types;
     }
 
     @Override
     public String toString() {
-        return "ClassScheme{" +
-                "methodSchemes=" + methodSchemes +
-                ", fieldSchemes=" + fieldSchemes +
-                ", constructorScheme=" + constructorScheme +
-                ", target=" + target +
-                '}';
+        return "ClassScheme{" + target + "}";
     }
 }

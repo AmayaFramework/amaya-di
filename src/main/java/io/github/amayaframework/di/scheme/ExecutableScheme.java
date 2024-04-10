@@ -1,8 +1,7 @@
 package io.github.amayaframework.di.scheme;
 
-import io.github.amayaframework.di.Artifact;
-
 import java.lang.reflect.Executable;
+import java.lang.reflect.Type;
 
 /**
  * An interface describing some abstract schema that defines
@@ -13,12 +12,12 @@ import java.lang.reflect.Executable;
  */
 public interface ExecutableScheme<T extends Executable> extends Scheme<T> {
 
-    /**
-     * Returns an array containing the artifacts in the order in which
-     * they should be passed when calling the {@link Executable} entity.
-     * Changing the returned array will not change this scheme.
-     *
-     * @return non-null array, containing artifacts
-     */
-    Artifact[] getMapping();
+    //    /**
+//     * Returns an array containing the artifacts in the order in which
+//     * they should be passed when calling the {@link Executable} entity.
+//     * Changing the returned array will not change this scheme.
+//     *
+//     * @return non-null array, containing artifacts
+//     */
+    Type[] getMapping();
 }
