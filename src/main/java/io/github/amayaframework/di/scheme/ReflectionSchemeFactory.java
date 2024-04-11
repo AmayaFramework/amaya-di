@@ -1,6 +1,5 @@
 package io.github.amayaframework.di.scheme;
 
-import com.github.romanqed.jtype.IllegalTypeException;
 import com.github.romanqed.jtype.TaggedType;
 import com.github.romanqed.jtype.Types;
 
@@ -70,14 +69,6 @@ public final class ReflectionSchemeFactory implements SchemeFactory {
     }
 
     private static Type process(Type type) {
-        // null -> null
-        if (type == null) {
-            return null;
-        }
-        // class -> class
-        if (type instanceof Class) {
-            return type;
-        }
         // process(Owner).RawType<process(T1), process(T2), ...>
         if (type instanceof ParameterizedType) {
             var parameterized = (ParameterizedType) type;
@@ -107,7 +98,7 @@ public final class ReflectionSchemeFactory implements SchemeFactory {
             var tagged = (TaggedType) type;
             return Types.of(process(tagged.getRawType()), tagged.getTags());
         }
-        throw new IllegalTypeException("Unexpected type implementation", type);
+        return type;
     }
 
     private static void process(Parameter[] parameters, int start, Set<Type> types, Type[] mapping) {

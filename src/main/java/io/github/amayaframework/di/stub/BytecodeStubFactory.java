@@ -212,12 +212,15 @@ public final class BytecodeStubFactory implements StubFactory {
                                             Set<java.lang.reflect.Type> types,
                                             TypeProvider provider) throws Throwable {
         var constructor = clazz.getDeclaredConstructor(Function0[].class);
+        if (types.isEmpty()) {
+            return (Function0<?>) constructor.newInstance((Object) null);
+        }
         var arguments = new Function0<?>[types.size()];
         var count = 0;
         for (var type : types) {
             arguments[count++] = Objects.requireNonNull(provider.apply(type));
         }
-        return (Function0<?>) constructor.newInstance(new Object[]{arguments});
+        return (Function0<?>) constructor.newInstance((Object) arguments);
     }
 
     @Override
