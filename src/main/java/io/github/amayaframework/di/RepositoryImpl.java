@@ -3,25 +3,22 @@ package io.github.amayaframework.di;
 import com.github.romanqed.jfunc.Function0;
 
 import java.lang.reflect.Type;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
+import java.util.function.BiConsumer;
+import java.util.function.Consumer;
 
 final class RepositoryImpl implements Repository {
     private final Map<Type, Function0<Object>> body;
+    private final Set<Type> keys;
 
     RepositoryImpl() {
         this.body = new HashMap<>();
+        this.keys = Collections.unmodifiableSet(this.body.keySet());
     }
 
     @Override
     public Function0<Object> get(Type type) {
         return body.get(type);
-    }
-
-    @Override
-    public Iterable<Type> getAll() {
-        return Collections.unmodifiableCollection(body.keySet());
     }
 
     @Override
@@ -42,5 +39,25 @@ final class RepositoryImpl implements Repository {
     @Override
     public void clear() {
         body.clear();
+    }
+
+    @Override
+    public void forEach(Consumer<? super Type> action) {
+        keys.forEach(action);
+    }
+
+    @Override
+    public Spliterator<Type> spliterator() {
+        return keys.spliterator();
+    }
+
+    @Override
+    public void forEach(BiConsumer<Type, Function0<Object>> consumer) {
+        body.forEach(consumer);
+    }
+
+    @Override
+    public Iterator<Type> iterator() {
+        return keys.iterator();
     }
 }

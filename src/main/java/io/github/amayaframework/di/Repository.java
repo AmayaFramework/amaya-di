@@ -3,11 +3,12 @@ package io.github.amayaframework.di;
 import com.github.romanqed.jfunc.Function0;
 
 import java.lang.reflect.Type;
+import java.util.function.BiConsumer;
 
 /**
  * An interface describing an abstract repository of instantiators associated with the specified types.
  */
-public interface Repository {
+public interface Repository extends Iterable<Type> {
 
     //    /**
 //     * Gets the instantiator associated with the specified type.
@@ -30,13 +31,6 @@ public interface Repository {
 //     * @return null or {@link Function0} instance
 //     */
     Function0<Object> get(Type type);
-
-    //    /**
-//     * Returns all types currently stored in the repository.
-//     *
-//     * @return {@link Iterable} instance contains stored types
-//     */
-    Iterable<Type> getAll();
 
     //    /**
 //     * Checks whether the repository contains an instantiator for the specified type.
@@ -66,4 +60,6 @@ public interface Repository {
      * Clears this repository.
      */
     void clear();
+
+    void forEach(BiConsumer<Type, Function0<Object>> consumer);
 }
