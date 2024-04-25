@@ -22,7 +22,7 @@ version = System.getenv('RELEASE_VERSION') ?: '1.0.0'
 repositories {
     mavenCentral()
     maven {
-        url "https://oss.sonatype.org/content/repositories/comgithubromanqed-1093"
+        url "https://oss.sonatype.org/content/repositories/comgithubromanqed-1094"
     }
 }
 

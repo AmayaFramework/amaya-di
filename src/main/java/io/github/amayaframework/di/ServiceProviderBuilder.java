@@ -1,6 +1,7 @@
 package io.github.amayaframework.di;
 
 import com.github.romanqed.jfunc.Function0;
+import com.github.romanqed.jtype.JType;
 
 import java.lang.reflect.Type;
 
@@ -53,6 +54,20 @@ public interface ServiceProviderBuilder {
      * @return this {@link ServiceProviderBuilder} instance
      */
     ServiceProviderBuilder addTransient(Type type, Class<?> implementation);
+
+    default <T> ServiceProviderBuilder addService(JType<T> type,
+                                                  Class<? extends T> implementation,
+                                                  ServiceWrapper<T> wrapper) {
+        return addService(type.getType(), implementation, wrapper);
+    }
+
+    default <T> ServiceProviderBuilder addSingleton(JType<T> type, Class<? extends T> implementation) {
+        return addSingleton(type.getType(), implementation);
+    }
+
+    default <T> ServiceProviderBuilder addTransient(JType<T> type, Class<? extends T> implementation) {
+        return addTransient(type.getType(), implementation);
+    }
 
     /**
      * Adds a service by its class, which is an implementation of the specified class.
@@ -128,6 +143,10 @@ public interface ServiceProviderBuilder {
      */
     ServiceProviderBuilder addService(Type type, Function0<?> supplier);
 
+    default <T> ServiceProviderBuilder addService(JType<T> type, Function0<T> supplier) {
+        return addService(type.getType(), supplier);
+    }
+
     /**
      * Removes the service that implements the specified type.
      *
@@ -135,6 +154,10 @@ public interface ServiceProviderBuilder {
      * @return this {@link ServiceProviderBuilder} instance
      */
     ServiceProviderBuilder removeService(Type type);
+
+    default ServiceProviderBuilder removeService(JType<?> type) {
+        return removeService(type.getType());
+    }
 
     /**
      * Builds a ready-to-use {@link ServiceProvider} implementation and resets

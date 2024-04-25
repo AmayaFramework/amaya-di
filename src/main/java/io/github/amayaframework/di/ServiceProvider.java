@@ -1,6 +1,7 @@
 package io.github.amayaframework.di;
 
 import com.github.romanqed.jfunc.Function0;
+import com.github.romanqed.jtype.JType;
 
 import java.lang.reflect.Type;
 
@@ -34,6 +35,10 @@ public interface ServiceProvider {
      */
     <T> Function0<T> get(Class<T> type);
 
+    default <T> Function0<T> get(JType<T> type) {
+        return get(type.getType());
+    }
+
     //    /**
 //     * Instantiates the service requested by specified artifact.
 //     *
@@ -51,4 +56,8 @@ public interface ServiceProvider {
      * @return null, if class not found, service instance otherwise
      */
     <T> T instantiate(Class<T> type);
+
+    default <T> T instantiate(JType<T> type) {
+        return instantiate(type.getType());
+    }
 }
