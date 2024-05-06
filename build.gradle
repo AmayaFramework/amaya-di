@@ -32,6 +32,7 @@ dependencies {
     jmhImplementation group: 'org.openjdk.jmh', name: 'jmh-generator-annprocess', version: '1.35'
     // Dependencies
     api group: 'com.github.romanqed', name: 'jeflect', version: '1.1.4L'
+    api group: 'com.github.romanqed', name: 'jtype', version: '1.0.0'
 }
 
 test {

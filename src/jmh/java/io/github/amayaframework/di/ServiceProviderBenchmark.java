@@ -9,8 +9,8 @@ import java.util.concurrent.TimeUnit;
 @OutputTimeUnit(TimeUnit.NANOSECONDS)
 @Warmup
 public class ServiceProviderBenchmark {
-    private static final ServiceProvider PROVIDER = CheckedProviderBuilder
-            .create()
+    private static final ServiceProvider PROVIDER = Builders
+            .createChecked()
             .addTransient(Service1.class)
             .addTransient(Service2.class)
             .addTransient(Service3.class)

@@ -3,7 +3,7 @@ package io.github.amayaframework.di.stub;
 import com.github.romanqed.jeflect.*;
 import com.github.romanqed.jfunc.Exceptions;
 import com.github.romanqed.jfunc.Function0;
-import io.github.amayaframework.di.Artifact;
+import com.github.romanqed.jtype.TypeUtil;
 import io.github.amayaframework.di.scheme.ClassScheme;
 import org.objectweb.asm.ClassWriter;
 import org.objectweb.asm.MethodVisitor;
@@ -14,7 +14,6 @@ import java.lang.reflect.Method;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
-import java.util.function.Function;
 
 /**
  * A factory that creates instantiators based on proxy classes generated on the fly.
@@ -71,7 +70,7 @@ public final class BytecodeStubFactory implements StubFactory {
                 AsmUtil.EMPTY_DESCRIPTOR,
                 false
         );
-        // Put artifact providers to fields
+        // Put type providers to fields
         for (var i = 0; i < order.length; ++i) {
             // Load this-ref and array-ref
             visitor.visitVarInsn(Opcodes.ALOAD, 0);
@@ -92,7 +91,7 @@ public final class BytecodeStubFactory implements StubFactory {
         visitor.visitEnd();
     }
 
-    private static void loadArtifact(MethodVisitor visitor, String name, String field, Artifact artifact) {
+    private static void loadType(MethodVisitor visitor, String name, String field, java.lang.reflect.Type type) {
         // Load this-ref
         visitor.visitVarInsn(Opcodes.ALOAD, 0);
         // Load field
@@ -102,7 +101,7 @@ public final class BytecodeStubFactory implements StubFactory {
                 field,
                 FUNCTION0.getDescriptor()
         );
-        // Get artifact implementation
+        // Get type implementation
         visitor.visitMethodInsn(
                 Opcodes.INVOKEINTERFACE,
                 FUNCTION0.getInternalName(),
@@ -110,29 +109,29 @@ public final class BytecodeStubFactory implements StubFactory {
                 Type.getMethodDescriptor(INVOKE),
                 true
         );
-        // Cast implementation to artifact type
-        visitor.visitTypeInsn(Opcodes.CHECKCAST, Type.getInternalName(artifact.getType()));
+        // Cast implementation to given type
+        visitor.visitTypeInsn(Opcodes.CHECKCAST, Type.getInternalName(TypeUtil.getRawType(type)));
     }
 
     private static void processExecutable(MethodVisitor visitor,
                                           String name,
-                                          Artifact[] parameters,
-                                          Map<Artifact, String> fields) {
+                                          java.lang.reflect.Type[] parameters,
+                                          Map<java.lang.reflect.Type, String> fields) {
         for (var parameter : parameters) {
             var field = fields.get(parameter);
-            loadArtifact(visitor, name, field, parameter);
+            loadType(visitor, name, field, parameter);
         }
     }
 
     private static void generateInvokeMethod(ClassWriter writer,
                                              String name,
                                              ClassScheme scheme,
-                                             Map<Artifact, String> artifacts) {
+                                             Map<java.lang.reflect.Type, String> types) {
         // Prepare schemes
         var constructor = scheme.getConstructorScheme();
         var fields = scheme.getFieldSchemes();
         var methods = scheme.getMethodSchemes();
-        var type = scheme.getTarget();
+        var raw = scheme.getTarget();
         // Declare method signature
         var visitor = writer.visitMethod(
                 Opcodes.ACC_PUBLIC | Opcodes.ACC_FINAL,
@@ -143,22 +142,22 @@ public final class BytecodeStubFactory implements StubFactory {
         );
         visitor.visitCode();
         // Create instance of target class
-        visitor.visitTypeInsn(Opcodes.NEW, Type.getInternalName(type));
+        visitor.visitTypeInsn(Opcodes.NEW, Type.getInternalName(raw));
         visitor.visitInsn(Opcodes.DUP);
         // Invoke constructor by scheme
-        processExecutable(visitor, name, constructor.getMapping(), artifacts);
+        processExecutable(visitor, name, constructor.getMapping(), types);
         AsmUtil.invoke(visitor, constructor.getTarget());
         // Process field schemes
         for (var field : fields) {
-            // ref.<field> = (ArtifactType) this.<artifact>.invoke();
+            // ref.<field> = (Type) this.<type>.invoke();
             visitor.visitInsn(Opcodes.DUP);
             var target = field.getTarget();
-            var artifact = field.getArtifact();
-            var source = artifacts.get(artifact);
-            loadArtifact(visitor, name, source, artifact);
+            var type = field.getType();
+            var source = types.get(type);
+            loadType(visitor, name, source, type);
             visitor.visitFieldInsn(
                     Opcodes.PUTFIELD,
-                    Type.getInternalName(type),
+                    Type.getInternalName(raw),
                     target.getName(),
                     Type.getDescriptor(target.getType())
             );
@@ -166,7 +165,7 @@ public final class BytecodeStubFactory implements StubFactory {
         // Process method schemes
         for (var method : methods) {
             visitor.visitInsn(Opcodes.DUP);
-            processExecutable(visitor, name, method.getMapping(), artifacts);
+            processExecutable(visitor, name, method.getMapping(), types);
             AsmUtil.invoke(visitor, method.getTarget());
         }
         // Return constructed instance
@@ -175,7 +174,7 @@ public final class BytecodeStubFactory implements StubFactory {
         visitor.visitEnd();
     }
 
-    private static byte[] generate(String name, ClassScheme scheme, Set<Artifact> artifacts) {
+    private static byte[] generate(String name, ClassScheme scheme, Set<java.lang.reflect.Type> types) {
         // Init writer
         var writer = new ClassWriter(ClassWriter.COMPUTE_MAXS);
         // Declare class
@@ -187,8 +186,8 @@ public final class BytecodeStubFactory implements StubFactory {
                 AsmUtil.OBJECT.getInternalName(),
                 new String[]{FUNCTION0.getInternalName()}
         );
-        // Generate artifact-field mapping
-        var mapping = Mapping.of(artifacts);
+        // Generate type-field mapping
+        var mapping = Mapping.of(types);
         // Declare fields
         for (var field : mapping.fields.keySet()) {
             writer.visitField(
@@ -202,7 +201,7 @@ public final class BytecodeStubFactory implements StubFactory {
         // Generate constructor
         generateConstructor(writer, name, mapping.order);
         // Generate invoke method
-        generateInvokeMethod(writer, name, scheme, mapping.artifacts);
+        generateInvokeMethod(writer, name, scheme, mapping.types);
         // Close writer
         writer.visitEnd();
         // Return bytecode
@@ -210,28 +209,31 @@ public final class BytecodeStubFactory implements StubFactory {
     }
 
     private static Function0<?> instantiate(Class<?> clazz,
-                                            Set<Artifact> artifacts,
-                                            Function<Artifact, Function0<Object>> provider) throws Throwable {
+                                            Set<java.lang.reflect.Type> types,
+                                            TypeProvider provider) throws Throwable {
         var constructor = clazz.getDeclaredConstructor(Function0[].class);
-        var arguments = new Function0<?>[artifacts.size()];
-        var count = 0;
-        for (var artifact : artifacts) {
-            arguments[count++] = Objects.requireNonNull(provider.apply(artifact));
+        if (types.isEmpty()) {
+            return (Function0<?>) constructor.newInstance((Object) null);
         }
-        return (Function0<?>) constructor.newInstance(new Object[]{arguments});
+        var arguments = new Function0<?>[types.size()];
+        var count = 0;
+        for (var type : types) {
+            arguments[count++] = Objects.requireNonNull(provider.apply(type));
+        }
+        return (Function0<?>) constructor.newInstance((Object) arguments);
     }
 
     @Override
-    public Function0<?> create(ClassScheme scheme, Function<Artifact, Function0<Object>> provider) {
+    public Function0<?> create(ClassScheme scheme, TypeProvider provider) {
         Objects.requireNonNull(scheme);
         Objects.requireNonNull(provider);
         var target = scheme.getTarget();
         var name = target.getName() + STUB;
-        var artifacts = scheme.getArtifacts();
+        var types = scheme.getTypes();
         return factory.create(
                 name,
-                () -> generate(Type.getInternalName(target) + STUB, scheme, artifacts),
-                clazz -> instantiate(clazz, artifacts, provider)
+                () -> generate(Type.getInternalName(target) + STUB, scheme, types),
+                clazz -> instantiate(clazz, types, provider)
         );
     }
 }

@@ -1,46 +1,45 @@
 package io.github.amayaframework.di.scheme;
 
-import io.github.amayaframework.di.Artifact;
-
 import java.lang.reflect.Field;
+import java.lang.reflect.Type;
 import java.util.Objects;
 import java.util.Set;
 
 /**
- * A scheme that defines the correspondence between artifact and class field.
+ * A scheme that defines the correspondence between type and class field.
  */
 public final class FieldScheme extends AbstractScheme<Field> {
-    final Artifact artifact;
+    final Type type;
 
     /**
-     * Constructs field scheme for specified field and artifact.
+     * Constructs field scheme for specified field and type.
      *
-     * @param target   the specified field, must be non-null
-     * @param artifact the specified artifact, must be non-null
+     * @param target the specified field, must be non-null
+     * @param type   the specified type, must be non-null
      */
-    public FieldScheme(Field target, Artifact artifact) {
+    public FieldScheme(Field target, Type type) {
         super(target);
-        this.artifact = Objects.requireNonNull(artifact);
+        this.type = Objects.requireNonNull(type);
     }
 
     /**
-     * Returns the artifact associated with this field.
+     * Returns the type associated with this field.
      *
-     * @return the artifact associated with this field
+     * @return the type associated with this field
      */
-    public Artifact getArtifact() {
-        return artifact;
+    public Type getType() {
+        return type;
     }
 
     @Override
-    public Set<Artifact> getArtifacts() {
-        return Set.of(artifact);
+    public Set<Type> getTypes() {
+        return Set.of(type);
     }
 
     @Override
     public String toString() {
         return "FieldScheme{" +
-                "artifact=" + artifact +
+                "type=" + type +
                 ", target=" + target +
                 '}';
     }

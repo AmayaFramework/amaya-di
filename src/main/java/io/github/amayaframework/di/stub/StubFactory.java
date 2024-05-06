@@ -1,14 +1,11 @@
 package io.github.amayaframework.di.stub;
 
 import com.github.romanqed.jfunc.Function0;
-import io.github.amayaframework.di.Artifact;
 import io.github.amayaframework.di.scheme.ClassScheme;
-
-import java.util.function.Function;
 
 /**
  * An interface describing an abstract factory that creates
- * instantiators based on the passed class schema and dependency provider.
+ * instantiators based on the passed class scheme and dependency provider.
  */
 public interface StubFactory {
 
@@ -19,5 +16,5 @@ public interface StubFactory {
      * @param provider the specified provider, must be non-null
      * @return the created instantiator
      */
-    Function0<?> create(ClassScheme scheme, Function<Artifact, Function0<Object>> provider);
+    Function0<?> create(ClassScheme scheme, TypeProvider provider);
 }

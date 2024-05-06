@@ -1,5 +1,6 @@
 package io.github.amayaframework.di;
 
+import com.github.romanqed.jtype.Types;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
@@ -7,7 +8,10 @@ public class ServiceProviderTest extends Assertions {
     public ServiceProvider create(ServiceProviderBuilder builder) {
         return builder
                 .addTransient(Service1.class)
-                .addService(new Artifact(Service2.class, String.class), () -> new Service2<>("2"))
+                .addService(
+                        Types.ofOwned(ServiceProviderTest.class, Service2.class, String.class),
+                        () -> new Service2<>("2")
+                )
                 .addTransient(App.class)
                 .build();
     }
@@ -26,7 +30,12 @@ public class ServiceProviderTest extends Assertions {
 
     @Test
     public void testCheckedProvider() {
-        testProvider(CheckedProviderBuilder.create());
+        testProvider(Builders.createChecked());
+    }
+
+    @Test
+    public void testManualProvider() {
+        testProvider(Builders.createManual());
     }
 
     public static final class Service1 {

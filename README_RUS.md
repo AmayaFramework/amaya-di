@@ -156,6 +156,7 @@ s2=Service2, 377478451
 
 ```Java
 import io.github.amayaframework.di.Builders;
+import com.github.romanqed.jtype.JType;
 
 import java.util.List;
 
@@ -163,22 +164,22 @@ public class Main {
     public static void main(String[] args) {
         var provider = Builders
                 .createChecked()
-                .addService(Artifact.of(List.class, String.class), () -> List.of("Hi", "World"))
-                .addService(Artifact.of(List.class, Integer.class), () -> List.of(1, 2, 3))
+                .addService(new JType<List<String>>(){}, () -> List.of("Hi", "World"))
+                .addService(new JType<List<Integer>>(){}, () -> List.of(1, 2, 3))
                 .addTransient(App.class)
                 .build();
         System.out.println(provider.instantiate(App.class));
     }
-
+  
     public static final class App {
         final List<String> s1;
         final List<Integer> s2;
-
+    
         public App(List<String> s1, List<Integer> s2) {
             this.s1 = s1;
             this.s2 = s2;
         }
-
+        
         @Override
         public String toString() {
             return "hash=" + hashCode() + "\ns1=" + s1 + "\ns2=" + s2;
@@ -276,8 +277,8 @@ public class Main {
                     .addTransient(App.class)
                     .build();
             System.out.println(provider.instantiate(App.class));
-        } catch (ArtifactNotFoundException e) {
-            System.out.println(e.getArtifact() + " not found");
+        } catch (TypeNotFoundException e) {
+            System.out.println(e.getType() + " not found");
         }
     }
 
@@ -301,7 +302,7 @@ public class Main {
 Вывод:
 
 ```
-Artifact{type=interface java.util.List, metadata=[class java.lang.String]} not found
+java.util.List<java.lang.String> not found
 ```
 
 ### Циклическая зависимость
@@ -338,8 +339,7 @@ public class Main {
 Вывод:
 
 ```
-Found cycle: [Artifact{type=class io.github.amayaframework.di.Main$App, metadata=null}, 
-Artifact{type=class io.github.amayaframework.di.Main$Service, metadata=null}]
+Found cycle: [class io.github.amayaframework.di.Main$App, class io.github.amayaframework.di.Main$Service]
 ```
 
 ## Бенчмарк
@@ -363,97 +363,13 @@ ServiceProviderBenchmark.benchAmayaInjection   avgt   25  17,586 ± 0,240  ns/op
 ServiceProviderBenchmark.benchManualInjection  avgt   25  11,586 ± 0,085  ns/op
 ```
 
-## Структура и возможности для расширения
-
-Фреймворк фактически состоит из трёх заменяемых модулей: описательного, промежуточного и фасадного.
-
-### Описательный модуль
-
-По удобной аналогии с maven, фреймворк рассматривает все зависимости как некие артефакты, содержащие информацию о типе
-и дополнительные метаданные. Зависимые классы же рассматриваются как схемы-манифесты, требующие сборки.
-Например, в следующем примере
-
-```Java
-class Service1 {
-    public Service1() {
-    }
-}
-
-class Service2 {
-    public Service2() {
-    }
-}
-
-class App {
-    public App(Service1 s1, Service2 s2) {
-    }
-}
-```
-
-Service1 и Service2 будут одновременно и артефактами (как зависимости App), и конкретными реализациями этих артефактов.
-Благодаря такому подходу стало возможно отделить процесс построения "плана" инстанцирования класса от непосредственно
-процесса решения зависимостей.
-В amaya-di последний выполняется при помощи ещё одной сущности, названной репозиторий (Repository), ставящей в
-соответствие артефакт и его реализацию.
-Теперь, имея вышеописанный набор, фреймворк создаёт "схемы" инжекта.
-Например, для рассмотренного выше примера, это будет выглядеть так:
-
-```Java
-public class Main {
-    public static void main(String[] args) {
-        var service1 = Artifact.of(Service1.class);
-        var service2 = Artifact.of(Service2.class);
-        var app = Artifact.of(App.class);
-        var service1Scheme = new ClassScheme(
-                Service1.class,
-                new ConstructorScheme(Service1.class.getConstructor(), Set.of(), new Artifact[0]),
-                Set.of(),
-                Set.of()
-        );
-        var service2Scheme = new ClassScheme(
-                Service2.class,
-                new ConstructorScheme(Service2.class.getConstructor(), Set.of(), new Artifact[0]),
-                Set.of(),
-                Set.of()
-        );
-        var appScheme = new ClassScheme(
-                App.class,
-                new ConstructorScheme(
-                        App.class.getConstructor(Service1.class, Service2.class),
-                        Set.of(service1, service2),
-                        new Artifact[]{service1, service2}
-                ),
-                Set.of(),
-                Set.of()
-        );
-        ...
-    }
-}
-```
-
-В фреймворке за создание схемы отвечает SchemeFactory, по умолчанию реализованная с помощью рефлективного апи.
-
-### Промежуточный модуль
-
-Теперь, очевидно, после построения схемы инжекта, необходимо получить реализации "заглушек", выполняющих работу по
-созданию экземпляра объекта требуемого класса и заполнению его всеми требуемыми зависимостями по схеме.
-Большинство фреймворков на этом моменте используют рефлексию, однако amaya-di, как было заявлено выше,
-хоть и предоставляет простор для самостоятельной реализации, по умолчанию использует генерацию прокси-классов.
-
-В фреймворке за генерацию стабов отвечает StubFactory.
-
-### Фасадный модуль
-
-Наконец, после заполнения репозитория сгенерированными стабами, некоторых важных проверок (вроде отсутствия циклов или
-потерянных зависимостей), фреймворк предоставляет пользователю простой интерфейс для построения поставщика сервисов и
-его дальнейшего использования.
-
 ## Используемые зависимости
 
 * [Gradle](https://gradle.org) - Управление зависимостями
 * [ASM](https://asm.ow2.io) - Генерация прокси-классов
 * [jeflect](https://github.com/RomanQed/jeflect) - Загрузка классов из байт-кода, утилиты для ASM
 * [jfunc](https://github.com/RomanQed/jfunc) - "Ленивые" контейнеры, функциональные интерфейсы, утилиты
+* [jtype](https://github.com/RomanQed/jtype) - Утилиты для работы с дженериками
 
 ## Авторы
 

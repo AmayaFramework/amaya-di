@@ -1,31 +1,30 @@
 package io.github.amayaframework.di.scheme;
 
-import io.github.amayaframework.di.Artifact;
-
 import java.lang.reflect.Method;
+import java.lang.reflect.Type;
 import java.util.Arrays;
 import java.util.Set;
 
 /**
- * A scheme that defines the correspondence between set of artifacts and class method.
+ * A scheme that defines the correspondence between set of types and class method.
  */
 public final class MethodScheme extends AbstractExecutableScheme<Method> {
 
     /**
-     * Constructs method scheme for specified method, artifact set and its mapping.
+     * Constructs method scheme for specified method, type set and its mapping.
      *
-     * @param target    the specified method, must be non-null
-     * @param artifacts the artifact set, must be non-null
-     * @param mapping   the artifact mapping, must be non-null
+     * @param target  the specified method, must be non-null
+     * @param types   the type set, must be non-null
+     * @param mapping the type mapping, must be non-null
      */
-    public MethodScheme(Method target, Set<Artifact> artifacts, Artifact[] mapping) {
-        super(target, artifacts, mapping);
+    public MethodScheme(Method target, Set<Type> types, Type[] mapping) {
+        super(target, types, mapping);
     }
 
     @Override
     public String toString() {
         return "MethodScheme{" +
-                "artifacts=" + artifacts +
+                "types=" + types +
                 ", mapping=" + Arrays.toString(mapping) +
                 ", target=" + target +
                 '}';

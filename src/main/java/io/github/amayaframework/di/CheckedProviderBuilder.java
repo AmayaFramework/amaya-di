@@ -5,12 +5,10 @@ import io.github.amayaframework.di.graph.Graph;
 import io.github.amayaframework.di.graph.GraphUtil;
 import io.github.amayaframework.di.graph.HashGraph;
 import io.github.amayaframework.di.scheme.ClassScheme;
-import io.github.amayaframework.di.scheme.ReflectionSchemeFactory;
 import io.github.amayaframework.di.scheme.SchemeFactory;
-import io.github.amayaframework.di.stub.BytecodeStubFactory;
 import io.github.amayaframework.di.stub.StubFactory;
 
-import java.lang.annotation.Annotation;
+import java.lang.reflect.Type;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -37,37 +35,16 @@ public class CheckedProviderBuilder extends AbstractProviderBuilder {
         this.stubFactory = Objects.requireNonNull(stubFactory);
     }
 
-    /**
-     * Creates {@link CheckedProviderBuilder} instance
-     * with {@link ReflectionSchemeFactory} and {@link BytecodeStubFactory}, using the specified annotation as marker.
-     *
-     * @param annotation the specified annotation, must be non-null
-     * @return the {@link ServiceProviderBuilder} instance
-     */
-    public static ServiceProviderBuilder create(Class<? extends Annotation> annotation) {
-        return new CheckedProviderBuilder(new ReflectionSchemeFactory(annotation), new BytecodeStubFactory());
-    }
-
-    /**
-     * Creates {@link CheckedProviderBuilder} instance
-     * with {@link ReflectionSchemeFactory} and {@link BytecodeStubFactory}, using {@link Inject} annotation as marker.
-     *
-     * @return the {@link ServiceProviderBuilder} instance
-     */
-    public static ServiceProviderBuilder create() {
-        return create(Inject.class);
-    }
-
-    protected Graph<Artifact> makeGraph(Map<Class<?>, ClassScheme> schemes) {
-        var ret = new HashGraph<Artifact>();
+    protected Graph<Type> makeGraph(Map<Class<?>, ClassScheme> schemes) {
+        var ret = new HashGraph<Type>();
         for (var entry : any.entrySet()) {
-            var artifact = entry.getKey();
-            var artifacts = schemes.get(entry.getValue().implementation).getArtifacts();
-            artifacts.forEach(e -> {
-                if (artifact.equals(e)) {
+            var type = entry.getKey();
+            var types = schemes.get(entry.getValue().implementation).getTypes();
+            types.forEach(e -> {
+                if (type.equals(e)) {
                     throw new CycleFoundException(List.of(e));
                 }
-                ret.addEdge(artifact, e);
+                ret.addEdge(type, e);
             });
         }
         return ret;
@@ -84,13 +61,13 @@ public class CheckedProviderBuilder extends AbstractProviderBuilder {
     }
 
     @SuppressWarnings("unchecked")
-    protected void buildArtifacts(Map<Class<?>, ClassScheme> schemes, LazyProvider provider) {
+    protected void buildTypes(Map<Class<?>, ClassScheme> schemes, LazyProvider provider) {
         for (var entry : any.entrySet()) {
-            var artifact = entry.getKey();
+            var type = entry.getKey();
             var value = entry.getValue();
             var scheme = schemes.get(value.implementation);
             var wrapper = value.wrapper;
-            provider.add(artifact, () -> (Function0<Object>) wrapper.invoke(stubFactory.create(scheme, provider)));
+            provider.add(type, () -> (Function0<Object>) wrapper.invoke(stubFactory.create(scheme, provider)));
         }
     }
 
@@ -109,23 +86,23 @@ public class CheckedProviderBuilder extends AbstractProviderBuilder {
         }
         // Build repository
         var repository = Objects.requireNonNullElse(this.repository, new RepositoryImpl());
-        // Validate missing artifacts
+        // Validate missing types
         for (var scheme : schemes.values()) {
-            var artifacts = scheme.getArtifacts();
-            for (var artifact : artifacts) {
-                if (repository.contains(artifact)) {
+            var types = scheme.getTypes();
+            for (var type : types) {
+                if (repository.contains(type)) {
                     continue;
                 }
-                if (resolve(artifact)) {
+                if (canResolve(type)) {
                     continue;
                 }
-                throw new ArtifactNotFoundException(artifact);
+                throw new TypeNotFoundException(type);
             }
         }
-        // Prepare weak artifacts
+        // Prepare weak types
         var provider = new LazyProvider(repository);
-        buildArtifacts(schemes, provider);
-        // Add strong artifacts
+        buildTypes(schemes, provider);
+        // Add strong types
         strong.forEach(repository::add);
         // Fire all delayed stub creations
         provider.commit();

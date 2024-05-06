@@ -156,6 +156,7 @@ s2=Service2, 377478451
 
 ```Java
 import io.github.amayaframework.di.Builders;
+import com.github.romanqed.jtype.JType;
 
 import java.util.List;
 
@@ -163,8 +164,10 @@ public class Main {
     public static void main(String[] args) {
         var provider = Builders
                 .createChecked()
-                .addService(Artifact.of(List.class, String.class), () -> List.of("Hi", "World"))
-                .addService(Artifact.of(List.class, Integer.class), () -> List.of(1, 2, 3))
+                .addService(new JType<List<String>>() {
+                }, () -> List.of("Hi", "World"))
+                .addService(new JType<List<Integer>>() {
+                }, () -> List.of(1, 2, 3))
                 .addTransient(App.class)
                 .build();
         System.out.println(provider.instantiate(App.class));
@@ -276,8 +279,8 @@ public class Main {
                     .addTransient(App.class)
                     .build();
             System.out.println(provider.instantiate(App.class));
-        } catch (ArtifactNotFoundException e) {
-            System.out.println(e.getArtifact() + " not found");
+        } catch (TypeNotFoundException e) {
+            System.out.println(e.getType() + " not found");
         }
     }
 
@@ -301,7 +304,7 @@ public class Main {
 Output:
 
 ```
-Artifact{type=interface java.util.List, metadata=[class java.lang.String]} not found
+java.util.List<java.lang.String> not found
 ```
 
 ### Cyclical dependency
@@ -338,8 +341,7 @@ public class Main {
 Output:
 
 ```
-Found cycle: [Artifact{type=class io.github.amayaframework.di.Main$App, metadata=null}, 
-Artifact{type=class io.github.amayaframework.di.Main$Service, metadata=null}]
+Found cycle: [class io.github.amayaframework.di.Main$App, class io.github.amayaframework.di.Main$Service]
 ```
 
 ## Benchmark
@@ -363,99 +365,13 @@ ServiceProviderBenchmark.benchAmayaInjection   avgt   25  17,586 ± 0,240  ns/op
 ServiceProviderBenchmark.benchManualInjection  avgt   25  11,586 ± 0,085  ns/op
 ```
 
-## Structure and possibilities for expansion
-
-The framework actually consists of three replaceable modules: descriptive, intermediate and facade.
-
-### Descriptive module
-
-By a convenient analogy with maven, the framework treats all dependencies as some kind of artifacts containing type
-information and additional metadata. Dependent classes are treated as manifest schemas that require assembly.
-For example, in the following example
-
-```Java
-class Service1 {
-    public Service1() {
-    }
-}
-
-class Service2 {
-    public Service2() {
-    }
-}
-
-class App {
-    public App(Service1 s1, Service2 s2) {
-    }
-}
-```
-
-Service1 and Service2 will be both artifacts (like App dependencies) and specific implementations of these artifacts.
-Thanks to this approach, it became possible to separate the process of building a "plan" for instantiating a class from
-the process of solving dependencies directly.
-In amaya-di, the latter is performed using another entity called Repository,
-which matches the artifact and its implementation.
-Now, having the above set, the framework creates the "schemes" of the injection.
-For example, for the example above, it would look like this:
-
-```Java
-public class Main {
-    public static void main(String[] args) {
-        var service1 = Artifact.of(Service1.class);
-        var service2 = Artifact.of(Service2.class);
-        var app = Artifact.of(App.class);
-        var service1Scheme = new ClassScheme(
-                Service1.class,
-                new ConstructorScheme(Service1.class.getConstructor(), Set.of(), new Artifact[0]),
-                Set.of(),
-                Set.of()
-        );
-        var service2Scheme = new ClassScheme(
-                Service2.class,
-                new ConstructorScheme(Service2.class.getConstructor(), Set.of(), new Artifact[0]),
-                Set.of(),
-                Set.of()
-        );
-        var appScheme = new ClassScheme(
-                App.class,
-                new ConstructorScheme(
-                        App.class.getConstructor(Service1.class, Service2.class),
-                        Set.of(service1, service2),
-                        new Artifact[]{service1, service2}
-                ),
-                Set.of(),
-                Set.of()
-        );
-        ...
-    }
-}
-```
-
-In the framework, the SchemeFactory is responsible for creating the schema,
-which is implemented by default using a reflective api.
-
-### Intermediate module
-
-Now, obviously, after building the injection scheme, it is necessary to get implementations of "stubs" that perform
-the work of creating an instance of an object of the required class and filling it with all the required dependencies
-according to the scheme.
-Most frameworks use reflection at this point, but amaya-di, as stated above, although it provides scope for independent
-implementation, uses proxy class generation by default.
-
-In the framework, StubFactory is responsible for generating stabs.
-
-### Facade module
-
-Finally, after filling the repository with generated stabs, some important checks (such as the absence of cycles or
-lost dependencies), the framework provides the user with a simple interface for building a service provider and
-its further use.
-
 ## Built With
 
 * [Gradle](https://gradle.org) - Dependency management
 * [ASM](http://asm.ow2.io) - Generation of proxy classes
 * [jeflect](https://github.com/RomanQed/jeflect) - Defining classes from bytecode, utilities for ASM
 * [jfunc](https://github.com/RomanQed/jfunc) - "Lazy" containers, functional interfaces, utilities
+* [jtype](https://github.com/RomanQed/jtype) - Utilities for interaction with generic types
 
 ## Authors
 

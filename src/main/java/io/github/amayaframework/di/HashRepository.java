@@ -2,26 +2,28 @@ package io.github.amayaframework.di;
 
 import com.github.romanqed.jfunc.Function0;
 
-import java.util.Collections;
-import java.util.Map;
-import java.util.Objects;
+import java.lang.reflect.Type;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.BiConsumer;
+import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 /**
  * A {@link Repository} implementation using a hash map.
  */
 public class HashRepository implements Repository {
-    private final Map<Artifact, Function0<Object>> body;
+    private final Map<Type, Function0<Object>> body;
+    private final Set<Type> keys;
 
     /**
      * Constructs {@link HashRepository} instance with map instance, specified by the supplier.
      *
      * @param supplier the specified map supplier, must be non-null
      */
-    public HashRepository(Supplier<Map<Artifact, Function0<Object>>> supplier) {
-        Objects.requireNonNull(supplier);
+    public HashRepository(Supplier<Map<Type, Function0<Object>>> supplier) {
         this.body = Objects.requireNonNull(supplier.get());
+        this.keys = Collections.unmodifiableSet(this.body.keySet());
     }
 
     /**
@@ -29,40 +31,56 @@ public class HashRepository implements Repository {
      */
     public HashRepository() {
         this.body = new ConcurrentHashMap<>();
+        this.keys = Collections.unmodifiableSet(this.body.keySet());
     }
 
     @Override
-    public Function0<Object> get(Artifact artifact) {
-        Objects.requireNonNull(artifact);
-        return body.get(artifact);
+    public Function0<Object> get(Type type) {
+        Objects.requireNonNull(type);
+        return body.get(type);
     }
 
     @Override
-    public Iterable<Artifact> getAll() {
-        return Collections.unmodifiableCollection(body.keySet());
+    public boolean contains(Type type) {
+        Objects.requireNonNull(type);
+        return body.containsKey(type);
     }
 
     @Override
-    public boolean contains(Artifact artifact) {
-        Objects.requireNonNull(artifact);
-        return body.containsKey(artifact);
-    }
-
-    @Override
-    public void add(Artifact artifact, Function0<Object> supplier) {
-        Objects.requireNonNull(artifact);
+    public void add(Type type, Function0<Object> supplier) {
+        Objects.requireNonNull(type);
         Objects.requireNonNull(supplier);
-        body.put(artifact, supplier);
+        body.put(type, supplier);
     }
 
     @Override
-    public boolean remove(Artifact artifact) {
-        Objects.requireNonNull(artifact);
-        return body.remove(artifact) != null;
+    public boolean remove(Type type) {
+        Objects.requireNonNull(type);
+        return body.remove(type) != null;
     }
 
     @Override
     public void clear() {
         body.clear();
+    }
+
+    @Override
+    public void forEach(Consumer<? super Type> action) {
+        keys.forEach(action);
+    }
+
+    @Override
+    public Spliterator<Type> spliterator() {
+        return keys.spliterator();
+    }
+
+    @Override
+    public void forEach(BiConsumer<Type, Function0<Object>> consumer) {
+        body.forEach(consumer);
+    }
+
+    @Override
+    public Iterator<Type> iterator() {
+        return keys.iterator();
     }
 }

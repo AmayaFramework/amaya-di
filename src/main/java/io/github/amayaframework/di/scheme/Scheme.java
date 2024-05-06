@@ -1,12 +1,11 @@
 package io.github.amayaframework.di.scheme;
 
-import io.github.amayaframework.di.Artifact;
-
+import java.lang.reflect.Type;
 import java.util.Set;
 
 /**
- * An interface describing some abstract schema that defines
- * the correspondence between artifacts and a dependent entity.
+ * An interface describing some abstract scheme that defines
+ * the correspondence between types and a dependent entity.
  *
  * @param <T> dependent entity type
  */
@@ -20,9 +19,9 @@ public interface Scheme<T> {
     T getTarget();
 
     /**
-     * Returns the set of artifacts required by the dependent entity.
+     * Returns the set of types required by the dependent entity.
      *
-     * @return non-null set of artifacts
+     * @return non-null set of types
      */
-    Set<Artifact> getArtifacts();
+    Set<Type> getTypes();
 }
