@@ -1,4 +1,4 @@
-# amaya-di [![maven-central](https://img.shields.io/maven-central/v/io.github.amayaframework/amaya-di?color=blue)](https://repo1.maven.org/maven2/io/github/amayaframework/amaya-di/)
+# amaya-di [![maven-central](https://img.shields.io/maven-central/v/io.github.amayaframework/amaya-di/2.0.0?color=blue)](https://repo1.maven.org/maven2/io/github/amayaframework/amaya-di/2.0.0)
 
 A framework responsible for monitoring and automating the dependency injection process.
 
@@ -34,7 +34,7 @@ To install it, you will need:
 
 ```Groovy
 dependencies {
-    implementation group: 'io.github.amayaframework', name: 'amaya-di', version: 'LATEST'
+    implementation group: 'io.github.amayaframework', name: 'amaya-di', version: '2.0.0'
 }
 ```
 
@@ -44,7 +44,7 @@ dependencies {
 <dependency>
     <groupId>io.github.amayaframework</groupId>
     <artifactId>amaya-di</artifactId>
-    <version>LATEST</version>
+    <version>2.0.0</version>
 </dependency>
 ```
 
