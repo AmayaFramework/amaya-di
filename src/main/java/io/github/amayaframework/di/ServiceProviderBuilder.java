@@ -78,6 +78,7 @@ public interface ServiceProviderBuilder {
      * @param type           the specified type, must be non-null
      * @param implementation the specified implementation class, must extend the type type and be non-null
      * @return this {@link ServiceProviderBuilder} instance
+     * @param <T> the type of service
      */
     default <T> ServiceProviderBuilder addSingleton(JType<T> type, Class<? extends T> implementation) {
         return addSingleton(type.getType(), implementation);
@@ -91,6 +92,7 @@ public interface ServiceProviderBuilder {
      * @param type           the specified type, must be non-null
      * @param implementation the specified implementation class, must extend the type type and be non-null
      * @return this {@link ServiceProviderBuilder} instance
+     * @param <T> the type of service
      */
     default <T> ServiceProviderBuilder addTransient(JType<T> type, Class<? extends T> implementation) {
         return addTransient(type.getType(), implementation);
@@ -178,6 +180,7 @@ public interface ServiceProviderBuilder {
      * @param type     the specified type, must be non-null
      * @param supplier the specified instantiator, must be non-null
      * @return this {@link ServiceProviderBuilder} instance
+     * @param <T> the type of service
      */
     default <T> ServiceProviderBuilder addService(JType<T> type, Function0<T> supplier) {
         return addService(type.getType(), supplier);
