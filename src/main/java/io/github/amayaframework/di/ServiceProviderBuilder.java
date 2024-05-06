@@ -55,16 +55,43 @@ public interface ServiceProviderBuilder {
      */
     ServiceProviderBuilder addTransient(Type type, Class<?> implementation);
 
+    /**
+     * Adds a service by its class, which is an implementation of the specified type.
+     *
+     * @param type           the specified type, must be non-null
+     * @param implementation the specified implementation class, must extend the type type and be non-null
+     * @param wrapper        the wrapper function that will be applied to the created instantiator, must be non-null
+     * @param <T>            the service type
+     * @return this {@link ServiceProviderBuilder} instance
+     */
     default <T> ServiceProviderBuilder addService(JType<T> type,
                                                   Class<? extends T> implementation,
                                                   ServiceWrapper<T> wrapper) {
         return addService(type.getType(), implementation, wrapper);
     }
 
+    /**
+     * Adds a singleton service by its class, which is an implementation of the specified type.
+     * Singleton implies a dependency resolution policy in which each service request will return the same instance.
+     * It is guaranteed that the implementation of the policy is thread-safe.
+     *
+     * @param type           the specified type, must be non-null
+     * @param implementation the specified implementation class, must extend the type type and be non-null
+     * @return this {@link ServiceProviderBuilder} instance
+     */
     default <T> ServiceProviderBuilder addSingleton(JType<T> type, Class<? extends T> implementation) {
         return addSingleton(type.getType(), implementation);
     }
 
+    /**
+     * Adds a transient service by its class, which is an implementation of the specified type.
+     * Transient implies a dependency resolution policy in which each service request will return a new instance.
+     * It is guaranteed that the implementation of the policy is thread-safe.
+     *
+     * @param type           the specified type, must be non-null
+     * @param implementation the specified implementation class, must extend the type type and be non-null
+     * @return this {@link ServiceProviderBuilder} instance
+     */
     default <T> ServiceProviderBuilder addTransient(JType<T> type, Class<? extends T> implementation) {
         return addTransient(type.getType(), implementation);
     }
@@ -87,6 +114,7 @@ public interface ServiceProviderBuilder {
      *
      * @param type           the specified class, must be non-null
      * @param implementation the specified implementation class, must extend the service type and be non-null
+     * @param <T>            the type of service
      * @return this {@link ServiceProviderBuilder} instance
      */
     <T> ServiceProviderBuilder addSingleton(Class<T> type, Class<? extends T> implementation);
@@ -98,6 +126,7 @@ public interface ServiceProviderBuilder {
      *
      * @param type           the specified class, must be non-null
      * @param implementation the specified implementation class, must extend the service type and be non-null
+     * @param <T>            the type of service
      * @return this {@link ServiceProviderBuilder} instance
      */
     <T> ServiceProviderBuilder addTransient(Class<T> type, Class<? extends T> implementation);
@@ -143,6 +172,13 @@ public interface ServiceProviderBuilder {
      */
     ServiceProviderBuilder addService(Type type, Function0<?> supplier);
 
+    /**
+     * Adds a service by its instantiator, which creates instances of the specified type.
+     *
+     * @param type     the specified type, must be non-null
+     * @param supplier the specified instantiator, must be non-null
+     * @return this {@link ServiceProviderBuilder} instance
+     */
     default <T> ServiceProviderBuilder addService(JType<T> type, Function0<T> supplier) {
         return addService(type.getType(), supplier);
     }
@@ -155,6 +191,12 @@ public interface ServiceProviderBuilder {
      */
     ServiceProviderBuilder removeService(Type type);
 
+    /**
+     * Removes the service that implements the specified type.
+     *
+     * @param type the specified type, must be non-null
+     * @return this {@link ServiceProviderBuilder} instance
+     */
     default ServiceProviderBuilder removeService(JType<?> type) {
         return removeService(type.getType());
     }
