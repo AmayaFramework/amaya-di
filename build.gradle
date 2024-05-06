@@ -21,9 +21,6 @@ version = System.getenv('RELEASE_VERSION') ?: '1.0.0'
 
 repositories {
     mavenCentral()
-    maven {
-        url "https://oss.sonatype.org/content/repositories/comgithubromanqed-1094"
-    }
 }
 
 dependencies {
@@ -35,7 +32,7 @@ dependencies {
     jmhImplementation group: 'org.openjdk.jmh', name: 'jmh-generator-annprocess', version: '1.35'
     // Dependencies
     api group: 'com.github.romanqed', name: 'jeflect', version: '1.1.4L'
-    api group: 'com.github.romanqed', name: 'jtype', version: 'preview'
+    api group: 'com.github.romanqed', name: 'jtype', version: '1.0.0'
 }
 
 test {

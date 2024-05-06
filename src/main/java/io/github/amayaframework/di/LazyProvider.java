@@ -10,7 +10,8 @@ import java.util.Map;
 import java.util.Objects;
 
 /**
- * A lazy implementation of the {@link TypeProvider}, which allows you to organize the chain of building artifacts.
+ * A lazy implementation of the {@link TypeProvider}, which allows you to organize
+ * the chain of building type implementations.
  */
 public class LazyProvider implements TypeProvider {
     private final Repository repository;
@@ -27,9 +28,9 @@ public class LazyProvider implements TypeProvider {
     }
 
     /**
-     * Adds the deferred task of creating an artifact implementation.
+     * Adds the deferred task of creating a type implementation.
      *
-     * @param type the specified artifact
+     * @param type the specified type
      * @param task the specified task
      */
     public void add(Type type, Function0<Function0<Object>> task) {
@@ -37,9 +38,9 @@ public class LazyProvider implements TypeProvider {
     }
 
     /**
-     * Checks whether the provider contains a deferred task for the specified artifact.
+     * Checks whether the provider contains a deferred task for the specified type.
      *
-     * @param type the specified artifact
+     * @param type the specified type
      * @return true, if contains, false otherwise
      */
     public boolean contains(Type type) {
@@ -47,9 +48,9 @@ public class LazyProvider implements TypeProvider {
     }
 
     /**
-     * Removes the deferred task associated with the specified artifact.
+     * Removes the deferred task associated with the specified type.
      *
-     * @param type the specified artifact
+     * @param type the specified type
      * @return true if the task was removed, false otherwise
      */
     public boolean remove(Type type) {
@@ -84,7 +85,7 @@ public class LazyProvider implements TypeProvider {
         }
         var function = Exceptions.suppress(provided);
         repository.add(type, function);
-        // It is important to request the artifact again from the repository so that it can apply the wrapper.
+        // It is important to request the type again from the repository so that it can apply the wrapper.
         return repository.get(type);
     }
 }

@@ -17,13 +17,13 @@ public interface ServiceProvider {
      */
     Repository getRepository();
 
-    //    /**
-//     * Searches for an instantiator for the specified artifact.
-//     *
-//     * @param artifact the specified artifact
-//     * @param <T>      service type
-//     * @return null or empty stub, if artifact not found, instantiator implementation otherwise
-//     */
+    /**
+     * Searches for an instantiator for the specified type.
+     *
+     * @param type the specified type
+     * @param <T>  service type
+     * @return null or empty stub, if type not found, instantiator implementation otherwise
+     */
     <T> Function0<T> get(Type type);
 
     /**
@@ -39,13 +39,13 @@ public interface ServiceProvider {
         return get(type.getType());
     }
 
-    //    /**
-//     * Instantiates the service requested by specified artifact.
-//     *
-//     * @param artifact the specified artifact
-//     * @param <T>      service type
-//     * @return null, if artifact not found, service instance otherwise
-//     */
+    /**
+     * Instantiates the service requested by specified type.
+     *
+     * @param type the specified type
+     * @param <T>  service type
+     * @return null, if type not found, service instance otherwise
+     */
     <T> T instantiate(Type type);
 
     /**

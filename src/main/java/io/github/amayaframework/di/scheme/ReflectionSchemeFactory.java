@@ -8,59 +8,59 @@ import java.lang.reflect.*;
 import java.util.*;
 import java.util.stream.Collectors;
 
-///**
-// * A factory that creates a class schema based on information obtained through a java reflection api.
-// * The scheme is based on the following rules:
-// * <br>
-// * 1. The constructor is selected from the public ones,
-// * and this choice is made strictly unambiguously, i.e. the following cases will be incorrect:
-// * <pre>
-// *
-// *     class Service1 {
-// *         private Service1() {}
-// *     }
-// *     ...
-// *     class Service2 {
-// *         public Service2(int i) {}
-// *         public Service2() {}
-// *     }
-// * </pre>
-// * However, if the class contains several public constructors,
-// * you can specify the necessary one using a marker annotation:
-// * <pre>
-// *     class Service {
-// *         public Service(int i) {}
-// *
-// *        {@literal @}Inject
-// *         public Service() {}
-// *     }
-// * </pre>
-// * 2. The fields are selected exclusively from the virtual and public ones marked with a marker annotation.
-// * 3. Methods are selected from public ones marked with a marker annotation and containing at least 1 parameter,
-// * otherwise, even if there is an annotation, the method will be discarded.
-// * <br>
-// * If the method is static, it must match the following pattern:
-// * <pre>
-// *     class Service {
-// *         public static void setter(? super Service, Dependency d, ...) {}
-// *     }
-// * </pre>
-// * Parameterized constructors and methods are not supported,
-// * and super-wildcards are not supported for statically defined generics.
-// * In other cases, type inference for wildcards will work as follows:
-// * <br>
-// * {@code ? => Object}
-// * <br>
-// * {@code ? extends Object => Object}
-// * <br>
-// * {@code ? extends Type => Type}
-// */
+/**
+ * A factory that creates a class scheme based on information obtained through a java reflection api.
+ * The scheme is based on the following rules:
+ * <br>
+ * 1. The constructor is selected from the public ones,
+ * and this choice is made strictly unambiguously, i.e. the following cases will be incorrect:
+ * <pre>
+ *
+ *     class Service1 {
+ *         private Service1() {}
+ *     }
+ *     ...
+ *     class Service2 {
+ *         public Service2(int i) {}
+ *         public Service2() {}
+ *     }
+ * </pre>
+ * However, if the class contains several public constructors,
+ * you can specify the necessary one using a marker annotation:
+ * <pre>
+ *     class Service {
+ *         public Service(int i) {}
+ *
+ *        {@literal @}Inject
+ *         public Service() {}
+ *     }
+ * </pre>
+ * 2. The fields are selected exclusively from the virtual and public ones marked with a marker annotation.
+ * 3. Methods are selected from public ones marked with a marker annotation and containing at least 1 parameter,
+ * otherwise, even if there is an annotation, the method will be discarded.
+ * <br>
+ * If the method is static, it must match the following pattern:
+ * <pre>
+ *     class Service {
+ *         public static void setter(? super Service, Dependency d, ...) {}
+ *     }
+ * </pre>
+ * Parameterized constructors and methods are not supported,
+ * and super-wildcards are not supported for statically defined generics.
+ * In other cases, type inference for wildcards will work as follows:
+ * <br>
+ * {@code ? => Object}
+ * <br>
+ * {@code ? extends Object => Object}
+ * <br>
+ * {@code ? extends Type => Type}
+ */
 public final class ReflectionSchemeFactory implements SchemeFactory {
     private final Class<? extends Annotation> annotation;
 
     /**
-     * Constructs a factory that will use the specified artifact factory and
-     * annotation as a marker to identify the dependent members of the class.
+     * Constructs a factory that will use the specified annotation
+     * as a marker to identify the dependent members of the class.
      *
      * @param annotation the specified annotation type, must be non-null
      */

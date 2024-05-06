@@ -86,7 +86,7 @@ public class CheckedProviderBuilder extends AbstractProviderBuilder {
         }
         // Build repository
         var repository = Objects.requireNonNullElse(this.repository, new RepositoryImpl());
-        // Validate missing artifacts
+        // Validate missing types
         for (var scheme : schemes.values()) {
             var types = scheme.getTypes();
             for (var type : types) {

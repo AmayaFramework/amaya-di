@@ -10,50 +10,50 @@ import java.util.function.BiConsumer;
  */
 public interface Repository extends Iterable<Type> {
 
-    //    /**
-//     * Gets the instantiator associated with the specified type.
-//     * <br>
-//     * Important:
-//     * if null was returned, it definitely means that the instantiator was not found,
-//     * but the opposite is NOT TRUE.
-//     * <br>
-//     * For example,
-//     * <pre>
-//     * var func = repository.get(Artifact.of(String.class));
-//     * System.out.println(func.invoke()); =&gt; "null"
-//     * </pre>
-//     * Here func is not null, but will always return null.
-//     * <br>
-//     * So, to unambiguously determine whether the repository contains an type or not,
-//     * use {@link Repository#contains(Artifact)}.
-//     *
-//     * @param type the specified type, must be non-null
-//     * @return null or {@link Function0} instance
-//     */
+    /**
+     * Gets the instantiator associated with the specified type.
+     * <br>
+     * Important:
+     * if null was returned, it definitely means that the instantiator was not found,
+     * but the opposite is NOT TRUE.
+     * <br>
+     * For example,
+     * <pre>
+     * var func = repository.get(String.class);
+     * System.out.println(func.invoke()); =&gt; "null"
+     * </pre>
+     * Here func is not null, but will always return null.
+     * <br>
+     * So, to unambiguously determine whether the repository contains a type or not,
+     * use {@link Repository#contains(Type)}.
+     *
+     * @param type the specified type, must be non-null
+     * @return null or {@link Function0} instance
+     */
     Function0<Object> get(Type type);
 
-    //    /**
-//     * Checks whether the repository contains an instantiator for the specified type.
-//     *
-//     * @param type the specified type, must be non-null
-//     * @return true, if contains, false otherwise
-//     */
+    /**
+     * Checks whether the repository contains an instantiator for the specified type.
+     *
+     * @param type the specified type, must be non-null
+     * @return true, if contains, false otherwise
+     */
     boolean contains(Type type);
 
-    //    /**
-//     * Adds an instantiator associated with the specified type, overwriting the previous one.
-//     *
-//     * @param type the specified type, must be non-null
-//     * @param supplier the specified instantiator, must be non-null
-//     */
+    /**
+     * Adds an instantiator associated with the specified type, overwriting the previous one.
+     *
+     * @param type     the specified type, must be non-null
+     * @param supplier the specified instantiator, must be non-null
+     */
     void add(Type type, Function0<Object> supplier);
 
-    //    /**
-//     * Removes the instantiator associated with the specified type.
-//     *
-//     * @param type the specified type, must be non-null
-//     * @return true if the instantiator was removed, false otherwise
-//     */
+    /**
+     * Removes the instantiator associated with the specified type.
+     *
+     * @param type the specified type, must be non-null
+     * @return true if the instantiator was removed, false otherwise
+     */
     boolean remove(Type type);
 
     /**

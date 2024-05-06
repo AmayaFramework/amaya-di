@@ -7,7 +7,7 @@ import java.util.Objects;
 import java.util.Set;
 
 /**
- * A scheme that defines the correspondence between set of artifacts and class.
+ * A scheme that defines the correspondence between set of types and class.
  */
 public final class ClassScheme extends AbstractScheme<Class<?>> {
     private final Set<MethodScheme> methodSchemes;
@@ -73,9 +73,9 @@ public final class ClassScheme extends AbstractScheme<Class<?>> {
     }
 
     /**
-     * Returns all artifacts that class members depend on.
+     * Returns all types that class members depend on.
      *
-     * @return the set of artifacts
+     * @return the set of types
      */
     @Override
     public Set<Type> getTypes() {

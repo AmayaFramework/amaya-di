@@ -70,7 +70,7 @@ public final class BytecodeStubFactory implements StubFactory {
                 AsmUtil.EMPTY_DESCRIPTOR,
                 false
         );
-        // Put artifact providers to fields
+        // Put type providers to fields
         for (var i = 0; i < order.length; ++i) {
             // Load this-ref and array-ref
             visitor.visitVarInsn(Opcodes.ALOAD, 0);
@@ -101,7 +101,7 @@ public final class BytecodeStubFactory implements StubFactory {
                 field,
                 FUNCTION0.getDescriptor()
         );
-        // Get artifact implementation
+        // Get type implementation
         visitor.visitMethodInsn(
                 Opcodes.INVOKEINTERFACE,
                 FUNCTION0.getInternalName(),
@@ -109,7 +109,7 @@ public final class BytecodeStubFactory implements StubFactory {
                 Type.getMethodDescriptor(INVOKE),
                 true
         );
-        // Cast implementation to artifact type
+        // Cast implementation to given type
         visitor.visitTypeInsn(Opcodes.CHECKCAST, Type.getInternalName(TypeUtil.getRawType(type)));
     }
 
@@ -149,7 +149,7 @@ public final class BytecodeStubFactory implements StubFactory {
         AsmUtil.invoke(visitor, constructor.getTarget());
         // Process field schemes
         for (var field : fields) {
-            // ref.<field> = (ArtifactType) this.<artifact>.invoke();
+            // ref.<field> = (Type) this.<type>.invoke();
             visitor.visitInsn(Opcodes.DUP);
             var target = field.getTarget();
             var type = field.getType();
@@ -186,7 +186,7 @@ public final class BytecodeStubFactory implements StubFactory {
                 AsmUtil.OBJECT.getInternalName(),
                 new String[]{FUNCTION0.getInternalName()}
         );
-        // Generate artifact-field mapping
+        // Generate type-field mapping
         var mapping = Mapping.of(types);
         // Declare fields
         for (var field : mapping.fields.keySet()) {

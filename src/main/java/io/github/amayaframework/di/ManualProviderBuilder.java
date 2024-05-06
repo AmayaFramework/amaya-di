@@ -13,15 +13,15 @@ import java.lang.reflect.Type;
 public interface ManualProviderBuilder extends ServiceProviderBuilder {
 
     /**
-     * Adds an artifact implementation provided by the specified function.
+     * Adds a type implementation provided by the specified function.
      * <br>
      * IMPORTANT: the result of a function call is not checked,
      * if a critical situation occurs during its operation, it will not be processed in any way
-     * (i.e., the function itself must control the absence of artifacts, cyclic dependencies, etc.).
+     * (i.e., the function itself must control the absence of types, cyclic dependencies, etc.).
      * <br>
      * Use this function only if you know what you are doing!
      *
-     * @param type     the specified artifact, must be non-null
+     * @param type     the specified type, must be non-null
      * @param function the specified function, must be non-null
      * @return this {@link ManualProviderBuilder} instance
      */

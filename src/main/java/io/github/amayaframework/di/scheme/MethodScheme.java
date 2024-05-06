@@ -6,16 +6,16 @@ import java.util.Arrays;
 import java.util.Set;
 
 /**
- * A scheme that defines the correspondence between set of artifacts and class method.
+ * A scheme that defines the correspondence between set of types and class method.
  */
 public final class MethodScheme extends AbstractExecutableScheme<Method> {
 
     /**
-     * Constructs method scheme for specified method, artifact set and its mapping.
+     * Constructs method scheme for specified method, type set and its mapping.
      *
      * @param target  the specified method, must be non-null
-     * @param types   the artifact set, must be non-null
-     * @param mapping the artifact mapping, must be non-null
+     * @param types   the type set, must be non-null
+     * @param mapping the type mapping, must be non-null
      */
     public MethodScheme(Method target, Set<Type> types, Type[] mapping) {
         super(target, types, mapping);

@@ -49,12 +49,12 @@ public abstract class AbstractProviderBuilder implements ServiceProviderBuilder 
         this.repository = null;
     }
 
-    //    /**
-//     * Determines whether an type implementation exists.
-//     *
-//     * @param type the specified type
-//     * @return true, if exists, false otherwise
-//     */
+    /**
+     * Determines whether a type implementation exists.
+     *
+     * @param type the specified type
+     * @return true, if exists, false otherwise
+     */
     protected boolean canResolve(Type type) {
         return strong.containsKey(type) || any.containsKey(type);
     }
@@ -73,7 +73,7 @@ public abstract class AbstractProviderBuilder implements ServiceProviderBuilder 
         Objects.requireNonNull(type);
         Objects.requireNonNull(implementation);
         Objects.requireNonNull(wrapper);
-        // Check if the implementation is a child class of an type type
+        // Check if the implementation is a child class of a given type
         var parent = TypeUtil.getRawType(type);
         if (!parent.isAssignableFrom(implementation)) {
             throw new IllegalArgumentException("The implementation is not a child class of the type type");
@@ -101,7 +101,7 @@ public abstract class AbstractProviderBuilder implements ServiceProviderBuilder 
         Objects.requireNonNull(type);
         Objects.requireNonNull(implementation);
         Objects.requireNonNull(wrapper);
-        // Check if the implementation is a child class of an type type
+        // Check if the implementation is a child class of a given type
         if (!type.isAssignableFrom(implementation)) {
             throw new IllegalArgumentException("The implementation is not a child class of the type type");
         }
