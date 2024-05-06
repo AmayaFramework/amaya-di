@@ -34,7 +34,7 @@
 
 ```Groovy
 dependencies {
-    implementation group: 'io.github.amayaframework', name: 'amaya-di', version: 'LATEST'
+    implementation group: 'io.github.amayaframework', name: 'amaya-di', version: '1.3.1'
 }
 ```
 
@@ -44,7 +44,7 @@ dependencies {
 <dependency>
     <groupId>io.github.amayaframework</groupId>
     <artifactId>amaya-di</artifactId>
-    <version>LATEST</version>
+    <version>1.3.1</version>
 </dependency>
 ```
 
