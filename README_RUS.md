@@ -164,8 +164,8 @@ public class Main {
     public static void main(String[] args) {
         var provider = Builders
                 .createChecked()
-                .addService(new JType<List<String>>(){}, () -> List.of("Hi", "World"))
-                .addService(new JType<List<Integer>>(){}, () -> List.of(1, 2, 3))
+                .addService(new JType<>(){}, () -> List.of("Hi", "World"))
+                .addService(new JType<>(){}, () -> List.of(1, 2, 3))
                 .addTransient(App.class)
                 .build();
         System.out.println(provider.instantiate(App.class));
