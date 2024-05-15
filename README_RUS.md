@@ -1,6 +1,7 @@
 # amaya-di [![maven-central](https://img.shields.io/maven-central/v/io.github.amayaframework/amaya-di/2.0.0?color=blue)](https://repo1.maven.org/maven2/io/github/amayaframework/amaya-di/2.0.0)
 
 Фреймворк, отвечающий за контроль и автоматизацию процесса внедрения зависимостей.
+Всего в ~1.23 медленнее скомпилированного кода! (См. [бенчмарк](#бенчмарк)).
 
 [English version](README.md)
 
@@ -359,8 +360,8 @@ gradle jmh
 # VM invoker: ~/.jdks/corretto-11.0.22/bin/java.exe
 
 Benchmark                                      Mode  Cnt   Score   Error  Units
-ServiceProviderBenchmark.benchAmayaInjection   avgt   25  17,586 ± 0,240  ns/op
-ServiceProviderBenchmark.benchManualInjection  avgt   25  11,586 ± 0,085  ns/op
+ServiceProviderBenchmark.benchAmayaInjection   avgt   25  14,142 ± 0,099  ns/op
+ServiceProviderBenchmark.benchManualInjection  avgt   25  11,482 ± 0,110  ns/op
 ```
 
 ## Используемые зависимости
