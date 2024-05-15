@@ -1,7 +1,8 @@
 # amaya-di [![maven-central](https://img.shields.io/maven-central/v/io.github.amayaframework/amaya-di/2.0.0?color=blue)](https://repo1.maven.org/maven2/io/github/amayaframework/amaya-di/2.0.0)
 
 Фреймворк, отвечающий за контроль и автоматизацию процесса внедрения зависимостей.
-Всего в ~1.23 медленнее скомпилированного кода! (См. [бенчмарк](#бенчмарк)).
+<br>
+**Всего в ~1.23 медленнее скомпилированного кода!** (См. [бенчмарк](#бенчмарк)).
 
 [English version](README.md)
 

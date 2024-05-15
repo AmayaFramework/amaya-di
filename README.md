@@ -1,7 +1,8 @@
 # amaya-di [![maven-central](https://img.shields.io/maven-central/v/io.github.amayaframework/amaya-di/2.0.0?color=blue)](https://repo1.maven.org/maven2/io/github/amayaframework/amaya-di/2.0.0)
 
 A framework responsible for monitoring and automating the dependency injection process.
-Only ~1.23 slower than compiled code! (See [benchmark](#benchmark)).
+<br>
+**Only ~1.23 slower than compiled code!** (See [benchmark](#benchmark)).
 
 [Russian version](README_RUS.md)
 
