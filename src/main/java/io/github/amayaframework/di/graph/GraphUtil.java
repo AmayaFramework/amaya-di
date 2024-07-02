@@ -103,28 +103,4 @@ public final class GraphUtil {
         }
         return ret;
     }
-
-    private static final class Node<E> {
-        E value;
-        int index;
-        int low;
-        List<Node<E>> adjacents;
-        boolean onStack;
-
-        Node(E value) {
-            this.value = value;
-            this.index = -1;
-            this.low = -1;
-        }
-    }
-
-    private static final class Entry<E> {
-        Node<E> node;
-        int time;
-
-        Entry(Node<E> node, int time) {
-            this.node = node;
-            this.time = time;
-        }
-    }
 }
