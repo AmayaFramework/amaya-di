@@ -9,10 +9,12 @@ public class ServiceProviderTest extends Assertions {
         return builder
                 .addTransient(Service1.class)
                 .addService(
-                        Types.ofOwned(ServiceProviderTest.class, Service2.class, String.class),
+                        Types.of(Service2.class, String.class),
                         () -> new Service2<>("2")
                 )
                 .addTransient(App.class)
+                .addSingleton(Service3.class)
+                .addInstance(String.class, "SomeString")
                 .build();
     }
 
@@ -24,7 +26,11 @@ public class ServiceProviderTest extends Assertions {
                 () -> assertNotNull(app.s1),
                 () -> assertNotNull(app.s2),
                 () -> assertNotNull(app.s2.value),
-                () -> assertEquals("2", app.s2.value)
+                () -> assertNotNull(app.s3),
+                () -> assertNotNull(app.s31),
+                () -> assertEquals(app.s3, app.s31),
+                () -> assertEquals("2", app.s2.value),
+                () -> assertEquals("SomeString", app.str)
         );
     }
 
@@ -49,13 +55,22 @@ public class ServiceProviderTest extends Assertions {
         }
     }
 
+    public static final class Service3 {
+    }
+
     public static final class App {
         final Service1 s1;
         final Service2<String> s2;
+        final Service3 s3;
+        final Service3 s31;
+        final String str;
 
-        public App(Service1 s1, Service2<String> s2) {
+        public App(Service1 s1, Service2<String> s2, Service3 s3, Service3 s31, String str) {
             this.s1 = s1;
             this.s2 = s2;
+            this.s3 = s3;
+            this.s31 = s31;
+            this.str = str;
         }
     }
 }
