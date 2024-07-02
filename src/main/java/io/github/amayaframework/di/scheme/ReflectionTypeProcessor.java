@@ -7,7 +7,7 @@ import java.lang.reflect.*;
 /**
  * A simple reflective implementation of the {@link TypeProcessor}. Ignores any annotations.
  */
-public final class ReflectionTypeProcessor implements TypeProcessor {
+public class ReflectionTypeProcessor implements TypeProcessor {
 
     private static Type process(Type type) {
         // process(Owner).RawType<process(T1), process(T2), ...>
