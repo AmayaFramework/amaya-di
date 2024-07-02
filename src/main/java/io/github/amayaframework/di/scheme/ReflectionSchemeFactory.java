@@ -1,8 +1,5 @@
 package io.github.amayaframework.di.scheme;
 
-import com.github.romanqed.jtype.TaggedType;
-import com.github.romanqed.jtype.Types;
-
 import java.lang.annotation.Annotation;
 import java.lang.reflect.*;
 import java.util.*;
@@ -56,7 +53,21 @@ import java.util.stream.Collectors;
  * {@code ? extends Type => Type}
  */
 public final class ReflectionSchemeFactory implements SchemeFactory {
+    private static final TypeProcessor TYPE_PROCESSOR = new ReflectionTypeProcessor();
+    private final TypeProcessor processor;
     private final Class<? extends Annotation> annotation;
+
+    /**
+     * Constructs a factory that will use the specified type processor and
+     * annotation as a marker to identify the dependent members of the class.
+     *
+     * @param processor  the specified type processor, must be non-null
+     * @param annotation the specified annotation type, must be non-null
+     */
+    public ReflectionSchemeFactory(TypeProcessor processor, Class<? extends Annotation> annotation) {
+        this.processor = Objects.requireNonNull(processor);
+        this.annotation = annotation;
+    }
 
     /**
      * Constructs a factory that will use the specified annotation
@@ -65,56 +76,24 @@ public final class ReflectionSchemeFactory implements SchemeFactory {
      * @param annotation the specified annotation type, must be non-null
      */
     public ReflectionSchemeFactory(Class<? extends Annotation> annotation) {
-        this.annotation = Objects.requireNonNull(annotation);
+        this(TYPE_PROCESSOR, annotation);
     }
 
-    private static Type process(Type type) {
-        // process(Owner).RawType<process(T1), process(T2), ...>
-        if (type instanceof ParameterizedType) {
-            var parameterized = (ParameterizedType) type;
-            var arguments = parameterized.getActualTypeArguments();
-            var length = arguments.length;
-            var parameters = new Type[length];
-            for (var i = 0; i < length; ++i) {
-                parameters[i] = process(arguments[i]);
-            }
-            return Types.ofOwned(
-                    process(parameterized.getOwnerType()),
-                    parameterized.getRawType(),
-                    parameters
-            );
-        }
-        // process(Type)[][][]...
-        if (type instanceof GenericArrayType) {
-            var array = (GenericArrayType) type;
-            return Types.of(process(array.getGenericComponentType()));
-        }
-        // Turn wildcards to its upper bounds
-        if (type instanceof WildcardType) {
-            return process(((WildcardType) type).getUpperBounds()[0]);
-        }
-        // process(type):tag1:tag2:...
-        if (type instanceof TaggedType) {
-            var tagged = (TaggedType) type;
-            return Types.of(process(tagged.getRawType()), tagged.getTags());
-        }
-        return type;
-    }
-
-    private static void process(Parameter[] parameters, int start, Set<Type> types, Type[] mapping) {
+    private void process(Parameter[] parameters, int start, Set<Type> types, Type[] mapping) {
         for (var i = start; i < parameters.length; ++i) {
-            var type = parameters[i].getParameterizedType();
-            var processed = process(type);
+            var parameter = parameters[i];
+            var type = parameter.getParameterizedType();
+            var processed = processor.process(type, parameter);
             types.add(processed);
             mapping[i - start] = processed;
         }
     }
 
-    private static void process(Parameter[] parameters, Set<Type> types, Type[] mapping) {
+    private void process(Parameter[] parameters, Set<Type> types, Type[] mapping) {
         process(parameters, 0, types, mapping);
     }
 
-    private static ConstructorScheme create(Constructor<?> constructor) {
+    private ConstructorScheme create(Constructor<?> constructor) {
         if (constructor.getTypeParameters().length != 0) {
             throw new IllegalMemberException("Cannot use parameterized constructor", constructor);
         }
@@ -124,7 +103,7 @@ public final class ReflectionSchemeFactory implements SchemeFactory {
         return new ConstructorScheme(constructor, types, mapping);
     }
 
-    private static MethodScheme create(Method method) {
+    private MethodScheme create(Method method) {
         if (method.getTypeParameters().length != 0) {
             throw new IllegalMemberException("Cannot use parameterized method", method);
         }
@@ -187,7 +166,7 @@ public final class ReflectionSchemeFactory implements SchemeFactory {
             return Collections.emptySet();
         }
         var ret = new HashSet<FieldScheme>();
-        fields.forEach(field -> ret.add(new FieldScheme(field, process(field.getGenericType()))));
+        fields.forEach(field -> ret.add(new FieldScheme(field, processor.process(field.getGenericType(), field))));
         return ret;
     }
 
