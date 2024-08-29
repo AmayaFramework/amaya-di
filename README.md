@@ -140,8 +140,8 @@ public class Main {
     public static void main(String[] args) {
         var provider = Builders
                 .createChecked()
-                .addInstance(new JType<>() {}, List.of("Hi", "World"))
-                .addInstance(new JType<>() {}, List.of(1, 2, 3))
+                .addInstance(new JType<>(){}, List.of("Hi", "World"))
+                .addInstance(new JType<>(){}, List.of(1, 2, 3))
                 .addTransient(App.class)
                 .build();
         System.out.println(provider.get(App.class));
