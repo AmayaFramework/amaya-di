@@ -4,6 +4,7 @@ import com.github.romanqed.jfunc.Function0;
 import com.github.romanqed.jtype.JType;
 
 import java.lang.reflect.Type;
+import java.util.Objects;
 
 /**
  * An interface describing an abstract {@link ServiceProvider} builder.
@@ -150,8 +151,13 @@ public interface ServiceProviderBuilder {
      * @param implementation the specified instance, may be null
      * @return this {@link ServiceProviderBuilder} instance
      */
-    default ServiceProviderBuilder addInstance(Type type, Object implementation) {
-        return addService(type, () -> implementation);
+    default ServiceProviderBuilder addInstance(Type type, Object instance) {
+        return addService(type, () -> instance);
+    }
+
+    default ServiceProviderBuilder addInstance(Object instance) {
+        Objects.requireNonNull(instance);
+        return addService(instance.getClass(), () -> instance);
     }
 
     /**

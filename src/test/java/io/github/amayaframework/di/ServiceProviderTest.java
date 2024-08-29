@@ -20,7 +20,7 @@ public class ServiceProviderTest extends Assertions {
 
     public void testProvider(ServiceProviderBuilder builder) {
         var provider = create(builder);
-        var app = provider.instantiate(App.class);
+        var app = provider.get(App.class);
         assertAll(
                 () -> assertNotNull(app),
                 () -> assertNotNull(app.s1),

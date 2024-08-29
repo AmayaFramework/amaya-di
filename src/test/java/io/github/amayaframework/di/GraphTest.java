@@ -41,7 +41,7 @@ public class GraphTest extends Assertions {
     }
 
     public void testSSC(Graph<Integer> graph, Set<Set<Integer>> cycles) {
-        var found = GraphUtil.findStronglyConnectedComponents(graph);
+        var found = GraphUtil.findSCC(graph);
         assertAll(
                 () -> assertEquals(cycles.size(), found.size()),
                 () -> {

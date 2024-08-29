@@ -78,7 +78,7 @@ public class CheckedProviderBuilder extends AbstractProviderBuilder {
         // Build dependency graph
         var graph = makeGraph(schemes);
         // Find for strongly connected components
-        var components = GraphUtil.findStronglyConnectedComponents(graph);
+        var components = GraphUtil.findSCC(graph);
         for (var component : components) {
             if (component.size() > 1) {
                 throw new CycleFoundException(component);

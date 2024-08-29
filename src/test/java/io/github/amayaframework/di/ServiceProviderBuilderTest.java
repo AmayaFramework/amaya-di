@@ -14,7 +14,7 @@ public class ServiceProviderBuilderTest extends Assertions {
                 .addTransient(Service.class)
                 .addTransient(App.class)
                 .build();
-        var app = provider.instantiate(App.class);
+        var app = provider.get(App.class);
         assertAll(
                 () -> assertNotNull(app),
                 () -> assertNotNull(app.service)
@@ -74,7 +74,7 @@ public class ServiceProviderBuilderTest extends Assertions {
                     return () -> new Service2(s.invoke());
                 })
                 .build();
-        assertNotNull(provider.instantiate(ManualApp.class));
+        assertNotNull(provider.get(ManualApp.class));
     }
 
     public void testMutualExclusion(ServiceProviderBuilder builder) {
@@ -83,7 +83,7 @@ public class ServiceProviderBuilderTest extends Assertions {
                 .addService(Service.class, () -> null)
                 .addTransient(Service.class)
                 .build();
-        assertNotNull(provider.instantiate(App.class));
+        assertNotNull(provider.get(App.class));
     }
 
     @Test
@@ -98,7 +98,7 @@ public class ServiceProviderBuilderTest extends Assertions {
                 .addManual(Service.class, v -> () -> null)
                 .addTransient(Service.class)
                 .build();
-        assertNotNull(provider.instantiate(App.class));
+        assertNotNull(provider.get(App.class));
     }
 
     @Test

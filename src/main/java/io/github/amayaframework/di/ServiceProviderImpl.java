@@ -1,7 +1,6 @@
 package io.github.amayaframework.di;
 
 import com.github.romanqed.jfunc.Exceptions;
-import com.github.romanqed.jfunc.Function0;
 
 import java.lang.reflect.Type;
 
@@ -19,20 +18,8 @@ final class ServiceProviderImpl implements ServiceProvider {
 
     @Override
     @SuppressWarnings("unchecked")
-    public <T> Function0<T> get(Type type) {
-        return (Function0<T>) repository.get(type);
-    }
-
-    @Override
-    @SuppressWarnings("unchecked")
-    public <T> Function0<T> get(Class<T> type) {
-        return (Function0<T>) repository.get(type);
-    }
-
-    @Override
-    @SuppressWarnings("unchecked")
-    public <T> T instantiate(Type type) {
-        var supplier = get(type);
+    public <T> T get(Type type) {
+        var supplier = repository.get(type);
         if (supplier == null) {
             return null;
         }
@@ -40,11 +27,12 @@ final class ServiceProviderImpl implements ServiceProvider {
     }
 
     @Override
-    public <T> T instantiate(Class<T> type) {
-        var supplier = get(type);
+    @SuppressWarnings("unchecked")
+    public <T> T get(Class<T> type) {
+        var supplier = repository.get(type);
         if (supplier == null) {
             return null;
         }
-        return Exceptions.suppress(supplier);
+        return (T) Exceptions.suppress(supplier);
     }
 }

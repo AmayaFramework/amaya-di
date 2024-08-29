@@ -75,8 +75,8 @@ public class HashRepository implements Repository {
     }
 
     @Override
-    public void forEach(BiConsumer<Type, Function0<Object>> consumer) {
-        body.forEach(consumer);
+    public void forEach(BiConsumer<Type, Function0<Object>> action) {
+        body.forEach(action);
     }
 
     @Override
