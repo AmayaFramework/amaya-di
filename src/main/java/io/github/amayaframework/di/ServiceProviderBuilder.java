@@ -147,14 +147,20 @@ public interface ServiceProviderBuilder {
     /**
      * Adds a service by its instance, which will continue to be used unchanged.
      *
-     * @param type           the specified type, must be non-null
-     * @param implementation the specified instance, may be null
+     * @param type     the specified type, must be non-null
+     * @param instance the specified instance, may be null
      * @return this {@link ServiceProviderBuilder} instance
      */
     default ServiceProviderBuilder addInstance(Type type, Object instance) {
         return addService(type, () -> instance);
     }
 
+    /**
+     * Adds a service by its instance, which will continue to be used unchanged.
+     *
+     * @param instance the specified instance, must be non-null (to determine service type)
+     * @return this {@link ServiceProviderBuilder} instance
+     */
     default ServiceProviderBuilder addInstance(Object instance) {
         Objects.requireNonNull(instance);
         return addService(instance.getClass(), () -> instance);
