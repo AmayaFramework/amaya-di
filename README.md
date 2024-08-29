@@ -34,7 +34,7 @@ To install it, you will need:
 
 ```Groovy
 dependencies {
-    implementation group: 'io.github.amayaframework', name: 'amaya-di', version: '2.0.0'
+    implementation group: 'io.github.amayaframework', name: 'amaya-di', version: '2.1.0'
 }
 ```
 
@@ -44,7 +44,7 @@ dependencies {
 <dependency>
     <groupId>io.github.amayaframework</groupId>
     <artifactId>amaya-di</artifactId>
-    <version>2.0.0</version>
+    <version>2.1.0</version>
 </dependency>
 ```
 
@@ -62,9 +62,9 @@ public class Main {
     public static void main(String[] args) {
         var provider = Builders
                 .createChecked()
-                .addService(String.class, () -> "Hello, world!")
+                .addInstance("Hello, world!")
                 .build();
-        System.out.println(provider.instantiate(String.class));
+        System.out.println(provider.get(String.class));
     }
 }
 ```
@@ -82,8 +82,8 @@ public class Main {
                 .addSingleton(Service2.class)
                 .addTransient(App.class)
                 .build();
-        System.out.println(provider.instantiate(App.class));
-        System.out.println(provider.instantiate(App.class));
+        System.out.println(provider.get(App.class));
+        System.out.println(provider.get(App.class));
     }
 
     public static final class Service1 {
@@ -140,13 +140,11 @@ public class Main {
     public static void main(String[] args) {
         var provider = Builders
                 .createChecked()
-                .addService(new JType<List<String>>() {
-                }, () -> List.of("Hi", "World"))
-                .addService(new JType<List<Integer>>() {
-                }, () -> List.of(1, 2, 3))
+                .addService(new JType<List<String>>() {}, () -> List.of("Hi", "World"))
+                .addService(new JType<List<Integer>>() {}, () -> List.of(1, 2, 3))
                 .addTransient(App.class)
                 .build();
-        System.out.println(provider.instantiate(App.class));
+        System.out.println(provider.get(App.class));
     }
 
     public static final class App {
@@ -189,7 +187,7 @@ public class Main {
                 .addTransient(Service4.class)
                 .addTransient(App.class)
                 .build();
-        System.out.println(provider.instantiate(App.class).s1);
+        System.out.println(provider.get(App.class).s1);
     }
 
     public static final class Service1 {
@@ -254,7 +252,7 @@ public class Main {
                     .createChecked()
                     .addTransient(App.class)
                     .build();
-            System.out.println(provider.instantiate(App.class));
+            System.out.println(provider.get(App.class));
         } catch (TypeNotFoundException e) {
             System.out.println(e.getType() + " not found");
         }
@@ -296,7 +294,7 @@ public class Main {
                     .addTransient(Service.class)
                     .addTransient(App.class)
                     .build();
-            System.out.println(provider.instantiate(App.class));
+            System.out.println(provider.get(App.class));
         } catch (CycleFoundException e) {
             System.out.println("Found cycle: " + e.getCycle());
         }
