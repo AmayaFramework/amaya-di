@@ -26,7 +26,7 @@ public interface ServiceProviderBuilder {
      * Adds a service by its class, which is an implementation of the specified type.
      *
      * @param type           the specified type, must be non-null
-     * @param implementation the specified implementation class, must extend the type type and be non-null
+     * @param implementation the specified implementation class, must extend the service type and be non-null
      * @param wrapper        the wrapper function that will be applied to the created instantiator, must be non-null
      * @param <T>            the service type
      * @return this {@link ServiceProviderBuilder} instance
@@ -39,7 +39,7 @@ public interface ServiceProviderBuilder {
      * It is guaranteed that the implementation of the policy is thread-safe.
      *
      * @param type           the specified type, must be non-null
-     * @param implementation the specified implementation class, must extend the type type and be non-null
+     * @param implementation the specified implementation class, must extend the service type and be non-null
      * @return this {@link ServiceProviderBuilder} instance
      */
     ServiceProviderBuilder addSingleton(Type type, Class<?> implementation);
@@ -50,7 +50,7 @@ public interface ServiceProviderBuilder {
      * It is guaranteed that the implementation of the policy is thread-safe.
      *
      * @param type           the specified type, must be non-null
-     * @param implementation the specified implementation class, must extend the type type and be non-null
+     * @param implementation the specified implementation class, must extend the service type and be non-null
      * @return this {@link ServiceProviderBuilder} instance
      */
     ServiceProviderBuilder addTransient(Type type, Class<?> implementation);
@@ -59,7 +59,7 @@ public interface ServiceProviderBuilder {
      * Adds a service by its class, which is an implementation of the specified type.
      *
      * @param type           the specified type, must be non-null
-     * @param implementation the specified implementation class, must extend the type type and be non-null
+     * @param implementation the specified implementation class, must extend the service type and be non-null
      * @param wrapper        the wrapper function that will be applied to the created instantiator, must be non-null
      * @param <T>            the service type
      * @return this {@link ServiceProviderBuilder} instance
@@ -76,7 +76,7 @@ public interface ServiceProviderBuilder {
      * It is guaranteed that the implementation of the policy is thread-safe.
      *
      * @param type           the specified type, must be non-null
-     * @param implementation the specified implementation class, must extend the type type and be non-null
+     * @param implementation the specified implementation class, must extend the service type and be non-null
      * @param <T>            the type of service
      * @return this {@link ServiceProviderBuilder} instance
      */
@@ -90,7 +90,7 @@ public interface ServiceProviderBuilder {
      * It is guaranteed that the implementation of the policy is thread-safe.
      *
      * @param type           the specified type, must be non-null
-     * @param implementation the specified implementation class, must extend the type type and be non-null
+     * @param implementation the specified implementation class, must extend the service type and be non-null
      * @param <T>            the type of service
      * @return this {@link ServiceProviderBuilder} instance
      */
