@@ -27,7 +27,7 @@ public class ServiceProviderBenchmark {
 
     @Benchmark
     public void benchAmayaInjection(Blackhole blackhole) {
-        blackhole.consume(PROVIDER.instantiate(App.class));
+        blackhole.consume(PROVIDER.get(App.class));
     }
 
     public static final class Service1 {
