@@ -1,6 +1,9 @@
 package io.github.amayaframework.di.stub;
 
-import com.github.romanqed.jeflect.*;
+import com.github.romanqed.jeflect.loader.DefineClassLoader;
+import com.github.romanqed.jeflect.loader.DefineLoader;
+import com.github.romanqed.jeflect.loader.DefineObjectFactory;
+import com.github.romanqed.jeflect.loader.ObjectFactory;
 import com.github.romanqed.jfunc.Exceptions;
 import com.github.romanqed.jfunc.Function0;
 import com.github.romanqed.jtype.TypeUtil;
