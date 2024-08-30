@@ -9,11 +9,6 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 
 final class AsmUtil {
-    // String constants
-    public static final String INIT = "<init>";
-    public static final String EMPTY_DESCRIPTOR = "()V";
-    // Type constants
-    public static final Type OBJECT = Type.getType(Object.class);
 
     private AsmUtil() {
     }
@@ -55,7 +50,7 @@ final class AsmUtil {
         visitor.visitMethodInsn(
                 Opcodes.INVOKESPECIAL,
                 Type.getInternalName(constructor.getDeclaringClass()),
-                INIT,
+                "<init>",
                 Type.getConstructorDescriptor(constructor),
                 false
         );
