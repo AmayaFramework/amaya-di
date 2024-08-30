@@ -31,8 +31,10 @@ dependencies {
     jmhImplementation group: 'org.openjdk.jmh', name: 'jmh-core', version: '1.35'
     jmhImplementation group: 'org.openjdk.jmh', name: 'jmh-generator-annprocess', version: '1.35'
     // Dependencies
-    api group: 'com.github.romanqed', name: 'jeflect', version: '1.1.4L'
+    api group: 'org.ow2.asm', name: 'asm', version: '9.7'
     api group: 'com.github.romanqed', name: 'jtype', version: '1.0.0'
+    api group: 'com.github.romanqed', name: 'jfunc', version: '1.1.4'
+    api group: 'com.github.romanqed', name: 'jeflect-loader', version: '1.0.0'
 }
 
 test {
@@ -122,8 +124,8 @@ publishing {
         maven {
             url "https://s01.oss.sonatype.org/service/local/staging/deploy/maven2"
             credentials {
-                username System.getenv('SONATYPE_USERNAME')
-                password System.getenv('SONATYPE_PASSWORD')
+                username System.getenv('SONATYPE1_USERNAME')
+                password System.getenv('SONATYPE1_PASSWORD')
             }
         }
     }

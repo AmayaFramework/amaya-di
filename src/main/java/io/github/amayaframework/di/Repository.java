@@ -61,5 +61,10 @@ public interface Repository extends Iterable<Type> {
      */
     void clear();
 
-    void forEach(BiConsumer<Type, Function0<Object>> consumer);
+    /**
+     * Iterates over repository entries.
+     *
+     * @param action the action to be performed for each element
+     */
+    void forEach(BiConsumer<Type, Function0<Object>> action);
 }

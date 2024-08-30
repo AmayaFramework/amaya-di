@@ -20,7 +20,7 @@ public final class GraphUtil {
         for (var node : ret) {
             var nodes = graph.getAdjacentNodes(node.value);
             if (nodes == null || nodes.isEmpty()) {
-                node.adjacents = Collections.emptyList();
+                node.adjacents = null;
                 continue;
             }
             var adjacents = new ArrayList<Node<E>>();
@@ -58,6 +58,10 @@ public final class GraphUtil {
                 deque.push(current);
                 current.onStack = true;
             }
+            if (adjacents == null) {
+                components.add(collectComponents(current, deque));
+                continue;
+            }
             var size = adjacents.size();
             while (local < size && adjacents.get(local).index != -1) {
                 var w = adjacents.get(local);
@@ -89,7 +93,7 @@ public final class GraphUtil {
      * @return a list of lists containing found loops, or in other words, a list of strongly connected components
      * @throws NullPointerException if graph is null
      */
-    public static <E> List<List<E>> findStronglyConnectedComponents(Graph<E> graph) {
+    public static <E> List<List<E>> findSCC(Graph<E> graph) {
         Objects.requireNonNull(graph);
         var ret = new LinkedList<List<E>>();
         var nodes = graphToNodes(graph);
@@ -102,29 +106,5 @@ public final class GraphUtil {
             time = processNode(node, deque, ret, time);
         }
         return ret;
-    }
-
-    private static final class Node<E> {
-        E value;
-        int index;
-        int low;
-        List<Node<E>> adjacents;
-        boolean onStack;
-
-        Node(E value) {
-            this.value = value;
-            this.index = -1;
-            this.low = -1;
-        }
-    }
-
-    private static final class Entry<E> {
-        Node<E> node;
-        int time;
-
-        Entry(Node<E> node, int time) {
-            this.node = node;
-            this.time = time;
-        }
     }
 }

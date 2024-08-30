@@ -1,12 +1,10 @@
 # amaya-di [![maven-central](https://img.shields.io/maven-central/v/io.github.amayaframework/amaya-di/2.0.0?color=blue)](https://repo1.maven.org/maven2/io/github/amayaframework/amaya-di/2.0.0)
 
 Фреймворк, отвечающий за контроль и автоматизацию процесса внедрения зависимостей.
-<br>
-**Всего в ~1.23 медленнее скомпилированного кода!** (См. [бенчмарк](#бенчмарк)).
 
 [English version](README.md)
 
-## Мудрость
+## Философия
 
 Учитывая особенности как существующих реализаций, так и JVM и языка Java в целом, фреймворк создавался в строгом
 соответствии со следующими принципами:
@@ -27,7 +25,7 @@
 
 Чтобы установить фреймворк, понадобятся:
 
-* Java 11+
+* java 11+
 * Maven/Gradle
 
 ## Установка
@@ -36,7 +34,7 @@
 
 ```Groovy
 dependencies {
-    implementation group: 'io.github.amayaframework', name: 'amaya-di', version: 'LATEST'
+    implementation group: 'io.github.amayaframework', name: 'amaya-di', version: '2.1.0'
 }
 ```
 
@@ -46,7 +44,7 @@ dependencies {
 <dependency>
     <groupId>io.github.amayaframework</groupId>
     <artifactId>amaya-di</artifactId>
-    <version>LATEST</version>
+    <version>2.1.0</version>
 </dependency>
 ```
 
@@ -64,33 +62,9 @@ public class Main {
     public static void main(String[] args) {
         var provider = Builders
                 .createChecked()
-                .addService(String.class, () -> "Hello, world!")
+                .addInstance("Hello, world!")
                 .build();
-        System.out.println(provider.instantiate(String.class));
-    }
-}
-```
-
-### Hello, world!, но теперь с классом
-
-```Java
-import io.github.amayaframework.di.Builders;
-
-public class Main {
-    public static void main(String[] args) {
-        var provider = Builders
-                .createChecked()
-                .addTransient(HelloWorld.class)
-                .build();
-        System.out.println(provider.instantiate(HelloWorld.class));
-    }
-
-    public static final class HelloWorld {
-
-        @Override
-        public String toString() {
-            return "Hello, world!";
-        }
+        System.out.println(provider.get(String.class));
     }
 }
 ```
@@ -108,8 +82,8 @@ public class Main {
                 .addSingleton(Service2.class)
                 .addTransient(App.class)
                 .build();
-        System.out.println(provider.instantiate(App.class));
-        System.out.println(provider.instantiate(App.class));
+        System.out.println(provider.get(App.class));
+        System.out.println(provider.get(App.class));
     }
 
     public static final class Service1 {
@@ -166,11 +140,11 @@ public class Main {
     public static void main(String[] args) {
         var provider = Builders
                 .createChecked()
-                .addService(new JType<>(){}, () -> List.of("Hi", "World"))
-                .addService(new JType<>(){}, () -> List.of(1, 2, 3))
+                .addInstance(new JType<>(){}, List.of("Hi", "World"))
+                .addInstance(new JType<>(){}, List.of(1, 2, 3))
                 .addTransient(App.class)
                 .build();
-        System.out.println(provider.instantiate(App.class));
+        System.out.println(provider.get(App.class));
     }
   
     public static final class App {
@@ -213,7 +187,7 @@ public class Main {
                 .addTransient(Service4.class)
                 .addTransient(App.class)
                 .build();
-        System.out.println(provider.instantiate(App.class).s1);
+        System.out.println(provider.get(App.class).s1);
     }
 
     public static final class Service1 {
@@ -278,7 +252,7 @@ public class Main {
                     .createChecked()
                     .addTransient(App.class)
                     .build();
-            System.out.println(provider.instantiate(App.class));
+            System.out.println(provider.get(App.class));
         } catch (TypeNotFoundException e) {
             System.out.println(e.getType() + " not found");
         }
@@ -320,7 +294,7 @@ public class Main {
                     .addTransient(Service.class)
                     .addTransient(App.class)
                     .build();
-            System.out.println(provider.instantiate(App.class));
+            System.out.println(provider.get(App.class));
         } catch (CycleFoundException e) {
             System.out.println("Found cycle: " + e.getCycle());
         }
@@ -361,8 +335,8 @@ gradle jmh
 # VM invoker: ~/.jdks/corretto-11.0.22/bin/java.exe
 
 Benchmark                                      Mode  Cnt   Score   Error  Units
-ServiceProviderBenchmark.benchAmayaInjection   avgt   25  14,142 ± 0,099  ns/op
-ServiceProviderBenchmark.benchManualInjection  avgt   25  11,482 ± 0,110  ns/op
+ServiceProviderBenchmark.benchAmayaInjection   avgt   25  17,586 ± 0,240  ns/op
+ServiceProviderBenchmark.benchManualInjection  avgt   25  11,586 ± 0,085  ns/op
 ```
 
 ## Используемые зависимости
@@ -376,7 +350,6 @@ ServiceProviderBenchmark.benchManualInjection  avgt   25  11,482 ± 0,110  ns/op
 ## Авторы
 
 * [RomanQed](https://github.com/RomanQed) - *Основная работа*
-* [1qwaka](https://github.com/1qwaka) - *Ведущий идеолог, мудрец, специалист по культурному просвещению*
 
 Загляните также в список [участников](https://github.com/AmayaFramework/amaya-di/contributors), которые внесли вклад
 в этот проект.

@@ -1,6 +1,9 @@
 package io.github.amayaframework.di.stub;
 
-import com.github.romanqed.jeflect.*;
+import com.github.romanqed.jeflect.loader.DefineClassLoader;
+import com.github.romanqed.jeflect.loader.DefineLoader;
+import com.github.romanqed.jeflect.loader.DefineObjectFactory;
+import com.github.romanqed.jeflect.loader.ObjectFactory;
 import com.github.romanqed.jfunc.Exceptions;
 import com.github.romanqed.jfunc.Function0;
 import com.github.romanqed.jtype.TypeUtil;
@@ -22,6 +25,7 @@ public final class BytecodeStubFactory implements StubFactory {
     private static final String STUB = "Stub";
     private static final Type FUNCTION0 = Type.getType(Function0.class);
     private static final Method INVOKE = Exceptions.suppress(() -> Function0.class.getDeclaredMethod("invoke"));
+    private static final String OBJECT_NAME = Type.getInternalName(Object.class);
 
     private final ObjectFactory<Function0<?>> factory;
 
@@ -55,7 +59,7 @@ public final class BytecodeStubFactory implements StubFactory {
     private static void generateConstructor(ClassWriter writer, String name, String[] order) {
         var visitor = writer.visitMethod(
                 Opcodes.ACC_PUBLIC,
-                AsmUtil.INIT,
+                "<init>",
                 "([" + FUNCTION0.getDescriptor() + ")V",
                 null,
                 null
@@ -65,9 +69,9 @@ public final class BytecodeStubFactory implements StubFactory {
         visitor.visitVarInsn(Opcodes.ALOAD, 0);
         visitor.visitMethodInsn(
                 Opcodes.INVOKESPECIAL,
-                AsmUtil.OBJECT.getInternalName(),
-                AsmUtil.INIT,
-                AsmUtil.EMPTY_DESCRIPTOR,
+                OBJECT_NAME,
+                "<init>",
+                "()V",
                 false
         );
         // Put type providers to fields
@@ -183,7 +187,7 @@ public final class BytecodeStubFactory implements StubFactory {
                 Opcodes.ACC_PUBLIC | Opcodes.ACC_FINAL,
                 name,
                 null,
-                AsmUtil.OBJECT.getInternalName(),
+                OBJECT_NAME,
                 new String[]{FUNCTION0.getInternalName()}
         );
         // Generate type-field mapping
