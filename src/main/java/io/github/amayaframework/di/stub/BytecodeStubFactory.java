@@ -114,7 +114,7 @@ public final class BytecodeStubFactory implements StubFactory {
                 true
         );
         // Cast implementation to given type
-        visitor.visitTypeInsn(Opcodes.CHECKCAST, Type.getInternalName(TypeUtil.getRawType(type)));
+        AsmUtil.castReference(visitor, TypeUtil.getRawType(type));
     }
 
     private static void processExecutable(MethodVisitor visitor,

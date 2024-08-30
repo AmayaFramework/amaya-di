@@ -7,10 +7,51 @@ import org.objectweb.asm.Type;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.util.Map;
 
 final class AsmUtil {
+    static final Map<Class<?>, Class<?>> PRIMITIVES = Map.of(
+            boolean.class, Boolean.class,
+            char.class, Character.class,
+            byte.class, Byte.class,
+            short.class, Short.class,
+            int.class, Integer.class,
+            float.class, Float.class,
+            long.class, Long.class,
+            double.class, Double.class
+    );
+    static final Map<Class<?>, String> PRIMITIVE_METHODS = Map.of(
+            boolean.class, "booleanValue",
+            char.class, "charValue",
+            byte.class, "byteValue",
+            short.class, "shortValue",
+            int.class, "intValue",
+            float.class, "floatValue",
+            long.class, "longValue",
+            double.class, "doubleValue"
+    );
 
     private AsmUtil() {
+    }
+
+    static void castReference(MethodVisitor visitor, Class<?> clazz) {
+        if (clazz == Object.class) {
+            return;
+        }
+        if (!clazz.isPrimitive()) {
+            visitor.visitTypeInsn(Opcodes.CHECKCAST, Type.getInternalName(clazz));
+            return;
+        }
+        var wrap = Type.getInternalName(PRIMITIVES.get(clazz));
+        visitor.visitTypeInsn(Opcodes.CHECKCAST, wrap);
+        var method = PRIMITIVE_METHODS.get(clazz);
+        visitor.visitMethodInsn(
+                Opcodes.INVOKEVIRTUAL,
+                wrap,
+                method,
+                "()" + Type.getDescriptor(clazz),
+                false
+        );
     }
 
     public static void pushInt(MethodVisitor visitor, int value) {
