@@ -34,6 +34,13 @@ public interface ServiceProvider {
      */
     <T> T get(Class<T> type);
 
+    /**
+     * Instantiates the service requested by the specified type.
+     *
+     * @param type the specified type
+     * @param <T>  service type
+     * @return null, if class not found, service instance otherwise
+     */
     default <T> T get(JType<T> type) {
         return get(type.getType());
     }
