@@ -1,6 +1,8 @@
 # amaya-di [![maven-central](https://img.shields.io/maven-central/v/io.github.amayaframework/amaya-di/2.1.1?color=blue)](https://repo1.maven.org/maven2/io/github/amayaframework/amaya-di/2.1.1)
 
 A framework responsible for monitoring and automating the dependency injection process.
+<br>
+It is only **1.27 times** (15.829 vs 12.427) slower than manual injection! (see benchmark section).
 
 [Russian version](README_RUS.md)
 
@@ -335,8 +337,8 @@ Results:
 # VM invoker: ~/.jdks/corretto-11.0.22/bin/java.exe
 
 Benchmark                                      Mode  Cnt   Score   Error  Units
-ServiceProviderBenchmark.benchAmayaInjection   avgt   25  17,586 ± 0,240  ns/op
-ServiceProviderBenchmark.benchManualInjection  avgt   25  11,586 ± 0,085  ns/op
+ServiceProviderBenchmark.benchAmayaInjection   avgt   25  15,829 ± 1,685  ns/op
+ServiceProviderBenchmark.benchManualInjection  avgt   25  12,427 ± 0,930  ns/op
 ```
 
 ## Built With
