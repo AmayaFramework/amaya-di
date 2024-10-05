@@ -5,14 +5,14 @@ import com.github.romanqed.jfunc.Exceptions;
 import java.lang.reflect.Type;
 
 final class ServiceProviderImpl implements ServiceProvider {
-    private final Repository repository;
+    private final ServiceRepository repository;
 
-    ServiceProviderImpl(Repository repository) {
+    ServiceProviderImpl(ServiceRepository repository) {
         this.repository = repository;
     }
 
     @Override
-    public Repository getRepository() {
+    public ServiceRepository getRepository() {
         return repository;
     }
 

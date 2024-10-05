@@ -30,7 +30,7 @@ public interface ManualProviderBuilder extends ServiceProviderBuilder {
 
     // Override parent methods to provide proper flow api
     @Override
-    ManualProviderBuilder setRepository(Repository repository);
+    ManualProviderBuilder setRepository(ServiceRepository repository);
 
     @Override
     <T> ManualProviderBuilder addService(Type type, Class<? extends T> implementation, ServiceWrapper<T> wrapper);

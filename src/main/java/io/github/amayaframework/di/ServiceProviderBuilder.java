@@ -17,10 +17,10 @@ public interface ServiceProviderBuilder {
      * until the {@link ServiceProviderBuilder#build} method is called.
      * If any error occurs during the build process, no changes will be made either.
      *
-     * @param repository the specified {@link Repository} instance, may be null
+     * @param repository the specified {@link ServiceRepository} instance, may be null
      * @return this {@link ServiceProviderBuilder} instance
      */
-    ServiceProviderBuilder setRepository(Repository repository);
+    ServiceProviderBuilder setRepository(ServiceRepository repository);
 
     /**
      * Adds a service by its class, which is an implementation of the specified type.

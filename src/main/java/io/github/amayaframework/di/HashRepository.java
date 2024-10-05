@@ -10,9 +10,9 @@ import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 /**
- * A {@link Repository} implementation using a hash map.
+ * A {@link ServiceRepository} implementation using a hash map.
  */
-public class HashRepository implements Repository {
+public class HashRepository implements ServiceRepository {
     private final Map<Type, Function0<Object>> body;
     private final Set<Type> keys;
 

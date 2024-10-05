@@ -8,7 +8,7 @@ import java.util.function.BiConsumer;
 /**
  * An interface describing an abstract repository of instantiators associated with the specified types.
  */
-public interface Repository extends Iterable<Type> {
+public interface ServiceRepository extends Iterable<Type> {
 
     /**
      * Gets the instantiator associated with the specified type.
@@ -25,7 +25,7 @@ public interface Repository extends Iterable<Type> {
      * Here func is not null, but will always return null.
      * <br>
      * So, to unambiguously determine whether the repository contains a type or not,
-     * use {@link Repository#contains(Type)}.
+     * use {@link ServiceRepository#contains(Type)}.
      *
      * @param type the specified type, must be non-null
      * @return null or {@link Function0} instance
