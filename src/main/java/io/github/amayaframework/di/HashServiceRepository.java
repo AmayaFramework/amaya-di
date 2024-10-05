@@ -12,24 +12,24 @@ import java.util.function.Supplier;
 /**
  * A {@link ServiceRepository} implementation using a hash map.
  */
-public class HashRepository implements ServiceRepository {
+public class HashServiceRepository implements ServiceRepository {
     private final Map<Type, Function0<Object>> body;
     private final Set<Type> keys;
 
     /**
-     * Constructs {@link HashRepository} instance with map instance, specified by the supplier.
+     * Constructs {@link HashServiceRepository} instance with map instance, specified by the supplier.
      *
      * @param supplier the specified map supplier, must be non-null
      */
-    public HashRepository(Supplier<Map<Type, Function0<Object>>> supplier) {
+    public HashServiceRepository(Supplier<Map<Type, Function0<Object>>> supplier) {
         this.body = Objects.requireNonNull(supplier.get());
         this.keys = Collections.unmodifiableSet(this.body.keySet());
     }
 
     /**
-     * Constructs {@link HashRepository} thread-safe instance with {@link ConcurrentHashMap}.
+     * Constructs {@link HashServiceRepository} thread-safe instance with {@link ConcurrentHashMap}.
      */
-    public HashRepository() {
+    public HashServiceRepository() {
         this.body = new ConcurrentHashMap<>();
         this.keys = Collections.unmodifiableSet(this.body.keySet());
     }
