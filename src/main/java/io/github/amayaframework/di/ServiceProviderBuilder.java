@@ -175,6 +175,18 @@ public interface ServiceProviderBuilder {
     ServiceProviderBuilder addService(Type type, Function0<?> supplier);
 
     /**
+     * Adds a service by its instantiator, which creates instances of the specified type.
+     *
+     * @param type     the specified type, must be non-null
+     * @param supplier the specified instantiator, must be non-null
+     * @param <T>      the service type
+     * @return this {@link ServiceProviderBuilder} instance
+     */
+    default <T> ServiceProviderBuilder addService(JType<T> type, Function0<T> supplier) {
+        return addService(type.getType(), supplier);
+    }
+
+    /**
      * Adds a service by its instance, which will continue to be used unchanged.
      *
      * @param type     the specified type, must be non-null
@@ -205,18 +217,6 @@ public interface ServiceProviderBuilder {
      */
     default ServiceProviderBuilder addInstance(Object instance) {
         return addService(instance.getClass(), () -> instance);
-    }
-
-    /**
-     * Adds a service by its instantiator, which creates instances of the specified type.
-     *
-     * @param type     the specified type, must be non-null
-     * @param supplier the specified instantiator, must be non-null
-     * @param <T>      the service type
-     * @return this {@link ServiceProviderBuilder} instance
-     */
-    default <T> ServiceProviderBuilder addService(JType<T> type, Function0<T> supplier) {
-        return addService(type.getType(), supplier);
     }
 
     /**

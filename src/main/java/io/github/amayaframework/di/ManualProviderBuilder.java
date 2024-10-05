@@ -80,6 +80,11 @@ public interface ManualProviderBuilder extends ServiceProviderBuilder {
     ManualProviderBuilder addService(Type type, Function0<?> supplier);
 
     @Override
+    default <T> ManualProviderBuilder addService(JType<T> type, Function0<T> supplier) {
+        return addService(type.getType(), supplier);
+    }
+
+    @Override
     default ManualProviderBuilder addInstance(Type type, Object instance) {
         return addService(type, () -> instance);
     }
@@ -92,11 +97,6 @@ public interface ManualProviderBuilder extends ServiceProviderBuilder {
     @Override
     default ManualProviderBuilder addInstance(Object instance) {
         return addService(instance.getClass(), () -> instance);
-    }
-
-    @Override
-    default <T> ManualProviderBuilder addService(JType<T> type, Function0<T> supplier) {
-        return addService(type.getType(), supplier);
     }
 
     @Override
