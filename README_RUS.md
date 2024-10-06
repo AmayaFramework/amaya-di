@@ -1,6 +1,8 @@
-# amaya-di [![maven-central](https://img.shields.io/maven-central/v/io.github.amayaframework/amaya-di/2.1.1?color=blue)](https://repo1.maven.org/maven2/io/github/amayaframework/amaya-di/2.1.1)
+# amaya-di [![maven-central](https://img.shields.io/maven-central/v/io.github.amayaframework/amaya-di/2.2.0?color=blue)](https://repo1.maven.org/maven2/io/github/amayaframework/amaya-di/2.2.0)
 
 Фреймворк, отвечающий за контроль и автоматизацию процесса внедрения зависимостей.
+<br>
+Медленнее чем ручное внедрение всего в **1.27 раза** (15.829 vs 12.427)! (см. раздел бенчмарков).
 
 [English version](README.md)
 
@@ -34,7 +36,7 @@
 
 ```Groovy
 dependencies {
-    implementation group: 'io.github.amayaframework', name: 'amaya-di', version: '2.1.0'
+    implementation group: 'io.github.amayaframework', name: 'amaya-di', version: '2.2.0'
 }
 ```
 
@@ -44,7 +46,7 @@ dependencies {
 <dependency>
     <groupId>io.github.amayaframework</groupId>
     <artifactId>amaya-di</artifactId>
-    <version>2.1.0</version>
+    <version>2.2.0</version>
 </dependency>
 ```
 
@@ -56,11 +58,11 @@ dependencies {
 ### Hello, world!
 
 ```Java
-import io.github.amayaframework.di.Builders;
+import io.github.amayaframework.di.ProviderBuilders;
 
 public class Main {
     public static void main(String[] args) {
-        var provider = Builders
+        var provider = ProviderBuilders
                 .createChecked()
                 .addInstance("Hello, world!")
                 .build();
@@ -72,11 +74,11 @@ public class Main {
 ### Два сервиса и зависимый класс
 
 ```Java
-import io.github.amayaframework.di.Builders;
+import io.github.amayaframework.di.ProviderBuilders;
 
 public class Main {
     public static void main(String[] args) {
-        var provider = Builders
+        var provider = ProviderBuilders
                 .createChecked()
                 .addTransient(Service1.class)
                 .addSingleton(Service2.class)
@@ -131,14 +133,14 @@ s2=Service2, 377478451
 ### Зависимости с дженериками
 
 ```Java
-import io.github.amayaframework.di.Builders;
+import io.github.amayaframework.di.ProviderBuilders;
 import com.github.romanqed.jtype.JType;
 
 import java.util.List;
 
 public class Main {
     public static void main(String[] args) {
-        var provider = Builders
+        var provider = ProviderBuilders
                 .createChecked()
                 .addInstance(new JType<>(){}, List.of("Hi", "World"))
                 .addInstance(new JType<>(){}, List.of(1, 2, 3))
@@ -175,11 +177,11 @@ s2=[1, 2, 3]
 ### Поля, методы, несколько конструкторов
 
 ```Java
-import io.github.amayaframework.di.Builders;
+import io.github.amayaframework.di.ProviderBuilders;
 
 public class Main {
     public static void main(String[] args) {
-        var provider = Builders
+        var provider = ProviderBuilders
                 .createChecked()
                 .addTransient(Service1.class)
                 .addTransient(Service2.class)
@@ -241,14 +243,14 @@ io.github.amayaframework.di.Main$Service1@1d29cf23
 ### Потерянная зависимость
 
 ```Java
-import io.github.amayaframework.di.Builders;
+import io.github.amayaframework.di.ProviderBuilders;
 
 import java.util.List;
 
 public class Main {
     public static void main(String[] args) {
         try {
-            var provider = Builders
+            var provider = ProviderBuilders
                     .createChecked()
                     .addTransient(App.class)
                     .build();
@@ -284,31 +286,31 @@ java.util.List<java.lang.String> not found
 ### Циклическая зависимость
 
 ```Java
-import io.github.amayaframework.di.Builders;
+import io.github.amayaframework.di.ProviderBuilders;
 
 public class Main {
-    public static void main(String[] args) {
-        try {
-            var provider = Builders
-                    .createChecked()
-                    .addTransient(Service.class)
-                    .addTransient(App.class)
-                    .build();
-            System.out.println(provider.get(App.class));
-        } catch (CycleFoundException e) {
-            System.out.println("Found cycle: " + e.getCycle());
-        }
+  public static void main(String[] args) {
+    try {
+      var provider = ProviderBuilders
+              .createChecked()
+              .addTransient(Service.class)
+              .addTransient(App.class)
+              .build();
+      System.out.println(provider.get(App.class));
+    } catch (CycleFoundException e) {
+      System.out.println("Found cycle: " + e.getCycle());
     }
+  }
 
-    public static final class Service {
-        public Service(App app) {
-        }
+  public static final class Service {
+    public Service(App app) {
     }
+  }
 
-    public static final class App {
-        public App(Service s) {
-        }
+  public static final class App {
+    public App(Service s) {
     }
+  }
 }
 ```
 
