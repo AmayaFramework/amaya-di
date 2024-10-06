@@ -63,7 +63,7 @@ public class ManualCheckedProviderBuilder extends CheckedProviderBuilder impleme
 
     // Override parent methods to provide proper flow api
     @Override
-    public ManualProviderBuilder setRepository(Repository repository) {
+    public ManualProviderBuilder setRepository(ServiceRepository repository) {
         super.setRepository(repository);
         return this;
     }

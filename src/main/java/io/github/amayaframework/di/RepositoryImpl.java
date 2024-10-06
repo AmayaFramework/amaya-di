@@ -7,7 +7,7 @@ import java.util.*;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
-final class RepositoryImpl implements Repository {
+final class RepositoryImpl implements ServiceRepository {
     private final Map<Type, Function0<Object>> body;
     private final Set<Type> keys;
 

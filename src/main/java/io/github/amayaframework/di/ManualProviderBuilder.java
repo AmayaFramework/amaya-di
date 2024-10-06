@@ -2,6 +2,7 @@ package io.github.amayaframework.di;
 
 import com.github.romanqed.jfunc.Function0;
 import com.github.romanqed.jfunc.Function1;
+import com.github.romanqed.jtype.JType;
 import io.github.amayaframework.di.stub.TypeProvider;
 
 import java.lang.reflect.Type;
@@ -29,7 +30,7 @@ public interface ManualProviderBuilder extends ServiceProviderBuilder {
 
     // Override parent methods to provide proper flow api
     @Override
-    ManualProviderBuilder setRepository(Repository repository);
+    ManualProviderBuilder setRepository(ServiceRepository repository);
 
     @Override
     <T> ManualProviderBuilder addService(Type type, Class<? extends T> implementation, ServiceWrapper<T> wrapper);
@@ -39,6 +40,23 @@ public interface ManualProviderBuilder extends ServiceProviderBuilder {
 
     @Override
     ManualProviderBuilder addTransient(Type type, Class<?> implementation);
+
+    @Override
+    default <T> ManualProviderBuilder addService(JType<T> type,
+                                                 Class<? extends T> implementation,
+                                                 ServiceWrapper<T> wrapper) {
+        return addService(type.getType(), implementation, wrapper);
+    }
+
+    @Override
+    default <T> ManualProviderBuilder addSingleton(JType<T> type, Class<? extends T> implementation) {
+        return addSingleton(type.getType(), implementation);
+    }
+
+    @Override
+    default <T> ManualProviderBuilder addTransient(JType<T> type, Class<? extends T> implementation) {
+        return addTransient(type.getType(), implementation);
+    }
 
     @Override
     <T> ManualProviderBuilder addService(Class<T> type, Class<? extends T> implementation, ServiceWrapper<T> wrapper);
@@ -60,6 +78,26 @@ public interface ManualProviderBuilder extends ServiceProviderBuilder {
 
     @Override
     ManualProviderBuilder addService(Type type, Function0<?> supplier);
+
+    @Override
+    default <T> ManualProviderBuilder addService(JType<T> type, Function0<T> supplier) {
+        return addService(type.getType(), supplier);
+    }
+
+    @Override
+    default ManualProviderBuilder addInstance(Type type, Object instance) {
+        return addService(type, () -> instance);
+    }
+
+    @Override
+    default <T> ManualProviderBuilder addInstance(JType<T> type, T instance) {
+        return addService(type, () -> instance);
+    }
+
+    @Override
+    default ManualProviderBuilder addInstance(Object instance) {
+        return addService(instance.getClass(), () -> instance);
+    }
 
     @Override
     ManualProviderBuilder removeService(Type type);

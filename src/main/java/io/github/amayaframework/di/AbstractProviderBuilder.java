@@ -28,9 +28,9 @@ public abstract class AbstractProviderBuilder implements ServiceProviderBuilder 
     protected Map<Type, Entry> any;
 
     /**
-     * The {@link Repository} instance used, may be null
+     * The {@link ServiceRepository} instance used, may be null
      */
-    protected Repository repository;
+    protected ServiceRepository repository;
 
     /**
      * Constructs {@link AbstractProviderBuilder}, reset to the initial state.
@@ -60,7 +60,7 @@ public abstract class AbstractProviderBuilder implements ServiceProviderBuilder 
     }
 
     @Override
-    public ServiceProviderBuilder setRepository(Repository repository) {
+    public ServiceProviderBuilder setRepository(ServiceRepository repository) {
         this.repository = repository;
         return this;
     }

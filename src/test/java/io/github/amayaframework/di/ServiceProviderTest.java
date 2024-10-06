@@ -36,12 +36,12 @@ public class ServiceProviderTest extends Assertions {
 
     @Test
     public void testCheckedProvider() {
-        testProvider(Builders.createChecked());
+        testProvider(ProviderBuilders.createChecked());
     }
 
     @Test
     public void testManualProvider() {
-        testProvider(Builders.createManual());
+        testProvider(ProviderBuilders.createManual());
     }
 
     public static final class Service1 {
