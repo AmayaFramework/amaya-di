@@ -12,9 +12,9 @@ public interface ServiceProvider {
     /**
      * Returns the repository used by this {@link ServiceProvider} instance.
      *
-     * @return {@link Repository} instance
+     * @return {@link ServiceRepository} instance
      */
-    Repository getRepository();
+    ServiceRepository getRepository();
 
     /**
      * Instantiates the service requested by specified type.

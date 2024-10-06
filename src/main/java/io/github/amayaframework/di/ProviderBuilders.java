@@ -11,11 +11,11 @@ import java.lang.annotation.Annotation;
  * A utility class that provides methods for creating all {@link ServiceProviderBuilder}
  * and {@link ManualProviderBuilder} implementations included in the current version of the framework.
  */
-public final class Builders {
+public final class ProviderBuilders {
     private static final SchemeFactory REFLECTION_FACTORY = new ReflectionSchemeFactory(Inject.class);
     private static final StubFactory BYTECODE_FACTORY = new BytecodeStubFactory();
 
-    private Builders() {
+    private ProviderBuilders() {
     }
 
     /**

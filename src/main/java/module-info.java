@@ -1,4 +1,4 @@
-open module io.github.amayaframework.di {
+module io.github.amayaframework.di {
     // Imports
     requires org.objectweb.asm;
     requires com.github.romanqed.jtype;

@@ -6,8 +6,8 @@ import org.junit.jupiter.api.Test;
 import java.util.Objects;
 
 public class ServiceProviderBuilderTest extends Assertions {
-    private static final ServiceProviderBuilder CHECKED_BUILDER = Builders.createChecked();
-    private static final ManualProviderBuilder MANUAL_BUILDER = Builders.createManual();
+    private static final ServiceProviderBuilder CHECKED_BUILDER = ProviderBuilders.createChecked();
+    private static final ManualProviderBuilder MANUAL_BUILDER = ProviderBuilders.createManual();
 
     public void testCorrect(ServiceProviderBuilder builder) {
         var provider = builder

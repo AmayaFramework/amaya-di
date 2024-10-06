@@ -14,7 +14,7 @@ import java.util.Objects;
  * the chain of building type implementations.
  */
 public class LazyProvider implements TypeProvider {
-    private final Repository repository;
+    private final ServiceRepository repository;
     private final Map<Type, Function0<Function0<Object>>> body;
 
     /**
@@ -22,7 +22,7 @@ public class LazyProvider implements TypeProvider {
      *
      * @param repository the specified repository
      */
-    public LazyProvider(Repository repository) {
+    public LazyProvider(ServiceRepository repository) {
         this.repository = Objects.requireNonNull(repository);
         this.body = new HashMap<>();
     }
