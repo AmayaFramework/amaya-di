@@ -1,4 +1,4 @@
-# amaya-di [![maven-central](https://img.shields.io/maven-central/v/io.github.amayaframework/amaya-di/2.1.1?color=blue)](https://repo1.maven.org/maven2/io/github/amayaframework/amaya-di/2.1.1)
+# amaya-di [![maven-central](https://img.shields.io/maven-central/v/io.github.amayaframework/amaya-di/2.2.0?color=blue)](https://repo1.maven.org/maven2/io/github/amayaframework/amaya-di/2.2.0)
 
 A framework responsible for monitoring and automating the dependency injection process.
 <br>
@@ -36,7 +36,7 @@ To install it, you will need:
 
 ```Groovy
 dependencies {
-    implementation group: 'io.github.amayaframework', name: 'amaya-di', version: '2.1.0'
+    implementation group: 'io.github.amayaframework', name: 'amaya-di', version: '2.2.0'
 }
 ```
 
@@ -46,7 +46,7 @@ dependencies {
 <dependency>
     <groupId>io.github.amayaframework</groupId>
     <artifactId>amaya-di</artifactId>
-    <version>2.1.0</version>
+    <version>2.2.0</version>
 </dependency>
 ```
 
@@ -58,11 +58,11 @@ the ServiceProviderBuilder#build() method has not been called yet.
 ### Hello, world!
 
 ```Java
-import io.github.amayaframework.di.Builders;
+import io.github.amayaframework.di.ProviderBuilders;
 
 public class Main {
     public static void main(String[] args) {
-        var provider = Builders
+        var provider = ProviderBuilders
                 .createChecked()
                 .addInstance("Hello, world!")
                 .build();
@@ -74,11 +74,11 @@ public class Main {
 ### Two services and a dependent class
 
 ```Java
-import io.github.amayaframework.di.Builders;
+import io.github.amayaframework.di.ProviderBuilders;
 
 public class Main {
     public static void main(String[] args) {
-        var provider = Builders
+        var provider = ProviderBuilders
                 .createChecked()
                 .addTransient(Service1.class)
                 .addSingleton(Service2.class)
@@ -133,14 +133,14 @@ s2=Service2, 377478451
 ### Generics
 
 ```Java
-import io.github.amayaframework.di.Builders;
+import io.github.amayaframework.di.ProviderBuilders;
 import com.github.romanqed.jtype.JType;
 
 import java.util.List;
 
 public class Main {
     public static void main(String[] args) {
-        var provider = Builders
+        var provider = ProviderBuilders
                 .createChecked()
                 .addInstance(new JType<>(){}, List.of("Hi", "World"))
                 .addInstance(new JType<>(){}, List.of(1, 2, 3))
@@ -177,11 +177,11 @@ s2=[1, 2, 3]
 ### Fields, methods, multiple constructors
 
 ```Java
-import io.github.amayaframework.di.Builders;
+import io.github.amayaframework.di.ProviderBuilders;
 
 public class Main {
     public static void main(String[] args) {
-        var provider = Builders
+        var provider = ProviderBuilders
                 .createChecked()
                 .addTransient(Service1.class)
                 .addTransient(Service2.class)
@@ -243,14 +243,14 @@ io.github.amayaframework.di.Main$Service1@1d29cf23
 ### Missing dependency
 
 ```Java
-import io.github.amayaframework.di.Builders;
+import io.github.amayaframework.di.ProviderBuilders;
 
 import java.util.List;
 
 public class Main {
     public static void main(String[] args) {
         try {
-            var provider = Builders
+            var provider = ProviderBuilders
                     .createChecked()
                     .addTransient(App.class)
                     .build();
@@ -286,12 +286,12 @@ java.util.List<java.lang.String> not found
 ### Cyclical dependency
 
 ```Java
-import io.github.amayaframework.di.Builders;
+import io.github.amayaframework.di.ProviderBuilders;
 
 public class Main {
     public static void main(String[] args) {
         try {
-            var provider = Builders
+            var provider = ProviderBuilders
                     .createChecked()
                     .addTransient(Service.class)
                     .addTransient(App.class)

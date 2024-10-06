@@ -58,11 +58,11 @@ dependencies {
 ### Hello, world!
 
 ```Java
-import io.github.amayaframework.di.Builders;
+import io.github.amayaframework.di.ProviderBuilders;
 
 public class Main {
     public static void main(String[] args) {
-        var provider = Builders
+        var provider = ProviderBuilders
                 .createChecked()
                 .addInstance("Hello, world!")
                 .build();
@@ -74,11 +74,11 @@ public class Main {
 ### Два сервиса и зависимый класс
 
 ```Java
-import io.github.amayaframework.di.Builders;
+import io.github.amayaframework.di.ProviderBuilders;
 
 public class Main {
     public static void main(String[] args) {
-        var provider = Builders
+        var provider = ProviderBuilders
                 .createChecked()
                 .addTransient(Service1.class)
                 .addSingleton(Service2.class)
@@ -133,14 +133,14 @@ s2=Service2, 377478451
 ### Зависимости с дженериками
 
 ```Java
-import io.github.amayaframework.di.Builders;
+import io.github.amayaframework.di.ProviderBuilders;
 import com.github.romanqed.jtype.JType;
 
 import java.util.List;
 
 public class Main {
     public static void main(String[] args) {
-        var provider = Builders
+        var provider = ProviderBuilders
                 .createChecked()
                 .addInstance(new JType<>(){}, List.of("Hi", "World"))
                 .addInstance(new JType<>(){}, List.of(1, 2, 3))
@@ -177,11 +177,11 @@ s2=[1, 2, 3]
 ### Поля, методы, несколько конструкторов
 
 ```Java
-import io.github.amayaframework.di.Builders;
+import io.github.amayaframework.di.ProviderBuilders;
 
 public class Main {
     public static void main(String[] args) {
-        var provider = Builders
+        var provider = ProviderBuilders
                 .createChecked()
                 .addTransient(Service1.class)
                 .addTransient(Service2.class)
@@ -243,14 +243,14 @@ io.github.amayaframework.di.Main$Service1@1d29cf23
 ### Потерянная зависимость
 
 ```Java
-import io.github.amayaframework.di.Builders;
+import io.github.amayaframework.di.ProviderBuilders;
 
 import java.util.List;
 
 public class Main {
     public static void main(String[] args) {
         try {
-            var provider = Builders
+            var provider = ProviderBuilders
                     .createChecked()
                     .addTransient(App.class)
                     .build();
@@ -286,12 +286,12 @@ java.util.List<java.lang.String> not found
 ### Циклическая зависимость
 
 ```Java
-import io.github.amayaframework.di.Builders;
+import io.github.amayaframework.di.ProviderBuilders;
 
 public class Main {
     public static void main(String[] args) {
         try {
-            var provider = Builders
+            var provider = ProviderBuilders
                     .createChecked()
                     .addTransient(Service.class)
                     .addTransient(App.class)
