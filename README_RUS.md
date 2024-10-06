@@ -1,4 +1,4 @@
-# amaya-di [![maven-central](https://img.shields.io/maven-central/v/io.github.amayaframework/amaya-di/2.1.1?color=blue)](https://repo1.maven.org/maven2/io/github/amayaframework/amaya-di/2.1.1)
+# amaya-di [![maven-central](https://img.shields.io/maven-central/v/io.github.amayaframework/amaya-di/2.2.0?color=blue)](https://repo1.maven.org/maven2/io/github/amayaframework/amaya-di/2.2.0)
 
 Фреймворк, отвечающий за контроль и автоматизацию процесса внедрения зависимостей.
 <br>
@@ -36,7 +36,7 @@
 
 ```Groovy
 dependencies {
-    implementation group: 'io.github.amayaframework', name: 'amaya-di', version: '2.1.0'
+    implementation group: 'io.github.amayaframework', name: 'amaya-di', version: '2.2.0'
 }
 ```
 
@@ -46,7 +46,7 @@ dependencies {
 <dependency>
     <groupId>io.github.amayaframework</groupId>
     <artifactId>amaya-di</artifactId>
-    <version>2.1.0</version>
+    <version>2.2.0</version>
 </dependency>
 ```
 
@@ -289,28 +289,28 @@ java.util.List<java.lang.String> not found
 import io.github.amayaframework.di.ProviderBuilders;
 
 public class Main {
-    public static void main(String[] args) {
-        try {
-            var provider = ProviderBuilders
-                    .createChecked()
-                    .addTransient(Service.class)
-                    .addTransient(App.class)
-                    .build();
-            System.out.println(provider.get(App.class));
-        } catch (CycleFoundException e) {
-            System.out.println("Found cycle: " + e.getCycle());
-        }
+  public static void main(String[] args) {
+    try {
+      var provider = ProviderBuilders
+              .createChecked()
+              .addTransient(Service.class)
+              .addTransient(App.class)
+              .build();
+      System.out.println(provider.get(App.class));
+    } catch (CycleFoundException e) {
+      System.out.println("Found cycle: " + e.getCycle());
     }
+  }
 
-    public static final class Service {
-        public Service(App app) {
-        }
+  public static final class Service {
+    public Service(App app) {
     }
+  }
 
-    public static final class App {
-        public App(Service s) {
-        }
+  public static final class App {
+    public App(Service s) {
     }
+  }
 }
 ```
 
