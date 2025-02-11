@@ -14,9 +14,9 @@ java {
     withSourcesJar()
 }
 
-group = 'io.github.amayaframework'
-archivesBaseName = 'amaya-di'
-version = System.getenv('DI_VERSION') ?: '1.0.0'
+group = 'com.github.romanqed'
+archivesBaseName = 'jgraph'
+version = System.getenv('GRAPH_VERSION') ?: '1.0.0'
 
 repositories {
     mavenCentral()
@@ -26,10 +26,6 @@ dependencies {
     // Tests
     testImplementation group: 'org.junit.jupiter', name: 'junit-jupiter-api', version: '5.10.0'
     testRuntimeOnly group: 'org.junit.jupiter', name: 'junit-jupiter-engine', version: '5.10.0'
-    // Dependencies
-    api group: 'com.github.romanqed', name: 'jtype', version: '1.0.0'
-    api group: 'com.github.romanqed', name: 'jfunc', version: '1.1.4'
-    api group: 'com.github.romanqed', name: 'jgraph', version: '1.0.0'
 }
 
 test {
@@ -49,7 +45,7 @@ jar {
                 'Build-Date': new SimpleDateFormat("yyyy-MM-dd").format(date),
                 'Build-Time': new SimpleDateFormat("HH:mm:ss.SSSZ").format(date),
                 'Built-By': 'Roman Bakaldin',
-                'Bundle-Name': 'Amaya Dependency Injection',
+                'Bundle-Name': 'Java Graph',
                 'Bundle-Version': archiveVersion,
                 'Bundle-SymbolicName': archivesBaseName,
                 'Implementation-Title': archivesBaseName,
@@ -77,9 +73,7 @@ publishing {
             // Configure pom
             pom {
                 name.set(archivesBaseName)
-                description.set(
-                        'A framework responsible for monitoring and automating the dependency injection process.'
-                )
+                description.set('Java Graph Lib')
                 url.set('https://github.com/AmayaFramework/amaya-di')
 
                 organization {
@@ -115,12 +109,13 @@ publishing {
             }
         }
     }
+
     repositories {
         maven {
-            url "https://s01.oss.sonatype.org/service/local/staging/deploy/maven2"
+            url "https://oss.sonatype.org/service/local/staging/deploy/maven2"
             credentials {
-                username System.getenv('SONATYPE1_USERNAME')
-                password System.getenv('SONATYPE1_PASSWORD')
+                username System.getenv('SONATYPE_USERNAME')
+                password System.getenv('SONATYPE_PASSWORD')
             }
         }
     }
