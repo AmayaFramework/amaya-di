@@ -34,7 +34,9 @@
 
 ```Groovy
 dependencies {
-    implementation group: 'io.github.amayaframework', name: 'amaya-di', version: '2.1.0'
+    implementation group: 'io.github.amayaframework', name: 'amaya-di', version: '2.3.0'
+    // ASM stub implementation
+    implementation group: 'io.github.amayaframework', name: 'amaya-di-asm', version: '1.0.0'
 }
 ```
 
@@ -44,7 +46,13 @@ dependencies {
 <dependency>
     <groupId>io.github.amayaframework</groupId>
     <artifactId>amaya-di</artifactId>
-    <version>2.1.0</version>
+    <version>2.3.0</version>
+</dependency>
+<!--ASM stub implementation-->
+<dependency>
+    <groupId>io.github.amayaframework</groupId>
+    <artifactId>amaya-di-asm</artifactId>
+    <version>1.0.0</version>
 </dependency>
 ```
 
@@ -56,12 +64,13 @@ dependencies {
 ### Hello, world!
 
 ```Java
-import io.github.amayaframework.di.Builders;
+import io.github.amayaframework.di.ProviderBuilders;
+import io.github.amayaframework.di.asm.BytecodeStubFactory;
 
 public class Main {
     public static void main(String[] args) {
-        var provider = Builders
-                .createChecked()
+        var provider = ProviderBuilders
+                .createChecked(new BytecodeStubFactory())
                 .addInstance("Hello, world!")
                 .build();
         System.out.println(provider.get(String.class));
@@ -72,12 +81,13 @@ public class Main {
 ### Два сервиса и зависимый класс
 
 ```Java
-import io.github.amayaframework.di.Builders;
+import io.github.amayaframework.di.ProviderBuilders;
+import io.github.amayaframework.di.asm.BytecodeStubFactory;
 
 public class Main {
     public static void main(String[] args) {
-        var provider = Builders
-                .createChecked()
+        var provider = ProviderBuilders
+                .createChecked(new BytecodeStubFactory())
                 .addTransient(Service1.class)
                 .addSingleton(Service2.class)
                 .addTransient(App.class)
@@ -131,15 +141,16 @@ s2=Service2, 377478451
 ### Зависимости с дженериками
 
 ```Java
-import io.github.amayaframework.di.Builders;
+import io.github.amayaframework.di.ProviderBuilders;
+import io.github.amayaframework.di.asm.BytecodeStubFactory;
 import com.github.romanqed.jtype.JType;
 
 import java.util.List;
 
 public class Main {
     public static void main(String[] args) {
-        var provider = Builders
-                .createChecked()
+        var provider = ProviderBuilders
+                .createChecked(new BytecodeStubFactory())
                 .addInstance(new JType<>(){}, List.of("Hi", "World"))
                 .addInstance(new JType<>(){}, List.of(1, 2, 3))
                 .addTransient(App.class)
@@ -175,12 +186,13 @@ s2=[1, 2, 3]
 ### Поля, методы, несколько конструкторов
 
 ```Java
-import io.github.amayaframework.di.Builders;
+import io.github.amayaframework.di.ProviderBuilders;
+import io.github.amayaframework.di.asm.BytecodeStubFactory;
 
 public class Main {
     public static void main(String[] args) {
-        var provider = Builders
-                .createChecked()
+        var provider = ProviderBuilders
+                .createChecked(new BytecodeStubFactory())
                 .addTransient(Service1.class)
                 .addTransient(Service2.class)
                 .addTransient(Service3.class)
@@ -241,15 +253,16 @@ io.github.amayaframework.di.Main$Service1@1d29cf23
 ### Потерянная зависимость
 
 ```Java
-import io.github.amayaframework.di.Builders;
+import io.github.amayaframework.di.ProviderBuilders;
+import io.github.amayaframework.di.asm.BytecodeStubFactory;
 
 import java.util.List;
 
 public class Main {
     public static void main(String[] args) {
         try {
-            var provider = Builders
-                    .createChecked()
+            var provider = ProviderBuilders
+                    .createChecked(new BytecodeStubFactory())
                     .addTransient(App.class)
                     .build();
             System.out.println(provider.get(App.class));
@@ -284,13 +297,14 @@ java.util.List<java.lang.String> not found
 ### Циклическая зависимость
 
 ```Java
-import io.github.amayaframework.di.Builders;
+import io.github.amayaframework.di.ProviderBuilders;
+import io.github.amayaframework.di.asm.BytecodeStubFactory;
 
 public class Main {
     public static void main(String[] args) {
         try {
-            var provider = Builders
-                    .createChecked()
+            var provider = ProviderBuilders
+                    .createChecked(new BytecodeStubFactory())
                     .addTransient(Service.class)
                     .addTransient(App.class)
                     .build();
@@ -320,11 +334,11 @@ Found cycle: [class io.github.amayaframework.di.Main$App, class io.github.amayaf
 
 ## Бенчмарк
 
-См. [jmh бенчмарк](src/jmh/java/io/github/amayaframework/di/ServiceProviderBenchmark.java).
+См. [jmh benchmark](amaya-di-asm/src/jmh/java/io/github/amayaframework/di/asm/ServiceProviderBenchmark.java).
 Запуск на вашей машине:
 
 ```
-gradle jmh
+gradle amaya-di-asm:jmh
 ```
 
 Результаты:
@@ -346,6 +360,7 @@ ServiceProviderBenchmark.benchManualInjection  avgt   25  11,586 ± 0,085  ns/op
 * [jeflect](https://github.com/RomanQed/jeflect) - Загрузка классов из байт-кода, утилиты для ASM
 * [jfunc](https://github.com/RomanQed/jfunc) - "Ленивые" контейнеры, функциональные интерфейсы, утилиты
 * [jtype](https://github.com/RomanQed/jtype) - Утилиты для работы с дженериками
+* [jgraph](graph) - Структура и алгоритм Тарьяна для орграфа
 
 ## Авторы
 

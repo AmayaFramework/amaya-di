@@ -34,7 +34,9 @@ To install it, you will need:
 
 ```Groovy
 dependencies {
-    implementation group: 'io.github.amayaframework', name: 'amaya-di', version: '2.1.0'
+    implementation group: 'io.github.amayaframework', name: 'amaya-di', version: '2.3.0'
+    // ASM stub implementation
+    implementation group: 'io.github.amayaframework', name: 'amaya-di-asm', version: '1.0.0'
 }
 ```
 
@@ -44,7 +46,13 @@ dependencies {
 <dependency>
     <groupId>io.github.amayaframework</groupId>
     <artifactId>amaya-di</artifactId>
-    <version>2.1.0</version>
+    <version>2.3.0</version>
+</dependency>
+<!--ASM stub implementation-->
+<dependency>
+    <groupId>io.github.amayaframework</groupId>
+    <artifactId>amaya-di-asm</artifactId>
+    <version>1.0.0</version>
 </dependency>
 ```
 
@@ -56,12 +64,13 @@ the ServiceProviderBuilder#build() method has not been called yet.
 ### Hello, world!
 
 ```Java
-import io.github.amayaframework.di.Builders;
+import io.github.amayaframework.di.ProviderBuilders;
+import io.github.amayaframework.di.asm.BytecodeStubFactory;
 
 public class Main {
     public static void main(String[] args) {
-        var provider = Builders
-                .createChecked()
+        var provider = ProviderBuilders
+                .createChecked(new BytecodeStubFactory())
                 .addInstance("Hello, world!")
                 .build();
         System.out.println(provider.get(String.class));
@@ -72,12 +81,13 @@ public class Main {
 ### Two services and a dependent class
 
 ```Java
-import io.github.amayaframework.di.Builders;
+import io.github.amayaframework.di.ProviderBuilders;
+import io.github.amayaframework.di.asm.BytecodeStubFactory;
 
 public class Main {
     public static void main(String[] args) {
-        var provider = Builders
-                .createChecked()
+        var provider = ProviderBuilders
+                .createChecked(new BytecodeStubFactory())
                 .addTransient(Service1.class)
                 .addSingleton(Service2.class)
                 .addTransient(App.class)
@@ -131,15 +141,16 @@ s2=Service2, 377478451
 ### Generics
 
 ```Java
-import io.github.amayaframework.di.Builders;
+import io.github.amayaframework.di.ProviderBuilders;
+import io.github.amayaframework.di.asm.BytecodeStubFactory;
 import com.github.romanqed.jtype.JType;
 
 import java.util.List;
 
 public class Main {
     public static void main(String[] args) {
-        var provider = Builders
-                .createChecked()
+        var provider = ProviderBuilders
+                .createChecked(new BytecodeStubFactory())
                 .addInstance(new JType<>(){}, List.of("Hi", "World"))
                 .addInstance(new JType<>(){}, List.of(1, 2, 3))
                 .addTransient(App.class)
@@ -175,12 +186,13 @@ s2=[1, 2, 3]
 ### Fields, methods, multiple constructors
 
 ```Java
-import io.github.amayaframework.di.Builders;
+import io.github.amayaframework.di.ProviderBuilders;
+import io.github.amayaframework.di.asm.BytecodeStubFactory;
 
 public class Main {
     public static void main(String[] args) {
-        var provider = Builders
-                .createChecked()
+        var provider = ProviderBuilders
+                .createChecked(new BytecodeStubFactory())
                 .addTransient(Service1.class)
                 .addTransient(Service2.class)
                 .addTransient(Service3.class)
@@ -241,15 +253,16 @@ io.github.amayaframework.di.Main$Service1@1d29cf23
 ### Missing dependency
 
 ```Java
-import io.github.amayaframework.di.Builders;
+import io.github.amayaframework.di.ProviderBuilders;
+import io.github.amayaframework.di.asm.BytecodeStubFactory;
 
 import java.util.List;
 
 public class Main {
     public static void main(String[] args) {
         try {
-            var provider = Builders
-                    .createChecked()
+            var provider = ProviderBuilders
+                    .createChecked(new BytecodeStubFactory())
                     .addTransient(App.class)
                     .build();
             System.out.println(provider.get(App.class));
@@ -284,13 +297,14 @@ java.util.List<java.lang.String> not found
 ### Cyclical dependency
 
 ```Java
-import io.github.amayaframework.di.Builders;
+import io.github.amayaframework.di.ProviderBuilders;
+import io.github.amayaframework.di.asm.BytecodeStubFactory;
 
 public class Main {
     public static void main(String[] args) {
         try {
-            var provider = Builders
-                    .createChecked()
+            var provider = ProviderBuilders
+                    .createChecked(new BytecodeStubFactory())
                     .addTransient(Service.class)
                     .addTransient(App.class)
                     .build();
@@ -320,11 +334,11 @@ Found cycle: [class io.github.amayaframework.di.Main$App, class io.github.amayaf
 
 ## Benchmark
 
-See [jmh benchmark](src/jmh/java/io/github/amayaframework/di/ServiceProviderBenchmark.java).
+See [jmh benchmark](amaya-di-asm/src/jmh/java/io/github/amayaframework/di/asm/ServiceProviderBenchmark.java).
 Running on your machine:
 
 ```
-gradle jmh
+gradle amaya-di-asm:jmh
 ```
 
 Results:
@@ -346,6 +360,7 @@ ServiceProviderBenchmark.benchManualInjection  avgt   25  11,586 ± 0,085  ns/op
 * [jeflect](https://github.com/RomanQed/jeflect) - Defining classes from bytecode, utilities for ASM
 * [jfunc](https://github.com/RomanQed/jfunc) - "Lazy" containers, functional interfaces, utilities
 * [jtype](https://github.com/RomanQed/jtype) - Utilities for interaction with generic types
+* [jgraph](graph) - Structure and Tarjan's algorithm for oriented graph
 
 ## Authors
 
