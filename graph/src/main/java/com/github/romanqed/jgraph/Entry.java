@@ -1,4 +1,4 @@
-package io.github.amayaframework.di.graph;
+package com.github.romanqed.jgraph;
 
 final class Entry<E> {
     Node<E> node;

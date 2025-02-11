@@ -1,8 +1,5 @@
-package io.github.amayaframework.di;
+package com.github.romanqed.jgraph;
 
-import io.github.amayaframework.di.graph.Graph;
-import io.github.amayaframework.di.graph.GraphUtil;
-import io.github.amayaframework.di.graph.HashGraph;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 

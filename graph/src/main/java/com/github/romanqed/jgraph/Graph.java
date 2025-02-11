@@ -1,4 +1,4 @@
-package io.github.amayaframework.di.graph;
+package com.github.romanqed.jgraph;
 
 import java.util.Collection;
 import java.util.Set;
