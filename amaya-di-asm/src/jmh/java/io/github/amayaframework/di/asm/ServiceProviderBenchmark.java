@@ -1,6 +1,8 @@
-package io.github.amayaframework.di;
+package io.github.amayaframework.di.asm;
 
-import io.github.amayaframework.di.asm.BytecodeStubFactory;
+import io.github.amayaframework.di.Inject;
+import io.github.amayaframework.di.ProviderBuilders;
+import io.github.amayaframework.di.ServiceProvider;
 import io.github.amayaframework.di.stub.StubFactory;
 import org.openjdk.jmh.annotations.*;
 import org.openjdk.jmh.infra.Blackhole;
