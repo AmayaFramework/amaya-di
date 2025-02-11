@@ -1,10 +1,16 @@
-package io.github.amayaframework.di;
+package io.github.amayaframework.di.asm;
 
 import com.github.romanqed.jtype.Types;
+import io.github.amayaframework.di.ProviderBuilders;
+import io.github.amayaframework.di.ServiceProvider;
+import io.github.amayaframework.di.ServiceProviderBuilder;
+import io.github.amayaframework.di.stub.StubFactory;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 public class ServiceProviderTest extends Assertions {
+    private static final StubFactory BYTECODE_FACTORY = new BytecodeStubFactory();
+
     public ServiceProvider create(ServiceProviderBuilder builder) {
         return builder
                 .addTransient(Service1.class)
@@ -36,12 +42,12 @@ public class ServiceProviderTest extends Assertions {
 
     @Test
     public void testCheckedProvider() {
-        testProvider(ProviderBuilders.createChecked());
+        testProvider(ProviderBuilders.createChecked(BYTECODE_FACTORY));
     }
 
     @Test
     public void testManualProvider() {
-        testProvider(ProviderBuilders.createManual());
+        testProvider(ProviderBuilders.createManual(BYTECODE_FACTORY));
     }
 
     public static final class Service1 {

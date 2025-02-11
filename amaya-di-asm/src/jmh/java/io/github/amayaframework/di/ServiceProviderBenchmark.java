@@ -1,5 +1,7 @@
 package io.github.amayaframework.di;
 
+import io.github.amayaframework.di.asm.BytecodeStubFactory;
+import io.github.amayaframework.di.stub.StubFactory;
 import org.openjdk.jmh.annotations.*;
 import org.openjdk.jmh.infra.Blackhole;
 
@@ -9,8 +11,9 @@ import java.util.concurrent.TimeUnit;
 @OutputTimeUnit(TimeUnit.NANOSECONDS)
 @Warmup
 public class ServiceProviderBenchmark {
+    private static final StubFactory STUB_FACTORY = new BytecodeStubFactory();
     private static final ServiceProvider PROVIDER = ProviderBuilders
-            .createChecked()
+            .createChecked(STUB_FACTORY)
             .addTransient(Service1.class)
             .addTransient(Service2.class)
             .addTransient(Service3.class)

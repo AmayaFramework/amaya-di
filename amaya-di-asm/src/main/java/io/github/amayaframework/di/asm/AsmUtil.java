@@ -1,4 +1,4 @@
-package io.github.amayaframework.di.stub;
+package io.github.amayaframework.di.asm;
 
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;

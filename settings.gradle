@@ -1,2 +1,3 @@
 rootProject.name = 'amaya-di'
+include 'amaya-di-asm'
 

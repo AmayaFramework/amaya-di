@@ -1,4 +1,4 @@
-package io.github.amayaframework.di.stub;
+package io.github.amayaframework.di.asm;
 
 import com.github.romanqed.jeflect.loader.DefineClassLoader;
 import com.github.romanqed.jeflect.loader.DefineLoader;
@@ -8,6 +8,8 @@ import com.github.romanqed.jfunc.Exceptions;
 import com.github.romanqed.jfunc.Function0;
 import com.github.romanqed.jtype.TypeUtil;
 import io.github.amayaframework.di.scheme.ClassScheme;
+import io.github.amayaframework.di.stub.StubFactory;
+import io.github.amayaframework.di.stub.TypeProvider;
 import org.objectweb.asm.ClassWriter;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;

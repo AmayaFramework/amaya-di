@@ -1,11 +1,10 @@
-package io.github.amayaframework.di;
+package io.github.amayaframework.di.asm;
 
 import com.github.romanqed.jtype.Types;
 import io.github.amayaframework.di.scheme.ClassScheme;
 import io.github.amayaframework.di.scheme.ConstructorScheme;
 import io.github.amayaframework.di.scheme.FieldScheme;
 import io.github.amayaframework.di.scheme.MethodScheme;
-import io.github.amayaframework.di.stub.BytecodeStubFactory;
 import io.github.amayaframework.di.stub.StubFactory;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;

@@ -1,4 +1,4 @@
-package io.github.amayaframework.di.stub;
+package io.github.amayaframework.di.asm;
 
 import java.lang.reflect.Type;
 import java.util.HashMap;
