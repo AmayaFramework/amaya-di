@@ -1,9 +1,9 @@
 package io.github.amayaframework.di;
 
 import com.github.romanqed.jfunc.Function0;
-import io.github.amayaframework.di.graph.Graph;
-import io.github.amayaframework.di.graph.GraphUtil;
-import io.github.amayaframework.di.graph.HashGraph;
+import com.github.romanqed.jgraph.Graph;
+import com.github.romanqed.jgraph.GraphUtil;
+import com.github.romanqed.jgraph.HashGraph;
 import io.github.amayaframework.di.scheme.ClassScheme;
 import io.github.amayaframework.di.scheme.SchemeFactory;
 import io.github.amayaframework.di.stub.StubFactory;
