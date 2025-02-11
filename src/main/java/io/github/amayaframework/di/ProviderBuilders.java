@@ -32,7 +32,7 @@ public final class ProviderBuilders {
      * {@link ReflectionSchemeFactory}, using the specified annotation as marker.
      *
      * @param annotation the specified annotation, must be non-null
-     * @param factory the specified stub factory, must be non-null
+     * @param factory    the specified stub factory, must be non-null
      * @return the {@link ServiceProviderBuilder} instance
      */
     public static ServiceProviderBuilder createChecked(Class<? extends Annotation> annotation, StubFactory factory) {
@@ -66,7 +66,7 @@ public final class ProviderBuilders {
      * {@link ReflectionSchemeFactory}, using the specified annotation as marker.
      *
      * @param annotation the specified annotation, must be non-null
-     * @param factory the specified stub factory, must be non-null
+     * @param factory    the specified stub factory, must be non-null
      * @return the {@link ServiceProviderBuilder} instance
      */
     public static ManualProviderBuilder createManual(Class<? extends Annotation> annotation, StubFactory factory) {
