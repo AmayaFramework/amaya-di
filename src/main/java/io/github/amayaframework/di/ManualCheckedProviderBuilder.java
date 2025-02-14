@@ -19,13 +19,25 @@ public class ManualCheckedProviderBuilder extends CheckedProviderBuilder impleme
     protected Map<Type, Function1<TypeProvider, Function0<?>>> manual;
 
     /**
+     * Constructs {@link ManualCheckedProviderBuilder} instance with the specified scheme, stub factories and check set.
+     *
+     * @param schemeFactory the specified scheme factory, must be non-null
+     * @param stubFactory   the specified stub factory, must be non-null
+     * @param checks        the specified set of applied checks
+     */
+    public ManualCheckedProviderBuilder(SchemeFactory schemeFactory, StubFactory stubFactory, int checks) {
+        super(schemeFactory, stubFactory, checks);
+    }
+
+    /**
      * Constructs {@link ManualCheckedProviderBuilder} instance with the specified scheme and stub factories.
+     * Enables all available checks {@link CheckedProviderBuilder#VALIDATE_ALL}.
      *
      * @param schemeFactory the specified scheme factory, must be non-null
      * @param stubFactory   the specified stub factory, must be non-null
      */
     public ManualCheckedProviderBuilder(SchemeFactory schemeFactory, StubFactory stubFactory) {
-        super(schemeFactory, stubFactory);
+        this(schemeFactory, stubFactory, VALIDATE_ALL);
     }
 
     @Override

@@ -10,13 +10,12 @@ Taking into account the features of both existing implementations, and the JVM a
 the framework was created in strict accordance with the following principles:
 
 * Support only for new versions of java (11+)
-* Complete rejection of reflective calls in the process of instantiating objects
 * The minimum possible size of the framework
 * The minimum possible set of dependencies
-* Absence of transitive dependencies (i.e., when you get a framework, you get only it and
+* No transitive dependencies (i.e., when you get a framework, you get only it and
   several service libraries necessary for its operation)
 * No dependencies outside the jdk (no plugins, utilities, or scripts)
-* Lack of built-in integrations
+* No built-in integrations
 * Maximum possible flexibility to adapt the framework to support specifications of any format
 * Avoiding making difficult decisions (if something cannot be unambiguously determined in a finite time,
   it will not be determined)
