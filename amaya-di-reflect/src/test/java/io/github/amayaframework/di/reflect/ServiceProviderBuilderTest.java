@@ -1,4 +1,4 @@
-package io.github.amayaframework.di.asm;
+package io.github.amayaframework.di.reflect;
 
 import io.github.amayaframework.di.*;
 import io.github.amayaframework.di.stub.StubFactory;
@@ -8,9 +8,9 @@ import org.junit.jupiter.api.Test;
 import java.util.Objects;
 
 public class ServiceProviderBuilderTest extends Assertions {
-    private static final StubFactory BYTECODE_FACTORY = new BytecodeStubFactory();
-    private static final ServiceProviderBuilder CHECKED_BUILDER = ProviderBuilders.createChecked(BYTECODE_FACTORY);
-    private static final ManualProviderBuilder MANUAL_BUILDER = ProviderBuilders.createManual(BYTECODE_FACTORY);
+    private static final StubFactory REFLECT_FACTORY = new ReflectStubFactory();
+    private static final ServiceProviderBuilder CHECKED_BUILDER = ProviderBuilders.createChecked(REFLECT_FACTORY);
+    private static final ManualProviderBuilder MANUAL_BUILDER = ProviderBuilders.createManual(REFLECT_FACTORY);
 
     public void testCorrect(ServiceProviderBuilder builder) {
         var provider = builder
