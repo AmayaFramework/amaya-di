@@ -5,7 +5,8 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 
 /**
- * TODO
+ * The no operation implementation of {@link ReflectCloner}.
+ * Returns the same instances that were given.
  */
 public final class NoopReflectCloner implements ReflectCloner {
 

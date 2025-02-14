@@ -3,7 +3,10 @@ package io.github.amayaframework.di.reflect;
 import java.lang.reflect.*;
 
 /**
- * TODO
+ * The implementation of the {@link ReflectCloner} that lookups over members cache to get copy of given instance.
+ * Throws an {@link IllegalStateException} if it cannot find the desired member in the cache.
+ * Normally, this should never happen in a JVM following the usual specifications.
+ * If this does happen, the problem is definitely on the side of your runtime.
  */
 public final class LookupReflectCloner implements ReflectCloner {
 

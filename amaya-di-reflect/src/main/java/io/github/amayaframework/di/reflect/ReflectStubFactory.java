@@ -14,22 +14,29 @@ import java.util.Objects;
 import java.util.Set;
 
 /**
- * TODO
+ * A factory that creates instantiators using member accessors from the Reflection API.
  */
 public final class ReflectStubFactory implements StubFactory {
     private final ReflectCloner cloner;
 
     /**
-     * TODO
+     * Constructs a {@link ReflectStubFactory} instance with the specified {@link ReflectCloner} instance,
+     * which will be used to clone reflective entities from {@link ClassScheme}.
      *
-     * @param cloner
+     * @param cloner the {@link ReflectCloner} instance, must be non-null
      */
     public ReflectStubFactory(ReflectCloner cloner) {
         this.cloner = Objects.requireNonNull(cloner);
     }
 
     /**
-     * TODO
+     * Constructs a {@link ReflectStubFactory} instance with the {@link NoopReflectCloner}.
+     * Suitable for use with any {@link io.github.amayaframework.di.scheme.SchemeFactory}
+     * and {@link io.github.amayaframework.di.ServiceProviderBuilder} implementations
+     * that use the {@link ClassScheme} created by the factory ONLY ONCE.
+     * Otherwise, after the first build of the {@link io.github.amayaframework.di.ServiceProvider},
+     * all the reflective objects in it will be changed by calling
+     * {@link java.lang.reflect.AccessibleObject#setAccessible(boolean)}.
      */
     public ReflectStubFactory() {
         this.cloner = new NoopReflectCloner();

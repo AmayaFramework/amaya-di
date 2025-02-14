@@ -5,31 +5,34 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 
 /**
- * TODO
+ * An interface describing an abstract cloner of member entities from the Reflection API.
+ * The need to clone them arises from the existence of the
+ * {@link java.lang.reflect.AccessibleObject#setAccessible(boolean)} API,
+ * which modifies the internal state of the instance of the member entity.
  */
 public interface ReflectCloner {
 
     /**
-     * TODO
+     * Create instance of given {@link Constructor}.
      *
-     * @param constructor
-     * @return
+     * @param constructor the constructor to be cloned
+     * @return the instance of given {@link Constructor}
      */
     Constructor<?> clone(Constructor<?> constructor);
 
     /**
-     * TODO
+     * Create instance of given {@link Method}.
      *
-     * @param method
-     * @return
+     * @param method the method to be cloned
+     * @return the instance of given {@link Method}
      */
     Method clone(Method method);
 
     /**
-     * TODO
+     * Create instance of given {@link Field}.
      *
-     * @param field
-     * @return
+     * @param field the field to be cloned
+     * @return the instance of given {@link Field}
      */
     Field clone(Field field);
 }
