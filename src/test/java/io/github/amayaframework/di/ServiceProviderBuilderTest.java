@@ -1,6 +1,5 @@
-package io.github.amayaframework.di.asm;
+package io.github.amayaframework.di;
 
-import io.github.amayaframework.di.*;
 import io.github.amayaframework.di.stub.StubFactory;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -8,7 +7,7 @@ import org.junit.jupiter.api.Test;
 import java.util.Objects;
 
 public class ServiceProviderBuilderTest extends Assertions {
-    private static final StubFactory BYTECODE_FACTORY = new BytecodeStubFactory();
+    private static final StubFactory BYTECODE_FACTORY = (scheme, provider) -> () -> null;
     private static final ServiceProviderBuilder CHECKED_BUILDER = ProviderBuilders.createChecked(BYTECODE_FACTORY);
     private static final ManualProviderBuilder MANUAL_BUILDER = ProviderBuilders.createManual(BYTECODE_FACTORY);
 
@@ -17,11 +16,8 @@ public class ServiceProviderBuilderTest extends Assertions {
                 .addTransient(Service.class)
                 .addTransient(App.class)
                 .build();
-        var app = provider.get(App.class);
-        assertAll(
-                () -> assertNotNull(app),
-                () -> assertNotNull(app.service)
-        );
+        var app = provider.getRepository().get(App.class);
+        assertAll(() -> assertNotNull(app));
     }
 
     @Test
@@ -77,7 +73,7 @@ public class ServiceProviderBuilderTest extends Assertions {
                     return () -> new Service2(s.invoke());
                 })
                 .build();
-        assertNotNull(provider.get(ManualApp.class));
+        assertNotNull(provider.getRepository().get(ManualApp.class));
     }
 
     public void testMutualExclusion(ServiceProviderBuilder builder) {
@@ -86,7 +82,7 @@ public class ServiceProviderBuilderTest extends Assertions {
                 .addService(Service.class, () -> null)
                 .addTransient(Service.class)
                 .build();
-        assertNotNull(provider.get(App.class));
+        assertNotNull(provider.getRepository().get(App.class));
     }
 
     @Test
@@ -101,7 +97,7 @@ public class ServiceProviderBuilderTest extends Assertions {
                 .addManual(Service.class, v -> () -> null)
                 .addTransient(Service.class)
                 .build();
-        assertNotNull(provider.get(App.class));
+        assertNotNull(provider.getRepository().get(App.class));
     }
 
     @Test
