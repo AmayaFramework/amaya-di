@@ -35,9 +35,11 @@ To install it, you will need:
 
 ```Groovy
 dependencies {
-    implementation group: 'io.github.amayaframework', name: 'amaya-di', version: '2.3.0'
+    implementation group: 'io.github.amayaframework', name: 'amaya-di', version: '2.3.1'
     // ASM stub implementation
     implementation group: 'io.github.amayaframework', name: 'amaya-di-asm', version: '1.0.0'
+    // Or reflect stub implementation
+    implementation group: 'io.github.amayaframework', name: 'amaya-di-reflect', version: '1.0.0'
 }
 ```
 
@@ -47,7 +49,7 @@ dependencies {
 <dependency>
     <groupId>io.github.amayaframework</groupId>
     <artifactId>amaya-di</artifactId>
-    <version>2.3.0</version>
+    <version>2.3.1</version>
 </dependency>
 <!--ASM stub implementation-->
 <dependency>
@@ -55,12 +57,70 @@ dependencies {
     <artifactId>amaya-di-asm</artifactId>
     <version>1.0.0</version>
 </dependency>
+<!--Reflect stub implementation-->
+<dependency>
+    <groupId>io.github.amayaframework</groupId>
+    <artifactId>amaya-di-reflect</artifactId>
+    <version>1.0.0</version>
+</dependency>
+```
+
+## ASM or reflect stub factory
+
+The choice between asm and reflect implementations depends only on how DI is used.
+1) If you create a container once (or many times) and request service implementations ONCE, 
+then you should use amaya-di-reflect.
+2) If you request service implementations MANY TIMES (that is, constantly throughout the lifetime of the application), 
+then you should use amaya-di-asm.
+
+Or you can always create your own implementation :)
+
+## Benchmark
+
+The time spent requesting the implementation of a service 
+with multiple dependencies from already built container is measured.
+
+See [asm benchmark](amaya-di-asm/src/jmh/java/io/github/amayaframework/di/asm/ServiceProviderBenchmark.java) and
+[reflect benchmark](amaya-di-reflect/src/jmh/java/io/github/amayaframework/di/asm/ServiceProviderBenchmark.java) and
+Running on your machine:
+
+```
+gradle amaya-di-asm:jmh
+gradle amaya-di-reflect:jmh
+```
+
+Results:
+<br>
+
+ASM
+```
+# JMH version: 1.36
+# VM version: JDK 11.0.22, OpenJDK 64-Bit Server VM, 11.0.22+7-LTS
+# VM invoker: ~/.jdks/corretto-11.0.22/bin/java.exe
+
+Benchmark                                      Mode  Cnt   Score   Error  Units
+ServiceProviderBenchmark.benchAmayaInjection   avgt   25  15,829 ± 1,685  ns/op
+ServiceProviderBenchmark.benchManualInjection  avgt   25  12,427 ± 0,930  ns/op
+```
+
+Reflect
+```
+# JMH version: 1.36
+# VM version: JDK 11.0.22, OpenJDK 64-Bit Server VM, 11.0.22+7-LTS
+# VM invoker: ~/.jdks/corretto-11.0.22/bin/java.exe
+
+Benchmark                                      Mode  Cnt   Score   Error  Units
+ServiceProviderBenchmark.benchAmayaInjection   avgt   25  59,779 ± 1,011  ns/op
+ServiceProviderBenchmark.benchManualInjection  avgt   25  11,582 ± 0,122  ns/op
 ```
 
 ## Usage example
 
 Important: the order of transferring services to the builder does NOT matter, no changes and no exceptions will occur,
-the ServiceProviderBuilder#build() method has not been called yet.
+the ServiceProviderBuilder#build() method has not been called yet. 
+
+The benchAmayaInjection() method measures the time of the request from the container, the benchManualInjection() 
+method measures the time of the "build" of an instance of the same service completely manually.
 
 ### Hello, world!
 
@@ -331,27 +391,6 @@ Output:
 
 ```
 Found cycle: [class io.github.amayaframework.di.Main$App, class io.github.amayaframework.di.Main$Service]
-```
-
-## Benchmark
-
-See [jmh benchmark](amaya-di-asm/src/jmh/java/io/github/amayaframework/di/asm/ServiceProviderBenchmark.java).
-Running on your machine:
-
-```
-gradle amaya-di-asm:jmh
-```
-
-Results:
-
-```
-# JMH version: 1.36
-# VM version: JDK 11.0.22, OpenJDK 64-Bit Server VM, 11.0.22+7-LTS
-# VM invoker: ~/.jdks/corretto-11.0.22/bin/java.exe
-
-Benchmark                                      Mode  Cnt   Score   Error  Units
-ServiceProviderBenchmark.benchAmayaInjection   avgt   25  15,829 ± 1,685  ns/op
-ServiceProviderBenchmark.benchManualInjection  avgt   25  12,427 ± 0,930  ns/op
 ```
 
 ## Built With

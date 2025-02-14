@@ -38,6 +38,8 @@ dependencies {
     implementation group: 'io.github.amayaframework', name: 'amaya-di', version: '2.3.0'
     // ASM stub implementation
     implementation group: 'io.github.amayaframework', name: 'amaya-di-asm', version: '1.0.0'
+    // Or reflect stub implementation
+    implementation group: 'io.github.amayaframework', name: 'amaya-di-reflect', version: '1.0.0'
 }
 ```
 
@@ -55,6 +57,62 @@ dependencies {
     <artifactId>amaya-di-asm</artifactId>
     <version>1.0.0</version>
 </dependency>
+<!--Reflect stub implementation-->
+<dependency>
+    <groupId>io.github.amayaframework</groupId>
+    <artifactId>amaya-di-reflect</artifactId>
+    <version>1.0.0</version>
+</dependency>
+```
+
+## ASM или reflect stub factory
+
+Выбор между реализациями asm и reflect зависит только от того, как используется DI.
+1) Если вы создаете контейнер один раз (или много раз) и запрашиваете реализации сервисов ОДИН раз, 
+то вам следует использовать amaya-di-reflect.
+2) Если вы запрашиваете сервисные реализации МНОГО РАЗ (то есть постоянно на протяжении всего времени жизни приложения),
+то вам следует использовать amaya-di-asm.
+
+Или вы всегда можете создать свою собственную реализацию :)
+
+## Бенчмарк
+
+Измеряется время, затраченное на запрос реализации сервиса с несколькими зависимостями из УЖЕ созданного контейнера.
+Метод benchAmayaInjection() измеряет время запроса из контейнера, метод benchManualInjection() измеряет время "сборки"
+инстанса такого же сервиса полностью вручную.
+
+См. [asm benchmark](amaya-di-asm/src/jmh/java/io/github/amayaframework/di/asm/ServiceProviderBenchmark.java) и 
+См. [reflect benchmark](amaya-di-reflect/src/jmh/java/io/github/amayaframework/di/asm/ServiceProviderBenchmark.java).
+Запуск на вашей машине:
+
+```
+gradle amaya-di-asm:jmh
+gradle amaya-di-reflect:jmh
+```
+
+Результаты:
+<br>
+
+ASM
+```
+# JMH version: 1.36
+# VM version: JDK 11.0.22, OpenJDK 64-Bit Server VM, 11.0.22+7-LTS
+# VM invoker: ~/.jdks/corretto-11.0.22/bin/java.exe
+
+Benchmark                                      Mode  Cnt   Score   Error  Units
+ServiceProviderBenchmark.benchAmayaInjection   avgt   25  15,829 ± 1,685  ns/op
+ServiceProviderBenchmark.benchManualInjection  avgt   25  12,427 ± 0,930  ns/op
+```
+
+Reflect
+```
+# JMH version: 1.36
+# VM version: JDK 11.0.22, OpenJDK 64-Bit Server VM, 11.0.22+7-LTS
+# VM invoker: ~/.jdks/corretto-11.0.22/bin/java.exe
+
+Benchmark                                      Mode  Cnt   Score   Error  Units
+ServiceProviderBenchmark.benchAmayaInjection   avgt   25  59,779 ± 1,011  ns/op
+ServiceProviderBenchmark.benchManualInjection  avgt   25  11,582 ± 0,122  ns/op
 ```
 
 ## Примеры использования
@@ -331,27 +389,6 @@ public class Main {
 
 ```
 Found cycle: [class io.github.amayaframework.di.Main$App, class io.github.amayaframework.di.Main$Service]
-```
-
-## Бенчмарк
-
-См. [jmh benchmark](amaya-di-asm/src/jmh/java/io/github/amayaframework/di/asm/ServiceProviderBenchmark.java).
-Запуск на вашей машине:
-
-```
-gradle amaya-di-asm:jmh
-```
-
-Результаты:
-
-```
-# JMH version: 1.36
-# VM version: JDK 11.0.22, OpenJDK 64-Bit Server VM, 11.0.22+7-LTS
-# VM invoker: ~/.jdks/corretto-11.0.22/bin/java.exe
-
-Benchmark                                      Mode  Cnt   Score   Error  Units
-ServiceProviderBenchmark.benchAmayaInjection   avgt   25  15,829 ± 1,685  ns/op
-ServiceProviderBenchmark.benchManualInjection  avgt   25  12,427 ± 0,930  ns/op
 ```
 
 ## Используемые зависимости
