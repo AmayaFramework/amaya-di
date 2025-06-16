@@ -1,5 +1,7 @@
 package io.github.amayaframework.di.reflect;
 
+import com.github.romanqed.jeflect.cloner.NoopReflectCloner;
+import com.github.romanqed.jeflect.cloner.ReflectCloner;
 import com.github.romanqed.jfunc.Function0;
 import com.github.romanqed.jfunc.Runnable1;
 import io.github.amayaframework.di.scheme.ClassScheme;
