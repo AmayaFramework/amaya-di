@@ -4,6 +4,7 @@ plugins {
     id 'java-library'
     id 'maven-publish'
     id 'signing'
+    id 'io.github.gradle-nexus.publish-plugin' version '2.0.0'
 }
 
 java {
@@ -115,13 +116,16 @@ publishing {
             }
         }
     }
+}
+
+
+nexusPublishing {
     repositories {
-        maven {
-            url "https://s01.oss.sonatype.org/service/local/staging/deploy/maven2"
-            credentials {
-                username System.getenv('SONATYPE1_USERNAME')
-                password System.getenv('SONATYPE1_PASSWORD')
-            }
+        sonatype {
+            username = centralUsername
+            password = centralPassword
+            nexusUrl.set(uri("https://ossrh-staging-api.central.sonatype.com/service/local/"))
+            snapshotRepositoryUrl.set(uri("https://central.sonatype.com/repository/maven-snapshots/"))
         }
     }
 }
