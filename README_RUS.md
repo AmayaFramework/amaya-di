@@ -35,11 +35,11 @@
 
 ```Groovy
 dependencies {
-    implementation group: 'io.github.amayaframework', name: 'amaya-di', version: '2.3.1'
+    implementation group: 'io.github.amayaframework', name: 'amaya-di', version: '2.3.2'
     // ASM stub implementation
-    implementation group: 'io.github.amayaframework', name: 'amaya-di-asm', version: '1.0.0'
+    implementation group: 'io.github.amayaframework', name: 'amaya-di-asm', version: '1.0.1'
     // Or reflect stub implementation
-    implementation group: 'io.github.amayaframework', name: 'amaya-di-reflect', version: '1.0.0'
+    implementation group: 'io.github.amayaframework', name: 'amaya-di-reflect', version: '1.0.2'
 }
 ```
 
@@ -49,19 +49,19 @@ dependencies {
 <dependency>
     <groupId>io.github.amayaframework</groupId>
     <artifactId>amaya-di</artifactId>
-    <version>2.3.1</version>
+    <version>2.3.2</version>
 </dependency>
 <!--ASM stub implementation-->
 <dependency>
     <groupId>io.github.amayaframework</groupId>
     <artifactId>amaya-di-asm</artifactId>
-    <version>1.0.0</version>
+    <version>1.0.1</version>
 </dependency>
 <!--Reflect stub implementation-->
 <dependency>
     <groupId>io.github.amayaframework</groupId>
     <artifactId>amaya-di-reflect</artifactId>
-    <version>1.0.0</version>
+    <version>1.0.2</version>
 </dependency>
 ```
 
