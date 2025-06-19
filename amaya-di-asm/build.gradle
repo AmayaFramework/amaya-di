@@ -33,9 +33,7 @@ dependencies {
     jmhImplementation group: 'org.openjdk.jmh', name: 'jmh-generator-annprocess', version: '1.35'
     // Dependencies
     compileOnly project(':')
-    api group: 'org.ow2.asm', name: 'asm', version: '9.7.1'
-    api group: 'com.github.romanqed', name: 'jtype', version: '1.0.0'
-    api group: 'com.github.romanqed', name: 'jfunc', version: '1.1.4'
+    implementation group: 'org.ow2.asm', name: 'asm', version: '9.8'
     api group: 'com.github.romanqed', name: 'jeflect-loader', version: '1.0.0'
 }
 
