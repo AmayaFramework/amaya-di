@@ -35,7 +35,7 @@ To install it, you will need:
 
 ```Groovy
 dependencies {
-    implementation group: 'io.github.amayaframework', name: 'amaya-di', version: '2.3.2'
+    implementation group: 'io.github.amayaframework', name: 'amaya-di', version: '2.3.3'
     // ASM stub implementation
     implementation group: 'io.github.amayaframework', name: 'amaya-di-asm', version: '1.0.1'
     // Or reflect stub implementation
