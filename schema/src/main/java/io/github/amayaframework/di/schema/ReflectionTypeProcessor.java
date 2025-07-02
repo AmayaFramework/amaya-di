@@ -3,11 +3,23 @@ package io.github.amayaframework.di.schema;
 import com.github.romanqed.jtype.Types;
 
 import java.lang.reflect.*;
+import java.util.Map;
 
 /**
  * A simple reflective implementation of the {@link TypeProcessor}. Ignores any annotations.
  */
 public class ReflectionTypeProcessor implements TypeProcessor {
+
+    private static final Map<Class<?>, Class<?>> PRIMITIVES = Map.of(
+            boolean.class, Boolean.class,
+            char.class, Character.class,
+            byte.class, Byte.class,
+            short.class, Short.class,
+            int.class, Integer.class,
+            float.class, Float.class,
+            long.class, Long.class,
+            double.class, Double.class
+    );
 
     private static Type process(Type type) {
         // process(Owner).RawType<process(T1), process(T2), ...>
@@ -39,6 +51,13 @@ public class ReflectionTypeProcessor implements TypeProcessor {
 
     @Override
     public Type process(Type type, AnnotatedElement element) {
+        if (type instanceof Class) {
+            var clazz = (Class<?>) type;
+            if (clazz.isPrimitive()) {
+                return PRIMITIVES.get(clazz);
+            }
+            return clazz;
+        }
         return process(type);
     }
 }

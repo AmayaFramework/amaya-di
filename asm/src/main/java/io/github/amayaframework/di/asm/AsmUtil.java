@@ -1,5 +1,6 @@
 package io.github.amayaframework.di.asm;
 
+import org.objectweb.asm.ClassWriter;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
@@ -10,6 +11,10 @@ import java.lang.reflect.Modifier;
 import java.util.Map;
 
 final class AsmUtil {
+    static final String OBJECT_NAME = "java/lang/Object";
+    static final String INIT = "<init>";
+    static final String EMPTY_DESCRIPTOR = "()V";
+
     static final Map<Class<?>, Class<?>> PRIMITIVES = Map.of(
             boolean.class, Boolean.class,
             char.class, Character.class,
@@ -34,6 +39,20 @@ final class AsmUtil {
     private AsmUtil() {
     }
 
+    static void createEmptyConstructor(ClassWriter writer) {
+        var init = writer.visitMethod(Opcodes.ACC_PUBLIC,
+                INIT,
+                EMPTY_DESCRIPTOR,
+                null,
+                null);
+        init.visitCode();
+        init.visitVarInsn(Opcodes.ALOAD, 0);
+        init.visitMethodInsn(Opcodes.INVOKESPECIAL, OBJECT_NAME, INIT, EMPTY_DESCRIPTOR, false);
+        init.visitInsn(Opcodes.RETURN);
+        init.visitMaxs(1, 1);
+        init.visitEnd();
+    }
+
     static void castReference(MethodVisitor visitor, Class<?> clazz) {
         if (clazz == Object.class) {
             return;
@@ -54,7 +73,7 @@ final class AsmUtil {
         );
     }
 
-    public static void pushInt(MethodVisitor visitor, int value) {
+    static void pushInt(MethodVisitor visitor, int value) {
         if (value >= -1 && value <= 5) {
             visitor.visitInsn(Opcodes.ICONST_M1 + value + 1);
             return;
@@ -70,7 +89,7 @@ final class AsmUtil {
         visitor.visitLdcInsn(value);
     }
 
-    public static void invoke(MethodVisitor visitor, Method method) {
+    static void invoke(MethodVisitor visitor, Method method) {
         var owner = method.getDeclaringClass();
         var isInterface = owner.isInterface();
         var opcode = Modifier.isStatic(method.getModifiers()) ?
@@ -87,7 +106,7 @@ final class AsmUtil {
         );
     }
 
-    public static void invoke(MethodVisitor visitor, Constructor<?> constructor) {
+    static void invoke(MethodVisitor visitor, Constructor<?> constructor) {
         visitor.visitMethodInsn(
                 Opcodes.INVOKESPECIAL,
                 Type.getInternalName(constructor.getDeclaringClass()),
