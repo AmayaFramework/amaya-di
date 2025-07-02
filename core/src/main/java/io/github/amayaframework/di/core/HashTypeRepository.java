@@ -13,11 +13,21 @@ public final class HashTypeRepository implements TypeRepository {
     private final Map<Type, ObjectFactory> body;
     private final Set<Type> keys;
 
+    /**
+     * Constructs a repository using a custom map supplier.
+     * <br>
+     * This allows using specialized or preconfigured map implementations.
+     *
+     * @param supplier a supplier that creates the internal {@link Map}
+     */
     public HashTypeRepository(Supplier<Map<Type, ObjectFactory>> supplier) {
         this.body = supplier.get();
         this.keys = body.keySet();
     }
 
+    /**
+     * Constructs an empty repository backed by a {@link HashMap}.
+     */
     public HashTypeRepository() {
         this.body = new HashMap<>();
         this.keys = body.keySet();

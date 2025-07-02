@@ -4,9 +4,21 @@ import com.github.romanqed.jtype.JType;
 
 import java.lang.reflect.Type;
 
+/**
+ * A base implementation of {@link ServiceProvider} that uses a {@link TypeRepository}
+ * to resolve services.
+ */
 public abstract class AbstractServiceProvider implements ServiceProvider {
+    /**
+     * The internal repository used to resolve services.
+     */
     protected TypeRepository repository;
 
+    /**
+     * Constructs a new instance with the specified type repository.
+     *
+     * @param repository the repository used to resolve services, must be non-null
+     */
     protected AbstractServiceProvider(TypeRepository repository) {
         this.repository = repository;
     }
