@@ -1,19 +1,21 @@
-package io.github.amayaframework.di;
+package io.github.romanqed.di.schema;
 
 import com.github.romanqed.jtype.Types;
-import io.github.amayaframework.di.scheme.*;
+import io.github.amayaframework.di.schema.*;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.lang.reflect.Type;
 import java.util.List;
 import java.util.Set;
 import java.util.function.BiConsumer;
 
-public class SchemeTest extends Assertions {
-    private static final SchemeFactory REFLECTION_FACTORY = new ReflectionSchemeFactory(Inject.class);
+public class SchemaTest extends Assertions {
+    private static final SchemaFactory REFLECTION_FACTORY = new ReflectionSchemaFactory(Inject.class);
 
-    public void testEmptyClass(SchemeFactory factory) {
+    public void testEmptyClass(SchemaFactory factory) {
         var scheme = factory.create(Empty.class);
         assertAll(
                 () -> assertEquals(Empty.class, scheme.getTarget()),
@@ -29,7 +31,7 @@ public class SchemeTest extends Assertions {
         testEmptyClass(REFLECTION_FACTORY);
     }
 
-    public void testNoConstructors(SchemeFactory factory) {
+    public void testNoConstructors(SchemaFactory factory) {
         assertThrows(IllegalClassException.class, () -> factory.create(NoConstructors.class));
     }
 
@@ -38,7 +40,7 @@ public class SchemeTest extends Assertions {
         testNoConstructors(REFLECTION_FACTORY);
     }
 
-    public void testOneConstructor(SchemeFactory factory) {
+    public void testOneConstructor(SchemaFactory factory) {
         var scheme = factory.create(OneConstructor.class);
         assertAll(
                 () -> assertEquals(OneConstructor.class, scheme.getTarget()),
@@ -58,7 +60,7 @@ public class SchemeTest extends Assertions {
         testOneConstructor(REFLECTION_FACTORY);
     }
 
-    public void testManyConstructors(SchemeFactory factory) {
+    public void testManyConstructors(SchemaFactory factory) {
         assertThrows(IllegalClassException.class, () -> factory.create(ManyConstructors.class));
     }
 
@@ -67,7 +69,7 @@ public class SchemeTest extends Assertions {
         testManyConstructors(REFLECTION_FACTORY);
     }
 
-    public void testAnnotatedConstructor(SchemeFactory factory) {
+    public void testAnnotatedConstructor(SchemaFactory factory) {
         var scheme = factory.create(AnnotatedConstructor.class);
         assertAll(
                 () -> assertEquals(AnnotatedConstructor.class, scheme.getTarget()),
@@ -87,10 +89,10 @@ public class SchemeTest extends Assertions {
         testAnnotatedConstructor(REFLECTION_FACTORY);
     }
 
-    public void testFields(SchemeFactory factory) throws NoSuchFieldException {
+    public void testFields(SchemaFactory factory) throws NoSuchFieldException {
         var scheme = factory.create(Fields.class);
         var type = Object.class;
-        var schemes = Set.of(new FieldScheme(Fields.class.getField("f1"), type));
+        var schemes = Set.of(new FieldSchema(Fields.class.getField("f1"), type));
         assertAll(
                 () -> assertEquals(Fields.class, scheme.getTarget()),
                 () -> assertEquals(Set.of(type), scheme.getTypes()),
@@ -103,14 +105,14 @@ public class SchemeTest extends Assertions {
         testFields(REFLECTION_FACTORY);
     }
 
-    public void testMethods(SchemeFactory factory) throws NoSuchMethodException {
+    public void testMethods(SchemaFactory factory) throws NoSuchMethodException {
         var scheme = factory.create(Methods.class);
         var type = (Type) Object.class;
         var types = Set.of(type);
         var mapping = new Type[]{type};
         var schemes = Set.of(
-                new MethodScheme(Methods.class.getMethod("psm2", Methods.class, Object.class), types, mapping),
-                new MethodScheme(Methods.class.getMethod("pm2", Object.class), types, mapping)
+                new MethodSchema(Methods.class.getMethod("psm2", Methods.class, Object.class), types, mapping),
+                new MethodSchema(Methods.class.getMethod("pm2", Object.class), types, mapping)
         );
         assertAll(
                 () -> assertEquals(Methods.class, scheme.getTarget()),
@@ -124,7 +126,7 @@ public class SchemeTest extends Assertions {
         testMethods(REFLECTION_FACTORY);
     }
 
-    public void testInvalidStaticSetter(SchemeFactory factory) {
+    public void testInvalidStaticSetter(SchemaFactory factory) {
         assertThrows(IllegalClassException.class, () -> factory.create(InvalidStaticSetter.class));
     }
 
@@ -133,7 +135,7 @@ public class SchemeTest extends Assertions {
         testInvalidStaticSetter(REFLECTION_FACTORY);
     }
 
-    public void testWildcards(SchemeFactory factory) {
+    public void testWildcards(SchemaFactory factory) {
         var scheme = factory.create(Wildcards.class);
         var types = Set.of(
                 Types.of(List.class, Object.class),
@@ -151,7 +153,7 @@ public class SchemeTest extends Assertions {
         testWildcards(REFLECTION_FACTORY);
     }
 
-    public void testGenerics(SchemeFactory factory) {
+    public void testGenerics(SchemaFactory factory) {
         var scheme = factory.create(Generics.class);
         var types = Set.of(
                 Types.of(List.class, String.class),
@@ -173,7 +175,7 @@ public class SchemeTest extends Assertions {
         testGenerics(REFLECTION_FACTORY);
     }
 
-    public void testGenericConstructor(SchemeFactory factory) {
+    public void testGenericConstructor(SchemaFactory factory) {
         assertThrows(IllegalMemberException.class, () -> factory.create(GenericConstructor.class));
     }
 
@@ -182,7 +184,7 @@ public class SchemeTest extends Assertions {
         testGenericConstructor(REFLECTION_FACTORY);
     }
 
-    public void testGenericMethod(SchemeFactory factory) {
+    public void testGenericMethod(SchemaFactory factory) {
         assertThrows(IllegalMemberException.class, () -> factory.create(GenericMethod.class));
     }
 
@@ -210,6 +212,10 @@ public class SchemeTest extends Assertions {
 
         public ManyConstructors(Object arg) {
         }
+    }
+
+    @Retention(RetentionPolicy.RUNTIME)
+    public @interface Inject {
     }
 
     public static final class AnnotatedConstructor {
