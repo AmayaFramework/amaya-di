@@ -1,7 +1,6 @@
-package io.github.romanqed.di.schema;
+package io.github.amayaframework.di.schema;
 
 import com.github.romanqed.jtype.Types;
-import io.github.amayaframework.di.schema.*;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
@@ -44,7 +43,7 @@ public class SchemaTest extends Assertions {
         var scheme = factory.create(OneConstructor.class);
         assertAll(
                 () -> assertEquals(OneConstructor.class, scheme.getTarget()),
-                () -> assertEquals(scheme.getTypes().size(), 1),
+                () -> assertEquals(1, scheme.getTypes().size()),
                 () -> assertTrue(scheme.getFieldSchemes().isEmpty()),
                 () -> assertTrue(scheme.getMethodSchemes().isEmpty()),
                 () -> assertEquals(
@@ -73,7 +72,7 @@ public class SchemaTest extends Assertions {
         var scheme = factory.create(AnnotatedConstructor.class);
         assertAll(
                 () -> assertEquals(AnnotatedConstructor.class, scheme.getTarget()),
-                () -> assertEquals(scheme.getTypes().size(), 1),
+                () -> assertEquals(1, scheme.getTypes().size()),
                 () -> assertTrue(scheme.getFieldSchemes().isEmpty()),
                 () -> assertTrue(scheme.getMethodSchemes().isEmpty()),
                 () -> assertEquals(
