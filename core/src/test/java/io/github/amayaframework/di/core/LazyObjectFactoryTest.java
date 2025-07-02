@@ -7,7 +7,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 public final class LazyObjectFactoryTest {
 
     @Test
-    public void testObjectEquality() {
+    public void testObjectEquality() throws Throwable {
         var factory = (ObjectFactory) p -> new Simple();
         var lazy = new LazyObjectFactory(factory);
         var s1 = lazy.create(null);
@@ -23,7 +23,7 @@ public final class LazyObjectFactoryTest {
     }
 
     @Test
-    public void testCtorCounter() {
+    public void testCtorCounter() throws Throwable {
         var factory = (ObjectFactory) p -> new WithCounter();
         var lazy = new LazyObjectFactory(factory);
         var s1 = lazy.create(null);

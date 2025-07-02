@@ -38,20 +38,18 @@ public abstract class AbstractServiceProvider implements ServiceProvider {
         if (factory == null) {
             return null;
         }
-        return (T) factory.create(repository);
+        try {
+            return (T) factory.create(repository);
+        } catch (Error | RuntimeException e) {
+            throw e;
+        } catch (Throwable e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Override
-    @SuppressWarnings("unchecked")
     public <T> T get(Class<T> type) {
-        if (type == null) {
-            return null;
-        }
-        var factory = repository.get(type);
-        if (factory == null) {
-            return null;
-        }
-        return (T) factory.create(repository);
+        return get((Type) type);
     }
 
     @Override
@@ -64,6 +62,12 @@ public abstract class AbstractServiceProvider implements ServiceProvider {
         if (factory == null) {
             return null;
         }
-        return (T) factory.create(repository);
+        try {
+            return (T) factory.create(repository);
+        }  catch (Error | RuntimeException e) {
+            throw e;
+        } catch (Throwable e) {
+            throw new RuntimeException(e);
+        }
     }
 }

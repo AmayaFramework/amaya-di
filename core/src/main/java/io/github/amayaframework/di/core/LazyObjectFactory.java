@@ -5,6 +5,8 @@ package io.github.amayaframework.di.core;
  * <br>
  * The wrapped factory is only invoked once upon the first call to {@link #create(TypeProvider)},
  * and the result is cached for future calls.
+ * <p>
+ * This class is suitable for implementing singleton-style scoping in dependency injection.
  */
 public final class LazyObjectFactory implements ObjectFactory {
     private final ObjectFactory body;
@@ -22,7 +24,19 @@ public final class LazyObjectFactory implements ObjectFactory {
     }
 
     /**
-     * Resets the cached value, allowing the wrapped factory to be invoked again.
+     * Returns the underlying (wrapped) factory used for instantiation.
+     *
+     * @return the delegate {@link ObjectFactory}
+     */
+    public ObjectFactory getFactory() {
+        return body;
+    }
+
+    /**
+     * Resets the cached value, allowing the wrapped factory to be invoked again
+     * on the next {@link #create(TypeProvider)} call.
+     * <br>
+     * Useful in scenarios where the instance needs to be refreshed or recreated.
      */
     public void reset() {
         synchronized (lock) {
@@ -30,8 +44,16 @@ public final class LazyObjectFactory implements ObjectFactory {
         }
     }
 
+    /**
+     * Returns the cached object if it exists, otherwise creates it by invoking
+     * the wrapped factory. Ensures thread-safe lazy initialization.
+     *
+     * @param provider the type provider used to resolve dependencies
+     * @return the created or cached instance
+     * @throws Throwable if the wrapped factory throws an exception during creation
+     */
     @Override
-    public Object create(TypeProvider provider) {
+    public Object create(TypeProvider provider) throws Throwable {
         if (value == null) {
             synchronized (lock) {
                 if (value == null) {

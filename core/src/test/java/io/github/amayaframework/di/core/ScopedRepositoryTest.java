@@ -11,7 +11,7 @@ import static org.junit.jupiter.api.Assertions.*;
 public final class ScopedRepositoryTest {
 
     @Test
-    public void testEmptyCurrent() {
+    public void testEmptyCurrent() throws Throwable {
         var current = of();
         var parent = of(String.class, Integer.class, Character.class);
         var scoped = new ScopedTypeRepository(current, parent);
@@ -78,7 +78,7 @@ public final class ScopedRepositoryTest {
     }
 
     @Test
-    public void testCurrentExtendsParent() {
+    public void testCurrentExtendsParent() throws Throwable {
         var current = of(Map.of(Character.class, 'c'));
         var parent = of(Map.of(String.class, "parent", Integer.class, 5));
         var scoped = new ScopedTypeRepository(current, parent);
@@ -106,7 +106,7 @@ public final class ScopedRepositoryTest {
     }
 
     @Test
-    public void testCurrentOverridesParent() {
+    public void testCurrentOverridesParent() throws Throwable {
         var current = of(Map.of(String.class, "current", Integer.class, 10));
         var parent = of(Map.of(String.class, "parent", Integer.class, 5));
         var scoped = new ScopedTypeRepository(current, parent);
@@ -141,7 +141,7 @@ public final class ScopedRepositoryTest {
     }
 
     @Test
-    public void testCurrentExtendsAndOverridesParent() {
+    public void testCurrentExtendsAndOverridesParent() throws Throwable {
         var current = of(Map.of(String.class, "current", Integer.class, 10, Character.class, 'c'));
         var parent = of(Map.of(String.class, "parent", Integer.class, 5));
         var scoped = new ScopedTypeRepository(current, parent);
