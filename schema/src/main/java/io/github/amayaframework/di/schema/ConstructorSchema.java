@@ -23,7 +23,7 @@ public final class ConstructorSchema extends AbstractExecutableSchema<Constructo
 
     @Override
     public String toString() {
-        return "ConstructorScheme{" +
+        return "ConstructorSchema{" +
                 "types=" + types +
                 ", mapping=" + Arrays.toString(mapping) +
                 ", target=" + target +

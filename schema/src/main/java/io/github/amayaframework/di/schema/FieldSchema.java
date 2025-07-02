@@ -38,7 +38,7 @@ public final class FieldSchema extends AbstractSchema<Field> {
 
     @Override
     public String toString() {
-        return "FieldScheme{" +
+        return "FieldSchema{" +
                 "type=" + type +
                 ", target=" + target +
                 '}';

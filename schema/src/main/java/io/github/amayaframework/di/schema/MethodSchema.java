@@ -23,7 +23,7 @@ public final class MethodSchema extends AbstractExecutableSchema<Method> {
 
     @Override
     public String toString() {
-        return "MethodScheme{" +
+        return "MethodSchema{" +
                 "types=" + types +
                 ", mapping=" + Arrays.toString(mapping) +
                 ", target=" + target +

@@ -5,12 +5,12 @@ import java.lang.reflect.Type;
 
 /**
  * An interface describing an abstract type processor
- * that performs their processing for subsequent use in the injection scheme.
+ * that performs their processing for subsequent use in the injection schema.
  */
 public interface TypeProcessor {
 
     /**
-     * Processes the type and returns an implementation ready for use in the injection scheme.
+     * Processes the type and returns an implementation ready for use in the injection schema.
      *
      * @param type    the specified type, must be non-null
      * @param element the annotated element that the type belongs to

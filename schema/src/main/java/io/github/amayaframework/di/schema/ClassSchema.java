@@ -10,36 +10,36 @@ import java.util.Set;
  * A scheme that defines the correspondence between set of types and class.
  */
 public final class ClassSchema extends AbstractSchema<Class<?>> {
-    private final Set<MethodSchema> methodSchemes;
-    private final Set<FieldSchema> fieldSchemes;
-    private final ConstructorSchema constructorScheme;
+    private final Set<MethodSchema> methodSchemas;
+    private final Set<FieldSchema> fieldSchemas;
+    private final ConstructorSchema constructorSchema;
     private final Set<Type> types;
 
     /**
      * Constructs class scheme for specified class and schemes for its members.
      *
      * @param clazz             the specified class, must be non-null
-     * @param constructorScheme the constructor scheme, may be null
-     * @param fieldSchemes      the set of field schemes, must be non-null
-     * @param methodSchemes     the set of method schemes, must be non-null
+     * @param constructorSchema the constructor scheme, may be null
+     * @param fieldSchemas      the set of field schemes, must be non-null
+     * @param methodSchemas     the set of method schemes, must be non-null
      */
     public ClassSchema(Class<?> clazz,
-                       ConstructorSchema constructorScheme,
-                       Set<FieldSchema> fieldSchemes,
-                       Set<MethodSchema> methodSchemes) {
+                       ConstructorSchema constructorSchema,
+                       Set<FieldSchema> fieldSchemas,
+                       Set<MethodSchema> methodSchemas) {
         super(clazz);
-        this.constructorScheme = Objects.requireNonNull(constructorScheme);
-        this.fieldSchemes = Collections.unmodifiableSet(Objects.requireNonNull(fieldSchemes));
-        this.methodSchemes = Collections.unmodifiableSet(Objects.requireNonNull(methodSchemes));
+        this.constructorSchema = Objects.requireNonNull(constructorSchema);
+        this.fieldSchemas = Collections.unmodifiableSet(Objects.requireNonNull(fieldSchemas));
+        this.methodSchemas = Collections.unmodifiableSet(Objects.requireNonNull(methodSchemas));
         this.types = Collections.unmodifiableSet(collectTypes());
     }
 
     private Set<Type> collectTypes() {
-        var ret = new HashSet<>(constructorScheme.types);
-        for (var scheme : fieldSchemes) {
+        var ret = new HashSet<>(constructorSchema.types);
+        for (var scheme : fieldSchemas) {
             ret.add(scheme.type);
         }
-        for (var scheme : methodSchemes) {
+        for (var scheme : methodSchemas) {
             ret.addAll(scheme.types);
         }
         return ret;
@@ -50,8 +50,8 @@ public final class ClassSchema extends AbstractSchema<Class<?>> {
      *
      * @return the constructor scheme.
      */
-    public ConstructorSchema getConstructorScheme() {
-        return constructorScheme;
+    public ConstructorSchema getConstructorSchema() {
+        return constructorSchema;
     }
 
     /**
@@ -59,8 +59,8 @@ public final class ClassSchema extends AbstractSchema<Class<?>> {
      *
      * @return the set of field schemes
      */
-    public Set<FieldSchema> getFieldSchemes() {
-        return fieldSchemes;
+    public Set<FieldSchema> getFieldSchemas() {
+        return fieldSchemas;
     }
 
     /**
@@ -68,8 +68,8 @@ public final class ClassSchema extends AbstractSchema<Class<?>> {
      *
      * @return the set of method schemes
      */
-    public Set<MethodSchema> getMethodSchemes() {
-        return methodSchemes;
+    public Set<MethodSchema> getMethodSchemas() {
+        return methodSchemas;
     }
 
     /**
@@ -84,6 +84,6 @@ public final class ClassSchema extends AbstractSchema<Class<?>> {
 
     @Override
     public String toString() {
-        return "ClassScheme{" + target + "}";
+        return "ClassSchema{" + target + "}";
     }
 }

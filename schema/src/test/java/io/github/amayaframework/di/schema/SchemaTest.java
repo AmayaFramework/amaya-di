@@ -19,9 +19,9 @@ public class SchemaTest extends Assertions {
         assertAll(
                 () -> assertEquals(Empty.class, scheme.getTarget()),
                 () -> assertTrue(scheme.getTypes().isEmpty()),
-                () -> assertTrue(scheme.getFieldSchemes().isEmpty()),
-                () -> assertTrue(scheme.getMethodSchemes().isEmpty()),
-                () -> assertEquals(Empty.class.getConstructor(), scheme.getConstructorScheme().getTarget())
+                () -> assertTrue(scheme.getFieldSchemas().isEmpty()),
+                () -> assertTrue(scheme.getMethodSchemas().isEmpty()),
+                () -> assertEquals(Empty.class.getConstructor(), scheme.getConstructorSchema().getTarget())
         );
     }
 
@@ -44,13 +44,13 @@ public class SchemaTest extends Assertions {
         assertAll(
                 () -> assertEquals(OneConstructor.class, scheme.getTarget()),
                 () -> assertEquals(1, scheme.getTypes().size()),
-                () -> assertTrue(scheme.getFieldSchemes().isEmpty()),
-                () -> assertTrue(scheme.getMethodSchemes().isEmpty()),
+                () -> assertTrue(scheme.getFieldSchemas().isEmpty()),
+                () -> assertTrue(scheme.getMethodSchemas().isEmpty()),
                 () -> assertEquals(
                         OneConstructor.class.getConstructor(Object.class),
-                        scheme.getConstructorScheme().getTarget()
+                        scheme.getConstructorSchema().getTarget()
                 ),
-                () -> assertEquals(Set.of(Object.class), scheme.getConstructorScheme().getTypes())
+                () -> assertEquals(Set.of(Object.class), scheme.getConstructorSchema().getTypes())
         );
     }
 
@@ -73,13 +73,13 @@ public class SchemaTest extends Assertions {
         assertAll(
                 () -> assertEquals(AnnotatedConstructor.class, scheme.getTarget()),
                 () -> assertEquals(1, scheme.getTypes().size()),
-                () -> assertTrue(scheme.getFieldSchemes().isEmpty()),
-                () -> assertTrue(scheme.getMethodSchemes().isEmpty()),
+                () -> assertTrue(scheme.getFieldSchemas().isEmpty()),
+                () -> assertTrue(scheme.getMethodSchemas().isEmpty()),
                 () -> assertEquals(
                         AnnotatedConstructor.class.getConstructor(Object.class),
-                        scheme.getConstructorScheme().getTarget()
+                        scheme.getConstructorSchema().getTarget()
                 ),
-                () -> assertEquals(Set.of(Object.class), scheme.getConstructorScheme().getTypes())
+                () -> assertEquals(Set.of(Object.class), scheme.getConstructorSchema().getTypes())
         );
     }
 
@@ -95,7 +95,7 @@ public class SchemaTest extends Assertions {
         assertAll(
                 () -> assertEquals(Fields.class, scheme.getTarget()),
                 () -> assertEquals(Set.of(type), scheme.getTypes()),
-                () -> assertEquals(schemes, scheme.getFieldSchemes())
+                () -> assertEquals(schemes, scheme.getFieldSchemas())
         );
     }
 
@@ -116,7 +116,7 @@ public class SchemaTest extends Assertions {
         assertAll(
                 () -> assertEquals(Methods.class, scheme.getTarget()),
                 () -> assertEquals(types, scheme.getTypes()),
-                () -> assertEquals(schemes, scheme.getMethodSchemes())
+                () -> assertEquals(schemes, scheme.getMethodSchemas())
         );
     }
 
