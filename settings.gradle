@@ -1,9 +1,8 @@
 rootProject.name = 'amaya-di'
 include 'core'
 include 'schema'
+include 'stub'
 include 'graph'
 include 'reflect'
 include 'asm'
 
-
-include 'stub'
