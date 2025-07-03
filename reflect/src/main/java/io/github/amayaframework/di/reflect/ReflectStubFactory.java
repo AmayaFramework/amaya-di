@@ -2,18 +2,21 @@ package io.github.amayaframework.di.reflect;
 
 import com.github.romanqed.jeflect.cloner.NoopReflectCloner;
 import com.github.romanqed.jeflect.cloner.ReflectCloner;
-import com.github.romanqed.jfunc.Function0;
-import com.github.romanqed.jfunc.Runnable1;
-import io.github.amayaframework.di.scheme.ClassScheme;
-import io.github.amayaframework.di.scheme.ConstructorScheme;
-import io.github.amayaframework.di.scheme.FieldScheme;
-import io.github.amayaframework.di.scheme.MethodScheme;
+import io.github.amayaframework.di.core.ObjectFactory;
+import io.github.amayaframework.di.schema.ClassSchema;
+import io.github.amayaframework.di.schema.ConstructorSchema;
+import io.github.amayaframework.di.schema.FieldSchema;
+import io.github.amayaframework.di.schema.MethodSchema;
+import io.github.amayaframework.di.stub.CacheMode;
 import io.github.amayaframework.di.stub.StubFactory;
-import io.github.amayaframework.di.stub.TypeProvider;
 
 import java.lang.reflect.Modifier;
+import java.lang.reflect.Type;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.function.Consumer;
 
 /**
  * A factory that creates instantiators using member accessors from the Reflection API.
@@ -23,7 +26,7 @@ public final class ReflectStubFactory implements StubFactory {
 
     /**
      * Constructs a {@link ReflectStubFactory} instance with the specified {@link ReflectCloner} instance,
-     * which will be used to clone reflective entities from {@link ClassScheme}.
+     * which will be used to clone reflective entities from {@link ClassSchema}.
      *
      * @param cloner the {@link ReflectCloner} instance, must be non-null
      */
@@ -33,94 +36,157 @@ public final class ReflectStubFactory implements StubFactory {
 
     /**
      * Constructs a {@link ReflectStubFactory} instance with the {@link NoopReflectCloner}.
-     * Suitable for use with any {@link io.github.amayaframework.di.scheme.SchemeFactory}
-     * and {@link io.github.amayaframework.di.ServiceProviderBuilder} implementations
-     * that use the {@link ClassScheme} created by the factory ONLY ONCE.
-     * Otherwise, after the first build of the {@link io.github.amayaframework.di.ServiceProvider},
-     * all the reflective objects in it will be changed by calling
-     * {@link java.lang.reflect.AccessibleObject#setAccessible(boolean)}.
+     * It is suitable for use in cases where classSchema is used ONLY ONCE,
+     * or when {@link java.lang.reflect.AccessibleObject#setAccessible(boolean)} does not affect the result.
      */
     public ReflectStubFactory() {
         this.cloner = new NoopReflectCloner();
     }
 
-    @SuppressWarnings("rawtypes")
-    private Function0 wrapConstructor(ConstructorScheme scheme, TypeProvider provider) {
-        var mapping = scheme.getMapping();
-        var length = mapping.length;
-        var target = cloner.clone(scheme.getTarget());
+    private static void register(Map<Type, Consumer<ObjectFactory>> map, Type type, Consumer<ObjectFactory> updater) {
+        var base = map.get(type);
+        if (base == null) {
+            map.put(type, updater);
+            return;
+        }
+        map.put(type, base.andThen(updater));
+    }
+
+    private static ObjectFactory[] prepareFactories(Type[] types, Map<Type, Consumer<ObjectFactory>> updaters) {
+        var ret = new ObjectFactory[types.length];
+        for (var i = 0; i < ret.length; ++i) {
+            register(updaters, types[i], new FactoryUpdater(ret, i));
+        }
+        return ret;
+    }
+
+    private static void register(Map<Type, Consumer<ObjectFactory>> map, Type type, FieldEntry entry) {
+        register(map, type, factory -> entry.factory = factory);
+    }
+
+    private ObjectFactory wrap(ConstructorSchema schema, CacheMode mode, Map<Type, Consumer<ObjectFactory>> updaters) {
+        var mapping = schema.getMapping();
+        var target = cloner.clone(schema.getTarget());
         target.setAccessible(true);
-        if (length == 0) {
+        if (mapping.length == 0) {
             return new EmptyConstructorObjectFactory(target);
         }
-        var providers = new Function0[length];
-        for (var i = 0; i < length; ++i) {
-            providers[i] = provider.apply(mapping[i]);
+        // Wrap with no cache
+        if (mode == CacheMode.NONE) {
+            return new ConstructorObjectFactory(target, mapping);
         }
-        return new ConstructorObjectFactory(target, providers);
+        // Wrap cached
+        var factories = prepareFactories(mapping, updaters);
+        if (mode == CacheMode.FULL) {
+            return new CachedConstructorObjectFactory(target, factories);
+        }
+        return new PartialConstructorObjectFactory(target, mapping, factories);
     }
 
-    @SuppressWarnings("rawtypes")
-    private Runnable1 wrapMethod(MethodScheme scheme, TypeProvider provider) {
-        var mapping = scheme.getMapping();
-        var length = mapping.length;
-        var target = cloner.clone(scheme.getTarget());
+    private MethodInvoker wrap(MethodSchema schema, CacheMode mode, Map<Type, Consumer<ObjectFactory>> updaters) {
+        var mapping = schema.getMapping();
+        var target = cloner.clone(schema.getTarget());
         target.setAccessible(true);
-        var providers = new Function0[length];
-        for (var i = 0; i < length; ++i) {
-            providers[i] = provider.apply(mapping[i]);
+        var isStatic = Modifier.isStatic(target.getModifiers());
+        // Wrap with no cache
+        if (mode == CacheMode.NONE) {
+            return isStatic ? new StaticMethodInvoker(target, mapping) : new VirtualMethodInvoker(target, mapping);
         }
-        if (Modifier.isStatic(target.getModifiers())) {
-            return new StaticMethodInvoker(target, providers);
+        // Wrap cached
+        var factories = prepareFactories(mapping, updaters);
+        if (mode == CacheMode.FULL) {
+            return isStatic
+                    ? new CachedStaticMethodInvoker(target, factories)
+                    : new CachedVirtualMethodInvoker(target, factories);
         }
-        return new VirtualMethodInvoker(target, providers);
+        return isStatic
+                ? new PartialStaticMethodInvoker(target, mapping, factories)
+                : new PartialVirtualMethodInvoker(target, mapping, factories);
     }
 
-    private FieldEntry wrapField(FieldScheme scheme, TypeProvider provider) {
-        var target = cloner.clone(scheme.getTarget());
+    private FieldEntry wrap(FieldSchema schema, CacheMode mode, Map<Type, Consumer<ObjectFactory>> updaters) {
+        var target = cloner.clone(schema.getTarget());
         target.setAccessible(true);
-        var found = provider.apply(scheme.getType());
-        return new FieldEntry(target, found);
+        // Wrap with no cache
+        if (mode == CacheMode.NONE) {
+            return new FieldEntry(target, schema.getType());
+        }
+        // Wrap cached
+        var type = schema.getType();
+        if (mode == CacheMode.FULL) {
+            var ret = new FieldEntry(target);
+            register(updaters, type, ret);
+            return ret;
+        }
+        var ret = new FieldEntry(target, type);
+        register(updaters, type, ret);
+        return ret;
     }
 
-    @SuppressWarnings("rawtypes")
-    private Runnable1[] wrapMethods(Set<MethodScheme> schemes, TypeProvider provider) {
-        var ret = new Runnable1[schemes.size()];
+    private MethodInvoker[] wrapMethods(Set<MethodSchema> schemas,
+                                        CacheMode mode,
+                                        Map<Type, Consumer<ObjectFactory>> updaters) {
+        var ret = new MethodInvoker[schemas.size()];
         var i = 0;
-        for (var scheme : schemes) {
-            ret[i++] = wrapMethod(scheme, provider);
+        for (var schema : schemas) {
+            ret[i++] = wrap(schema, mode, updaters);
         }
         return ret;
     }
 
-    private FieldEntry[] wrapFields(Set<FieldScheme> schemes, TypeProvider provider) {
-        var ret = new FieldEntry[schemes.size()];
+    private FieldEntry[] wrapFields(Set<FieldSchema> schemas,
+                                    CacheMode mode,
+                                    Map<Type, Consumer<ObjectFactory>> updaters) {
+        var ret = new FieldEntry[schemas.size()];
         var i = 0;
-        for (var scheme : schemes) {
-            ret[i++] = wrapField(scheme, provider);
+        for (var schema : schemas) {
+            ret[i++] = wrap(schema, mode, updaters);
         }
         return ret;
+    }
+
+    private ObjectFactory createFactory(ClassSchema schema,
+                                        CacheMode mode,
+                                        Map<Type, Consumer<ObjectFactory>> updaters) {
+        var constructor = wrap(schema.getConstructorSchema(), mode, updaters);
+        var methodSchemas = schema.getMethodSchemas();
+        var fieldSchemas = schema.getFieldSchemas();
+        if (methodSchemas.isEmpty() && fieldSchemas.isEmpty()) {
+            return constructor;
+        }
+        if (methodSchemas.isEmpty()) {
+            var fields = wrapFields(fieldSchemas, mode, updaters);
+            if (mode == CacheMode.NONE) {
+                return new FieldsObjectFactory(constructor, fields);
+            }
+            if (mode == CacheMode.FULL) {
+                return new CachedFieldsObjectFactory(constructor, fields);
+            }
+            return new PartialFieldsObjectFactory(constructor, fields);
+        }
+        if (fieldSchemas.isEmpty()) {
+            var methods = wrapMethods(methodSchemas, mode, updaters);
+            return new MethodsObjectFactory(constructor, methods);
+        }
+        var methods = wrapMethods(methodSchemas, mode, updaters);
+        var fields = wrapFields(fieldSchemas, mode, updaters);
+        if (mode == CacheMode.NONE) {
+            return new FullObjectFactory(constructor, methods, fields);
+        }
+        if (mode == CacheMode.FULL) {
+            return new CachedFullObjectFactory(constructor, methods, fields);
+        }
+        return new PartialFullObjectFactory(constructor, methods, fields);
     }
 
     @Override
-    public Function0<?> create(ClassScheme scheme, TypeProvider provider) {
-        Objects.requireNonNull(provider);
-        var constructor = wrapConstructor(scheme.getConstructorScheme(), provider);
-        var methodSchemes = scheme.getMethodSchemes();
-        var fieldSchemes = scheme.getFieldSchemes();
-        if (methodSchemes.isEmpty() && fieldSchemes.isEmpty()) {
-            return constructor;
+    public ObjectFactory create(ClassSchema schema, CacheMode mode) {
+        Objects.requireNonNull(schema);
+        if (mode == null || mode == CacheMode.NONE) {
+            return createFactory(schema, CacheMode.NONE, null);
         }
-        if (methodSchemes.isEmpty()) {
-            var fields = wrapFields(fieldSchemes, provider);
-            return new FieldsObjectFactory(constructor, fields);
-        }
-        if (fieldSchemes.isEmpty()) {
-            var methods = wrapMethods(methodSchemes, provider);
-            return new MethodsObjectFactory(constructor, methods);
-        }
-        var methods = wrapMethods(methodSchemes, provider);
-        var fields = wrapFields(fieldSchemes, provider);
-        return new FullObjectFactory(constructor, methods, fields);
+        var updaters = new HashMap<Type, Consumer<ObjectFactory>>();
+        var factory = createFactory(schema, mode, updaters);
+        return new UpdatedObjectFactory(factory, updaters);
     }
 }

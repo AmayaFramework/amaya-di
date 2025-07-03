@@ -1,22 +1,22 @@
 package io.github.amayaframework.di.reflect;
 
-import com.github.romanqed.jfunc.Function0;
+import io.github.amayaframework.di.core.ObjectFactory;
+import io.github.amayaframework.di.core.TypeProvider;
 
-@SuppressWarnings("rawtypes")
-final class FieldsObjectFactory implements Function0<Object> {
-    private final Function0 constructor;
+final class FieldsObjectFactory implements ObjectFactory {
+    private final ObjectFactory constructor;
     private final FieldEntry[] fields;
 
-    FieldsObjectFactory(Function0 constructor, FieldEntry[] fields) {
+    FieldsObjectFactory(ObjectFactory constructor, FieldEntry[] fields) {
         this.constructor = constructor;
         this.fields = fields;
     }
 
     @Override
-    public Object invoke() throws Throwable {
-        var ret = constructor.invoke();
+    public Object create(TypeProvider provider) throws Throwable {
+        var ret = constructor.create(provider);
         for (var entry : fields) {
-            entry.field.set(ret, entry.provider.invoke());
+            entry.field.set(ret, provider.get(entry.type).create(provider));
         }
         return ret;
     }

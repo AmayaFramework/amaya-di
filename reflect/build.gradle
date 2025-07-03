@@ -27,12 +27,14 @@ dependencies {
     // Tests
     testImplementation group: 'org.junit.jupiter', name: 'junit-jupiter-api', version: '5.10.0'
     testRuntimeOnly group: 'org.junit.jupiter', name: 'junit-jupiter-engine', version: '5.10.0'
-    testImplementation project(':')
     // Benchmarks
     jmhImplementation group: 'org.openjdk.jmh', name: 'jmh-core', version: '1.35'
     jmhImplementation group: 'org.openjdk.jmh', name: 'jmh-generator-annprocess', version: '1.35'
     // Dependencies
-    compileOnly project(':')
+    // TODO
+    /*compileOnly*/implementation project(':core')
+    /*compileOnly*/implementation project(':schema')
+    /*compileOnly*/implementation project(':stub')
     api group: 'com.github.romanqed', name: 'jeflect-cloner', version: '1.0.0'
 }
 

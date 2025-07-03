@@ -1,24 +1,22 @@
 package io.github.amayaframework.di.reflect;
 
-import com.github.romanqed.jfunc.Function0;
-import com.github.romanqed.jfunc.Runnable1;
+import io.github.amayaframework.di.core.ObjectFactory;
+import io.github.amayaframework.di.core.TypeProvider;
 
-@SuppressWarnings("rawtypes")
-final class MethodsObjectFactory implements Function0<Object> {
-    private final Function0 constructor;
-    private final Runnable1[] methods;
+final class MethodsObjectFactory implements ObjectFactory {
+    private final ObjectFactory constructor;
+    private final MethodInvoker[] methods;
 
-    MethodsObjectFactory(Function0 constructor, Runnable1[] methods) {
+    MethodsObjectFactory(ObjectFactory constructor, MethodInvoker[] methods) {
         this.constructor = constructor;
         this.methods = methods;
     }
 
     @Override
-    @SuppressWarnings("unchecked")
-    public Object invoke() throws Throwable {
-        var ret = constructor.invoke();
+    public Object create(TypeProvider provider) throws Throwable {
+        var ret = constructor.create(provider);
         for (var method : methods) {
-            method.run(ret);
+            method.invoke(ret, provider);
         }
         return ret;
     }

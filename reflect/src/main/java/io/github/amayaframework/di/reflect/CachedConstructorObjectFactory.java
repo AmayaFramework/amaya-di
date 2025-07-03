@@ -4,24 +4,23 @@ import io.github.amayaframework.di.core.ObjectFactory;
 import io.github.amayaframework.di.core.TypeProvider;
 
 import java.lang.reflect.Constructor;
-import java.lang.reflect.Type;
 
 @SuppressWarnings("rawtypes")
-final class ConstructorObjectFactory implements ObjectFactory {
+final class CachedConstructorObjectFactory implements ObjectFactory {
     private final Constructor constructor;
-    private final Type[] types;
+    private final ObjectFactory[] factories;
 
-    ConstructorObjectFactory(Constructor constructor, Type[] types) {
+    CachedConstructorObjectFactory(Constructor constructor, ObjectFactory[] factories) {
         this.constructor = constructor;
-        this.types = types;
+        this.factories = factories;
     }
 
     @Override
     public Object create(TypeProvider provider) throws Throwable {
-        var length = types.length;
+        var length = factories.length;
         var arguments = new Object[length];
         for (var i = 0; i < length; ++i) {
-            arguments[i] = provider.get(types[i]).create(provider);
+            arguments[i] = factories[i].create(provider);
         }
         return constructor.newInstance(arguments);
     }

@@ -1,11 +1,12 @@
 package io.github.amayaframework.di.reflect;
 
-import com.github.romanqed.jfunc.Function0;
+import io.github.amayaframework.di.core.ObjectFactory;
+import io.github.amayaframework.di.core.TypeProvider;
 
 import java.lang.reflect.Constructor;
 
 @SuppressWarnings("rawtypes")
-final class EmptyConstructorObjectFactory implements Function0 {
+final class EmptyConstructorObjectFactory implements ObjectFactory {
     private final Constructor constructor;
 
     EmptyConstructorObjectFactory(Constructor constructor) {
@@ -13,7 +14,7 @@ final class EmptyConstructorObjectFactory implements Function0 {
     }
 
     @Override
-    public Object invoke() throws Throwable {
+    public Object create(TypeProvider provider) throws Throwable {
         return constructor.newInstance((Object[]) null);
     }
 }

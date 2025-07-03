@@ -3,12 +3,12 @@ package io.github.amayaframework.di.reflect;
 import io.github.amayaframework.di.core.ObjectFactory;
 import io.github.amayaframework.di.core.TypeProvider;
 
-final class FullObjectFactory implements ObjectFactory {
+final class PartialFullObjectFactory implements ObjectFactory {
     private final ObjectFactory constructor;
     private final MethodInvoker[] methods;
     private final FieldEntry[] fields;
 
-    FullObjectFactory(ObjectFactory constructor, MethodInvoker[] methods, FieldEntry[] fields) {
+    PartialFullObjectFactory(ObjectFactory constructor, MethodInvoker[] methods, FieldEntry[] fields) {
         this.constructor = constructor;
         this.methods = methods;
         this.fields = fields;
@@ -21,7 +21,11 @@ final class FullObjectFactory implements ObjectFactory {
             method.invoke(ret, provider);
         }
         for (var entry : fields) {
-            entry.field.set(ret, provider.get(entry.type).create(provider));
+            var factory = entry.factory;
+            if (factory == null) {
+                factory = provider.get(entry.type);
+            }
+            entry.field.set(ret, factory.create(provider));
         }
         return ret;
     }

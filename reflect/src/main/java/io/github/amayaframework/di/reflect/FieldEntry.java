@@ -1,16 +1,22 @@
 package io.github.amayaframework.di.reflect;
 
-import com.github.romanqed.jfunc.Function0;
+import io.github.amayaframework.di.core.ObjectFactory;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.Type;
 
-@SuppressWarnings("rawtypes")
 final class FieldEntry {
     final Field field;
-    final Function0 provider;
+    final Type type;
+    ObjectFactory factory;
 
-    FieldEntry(Field field, Function0 provider) {
+    FieldEntry(Field field, Type type) {
         this.field = field;
-        this.provider = provider;
+        this.type = type;
+    }
+
+    FieldEntry(Field field) {
+        this.field = field;
+        this.type = null;
     }
 }
