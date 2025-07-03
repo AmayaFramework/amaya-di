@@ -52,8 +52,8 @@ import java.util.stream.Collectors;
  * <br>
  * {@code ? extends Type => Type}
  */
-public final class ReflectionSchemaFactory implements SchemaFactory {
-    private static final TypeProcessor TYPE_PROCESSOR = new ReflectionTypeProcessor();
+public final class ReflectSchemaFactory implements SchemaFactory {
+    private static final TypeProcessor TYPE_PROCESSOR = new ReflectTypeProcessor();
     private final TypeProcessor processor;
     private final Class<? extends Annotation> annotation;
 
@@ -64,7 +64,7 @@ public final class ReflectionSchemaFactory implements SchemaFactory {
      * @param processor  the specified type processor, must be non-null
      * @param annotation the specified annotation type, must be non-null
      */
-    public ReflectionSchemaFactory(TypeProcessor processor, Class<? extends Annotation> annotation) {
+    public ReflectSchemaFactory(TypeProcessor processor, Class<? extends Annotation> annotation) {
         this.processor = Objects.requireNonNull(processor);
         this.annotation = annotation;
     }
@@ -75,7 +75,7 @@ public final class ReflectionSchemaFactory implements SchemaFactory {
      *
      * @param annotation the specified annotation type, must be non-null
      */
-    public ReflectionSchemaFactory(Class<? extends Annotation> annotation) {
+    public ReflectSchemaFactory(Class<? extends Annotation> annotation) {
         this(TYPE_PROCESSOR, annotation);
     }
 

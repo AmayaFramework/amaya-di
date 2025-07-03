@@ -8,7 +8,7 @@ import java.util.Map;
 /**
  * A simple reflective implementation of the {@link TypeProcessor}. Ignores any annotations.
  */
-public class ReflectionTypeProcessor implements TypeProcessor {
+public class ReflectTypeProcessor implements TypeProcessor {
 
     private static final Map<Class<?>, Class<?>> PRIMITIVES = Map.of(
             boolean.class, Boolean.class,
