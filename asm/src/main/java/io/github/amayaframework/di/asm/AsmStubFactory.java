@@ -13,6 +13,7 @@ import org.objectweb.asm.Label;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
 
+import java.lang.reflect.Modifier;
 import java.lang.reflect.Type;
 import java.util.LinkedList;
 import java.util.List;
@@ -73,11 +74,13 @@ public final class AsmStubFactory implements StubFactory {
     private static void processExecutable(MethodVisitor visitor,
                                           ExecutableSchema<?> schema,
                                           BiConsumer<MethodVisitor, Type> loader) {
-        var types = schema.getTarget().getParameterTypes();
+        var target = schema.getTarget();
+        var offset = Modifier.isStatic(target.getModifiers()) ? 1 : 0;
+        var types = target.getParameterTypes();
         var mapping = schema.getMapping();
-        for (var i = 0; i < types.length; ++i) {
+        for (var i = 0; i < mapping.length; ++i) {
             loader.accept(visitor, mapping[i]);
-            AsmUtil.castReference(visitor, types[i]);
+            AsmUtil.castReference(visitor, types[i + offset]);
         }
     }
 

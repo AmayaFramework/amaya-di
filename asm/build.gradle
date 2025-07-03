@@ -27,16 +27,17 @@ dependencies {
     // Tests
     testImplementation group: 'org.junit.jupiter', name: 'junit-jupiter-api', version: '5.10.0'
     testRuntimeOnly group: 'org.junit.jupiter', name: 'junit-jupiter-engine', version: '5.10.0'
+    testImplementation project(':core')
+    testImplementation project(':schema')
+    testImplementation project(':stub')
+    testImplementation group: 'com.github.romanqed', name: 'jtype', version: '1.0.2'
     // Benchmarks
     jmhImplementation group: 'org.openjdk.jmh', name: 'jmh-core', version: '1.35'
     jmhImplementation group: 'org.openjdk.jmh', name: 'jmh-generator-annprocess', version: '1.35'
     // Dependencies
-//    compileOnly project(':core')
-//    compileOnly project(':schema')
-//    compileOnly project(':stub')
-    implementation project(':core')
-    implementation project(':schema')
-    implementation project(':stub')
+    compileOnly project(':core')
+    compileOnly project(':schema')
+    compileOnly project(':stub')
     implementation group: 'org.ow2.asm', name: 'asm', version: '9.8'
     api group: 'com.github.romanqed', name: 'jeflect-loader', version: '1.0.1'
 }
