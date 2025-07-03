@@ -6,10 +6,16 @@ import com.github.romanqed.jeflect.loader.DefineObjectFactory;
 import io.github.amayaframework.di.core.ObjectFactory;
 import io.github.amayaframework.di.schema.ClassSchema;
 import io.github.amayaframework.di.schema.ExecutableSchema;
+import io.github.amayaframework.di.stub.CacheMode;
 import io.github.amayaframework.di.stub.StubFactory;
-import org.objectweb.asm.*;
+import org.objectweb.asm.ClassWriter;
+import org.objectweb.asm.Label;
+import org.objectweb.asm.MethodVisitor;
+import org.objectweb.asm.Opcodes;
 
+import java.lang.reflect.Type;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.function.BiConsumer;
@@ -32,6 +38,7 @@ public final class AsmStubFactory implements StubFactory {
     private static final String OBJECT_FACTORY_DESCRIPTOR = "Lio/github/amayaframework/di/core/ObjectFactory;";
 
     private static final String STUB = "Stub";
+    private static final String PARTIAL_STUB = "PartialStub";
     private static final String CACHED_STUB = "CachedStub";
 
     private final com.github.romanqed.jeflect.loader.ObjectFactory<ObjectFactory> factory;
@@ -65,7 +72,7 @@ public final class AsmStubFactory implements StubFactory {
 
     private static void processExecutable(MethodVisitor visitor,
                                           ExecutableSchema<?> schema,
-                                          BiConsumer<MethodVisitor, java.lang.reflect.Type> loader) {
+                                          BiConsumer<MethodVisitor, Type> loader) {
         var types = schema.getTarget().getParameterTypes();
         var mapping = schema.getMapping();
         for (var i = 0; i < types.length; ++i) {
@@ -76,7 +83,7 @@ public final class AsmStubFactory implements StubFactory {
 
     private static void generateCreateMethod(ClassWriter writer,
                                              ClassSchema schema,
-                                             BiConsumer<MethodVisitor, java.lang.reflect.Type> loader) {
+                                             BiConsumer<MethodVisitor, Type> loader) {
         var target = schema.getTarget();
         // Declare method signature
         var visitor = writer.visitMethod(
@@ -84,12 +91,12 @@ public final class AsmStubFactory implements StubFactory {
                 "create",
                 CREATE_METHOD_DESCRIPTOR,
                 null,
-                new String[]{Type.getInternalName(Throwable.class)}
+                new String[]{org.objectweb.asm.Type.getInternalName(Throwable.class)}
         );
         visitor.visitCode();
         // {
         // Create instance of target class
-        visitor.visitTypeInsn(Opcodes.NEW, Type.getInternalName(target));
+        visitor.visitTypeInsn(Opcodes.NEW, org.objectweb.asm.Type.getInternalName(target));
         visitor.visitInsn(Opcodes.DUP);
         // Invoke constructor by schema
         // var v = new Type(arg1, arg2, arg3, ...);
@@ -107,9 +114,9 @@ public final class AsmStubFactory implements StubFactory {
             AsmUtil.castReference(visitor, type);
             visitor.visitFieldInsn(
                     Opcodes.PUTFIELD,
-                    Type.getInternalName(target),
+                    org.objectweb.asm.Type.getInternalName(target),
                     field.getName(),
-                    Type.getDescriptor(type)
+                    org.objectweb.asm.Type.getDescriptor(type)
             );
         }
         // Process method schemas
@@ -152,12 +159,7 @@ public final class AsmStubFactory implements StubFactory {
             AsmUtil.pushInt(visitor, i);
             // Load type from array and put to field
             visitor.visitInsn(Opcodes.AALOAD);
-            visitor.visitFieldInsn(
-                    Opcodes.PUTFIELD,
-                    name,
-                    Integer.toString(i),
-                    TYPE_DESCRIPTOR
-            );
+            visitor.visitFieldInsn(Opcodes.PUTFIELD, name, Integer.toString(i), TYPE_DESCRIPTOR);
         }
         visitor.visitInsn(Opcodes.RETURN);
         // }
@@ -165,32 +167,7 @@ public final class AsmStubFactory implements StubFactory {
         visitor.visitEnd();
     }
 
-    private static void loadTypeFromRepository(MethodVisitor visitor,
-                                               String name,
-                                               java.lang.reflect.Type type,
-                                               Map<java.lang.reflect.Type, String> map) {
-        // Load repository
-        visitor.visitVarInsn(Opcodes.ALOAD, 1);
-        // Push type
-        if (type.getClass() == Class.class) {
-            visitor.visitLdcInsn(Type.getType((Class<?>) type));
-        } else {
-            visitor.visitVarInsn(Opcodes.ALOAD, 0);
-            visitor.visitFieldInsn(
-                    Opcodes.GETFIELD,
-                    name,
-                    map.get(type),
-                    TYPE_DESCRIPTOR
-            );
-        }
-        // Lookup in TypeProvider
-        visitor.visitMethodInsn(
-                Opcodes.INVOKEINTERFACE,
-                TYPE_PROVIDER,
-                "get",
-                GET_METHOD_DESCRIPTOR,
-                true
-        );
+    private static void invokeCreate(MethodVisitor visitor) {
         // Invoke ObjectFactory#create(TypeProvider)
         visitor.visitVarInsn(Opcodes.ALOAD, 1);
         visitor.visitMethodInsn(
@@ -202,7 +179,27 @@ public final class AsmStubFactory implements StubFactory {
         );
     }
 
-    private static byte[] generateResolved(String name, ClassSchema schema, Map<java.lang.reflect.Type, String> map) {
+    private static void lookupType(MethodVisitor visitor, String name, Type type, Map<Type, String> map) {
+        // Load provider
+        visitor.visitVarInsn(Opcodes.ALOAD, 1);
+        // Push type
+        if (type.getClass() == Class.class) {
+            visitor.visitLdcInsn(org.objectweb.asm.Type.getType((Class<?>) type));
+        } else {
+            visitor.visitVarInsn(Opcodes.ALOAD, 0);
+            visitor.visitFieldInsn(Opcodes.GETFIELD, name, map.get(type), TYPE_DESCRIPTOR);
+        }
+        // Lookup in TypeProvider
+        visitor.visitMethodInsn(
+                Opcodes.INVOKEINTERFACE,
+                TYPE_PROVIDER,
+                "get",
+                GET_METHOD_DESCRIPTOR,
+                true
+        );
+    }
+
+    private static byte[] generateResolved(String name, ClassSchema schema, Map<Type, String> map) {
         var writer = new ClassWriter(ClassWriter.COMPUTE_MAXS);
         // Declare class
         writer.visit(
@@ -231,9 +228,10 @@ public final class AsmStubFactory implements StubFactory {
             generateConstructor(writer, name, count);
         }
         // Generate create() method
-        generateCreateMethod(writer, schema, (visitor, type) ->
-                loadTypeFromRepository(visitor, name, type, map)
-        );
+        generateCreateMethod(writer, schema, (visitor, type) -> {
+            lookupType(visitor, name, type, map);
+            invokeCreate(visitor);
+        });
         // Get bytecode
         writer.visitEnd();
         return writer.toByteArray();
@@ -242,20 +240,14 @@ public final class AsmStubFactory implements StubFactory {
     private static void setObjectFactoryField(MethodVisitor visitor, String name, String field) {
         visitor.visitVarInsn(Opcodes.ALOAD, 0);
         visitor.visitVarInsn(Opcodes.ALOAD, 2);
-        visitor.visitFieldInsn(
-                Opcodes.PUTFIELD,
-                name,
-                field,
-                OBJECT_FACTORY_DESCRIPTOR
-        );
+        visitor.visitFieldInsn(Opcodes.PUTFIELD, name, field, OBJECT_FACTORY_DESCRIPTOR);
     }
 
     private static void compareAndSet(MethodVisitor visitor, String name, Class<?> clazz, String field) {
         // Prepare out label
         var out = new Label();
-        // Compare ldc == type
-        visitor.visitLdcInsn(Type.getType(clazz));
-        visitor.visitVarInsn(Opcodes.ALOAD, 1);
+        // Compare type == ldc
+        visitor.visitLdcInsn(org.objectweb.asm.Type.getType(clazz));
         visitor.visitJumpInsn(Opcodes.IF_ACMPNE, out);
         setObjectFactoryField(visitor, name, field);
         visitor.visitInsn(Opcodes.RETURN);
@@ -263,7 +255,7 @@ public final class AsmStubFactory implements StubFactory {
         visitor.visitLabel(out);
     }
 
-    private static void compareAndSet(MethodVisitor visitor, String name, java.lang.reflect.Type type, String field) {
+    private static void compareAndSet(MethodVisitor visitor, String name, Type type, String field) {
         // Prepare out label
         var out = new Label();
         // Compare type.getTypeName().equals("ldc")
@@ -282,7 +274,63 @@ public final class AsmStubFactory implements StubFactory {
         visitor.visitLabel(out);
     }
 
-    private static void generateSetMethod(ClassWriter writer, String name, Map<java.lang.reflect.Type, String> map) {
+    private static void compareAndSet(MethodVisitor visitor, String name, String type, String field) {
+        // Prepare out label
+        var out = new Label();
+        // Compare type.equals(this.type)
+        visitor.visitVarInsn(Opcodes.ALOAD, 0);
+        visitor.visitFieldInsn(Opcodes.GETFIELD, name, type, TYPE_DESCRIPTOR);
+        visitor.visitMethodInsn(
+                Opcodes.INVOKEVIRTUAL,
+                "java/lang/Object",
+                "equals",
+                "(Ljava/lang/Object;)Z",
+                false
+        );
+        visitor.visitJumpInsn(Opcodes.IFEQ, out);
+        setObjectFactoryField(visitor, name, field);
+        // Set out label
+        visitor.visitLabel(out);
+    }
+
+    private static void compareComplexTypes(MethodVisitor visitor,
+                                            String name,
+                                            List<Map.Entry<Type, String>> types,
+                                            Map<Type, String> map) {
+        if (types.isEmpty()) {
+            return;
+        }
+        if (map != null) {
+            visitor.visitVarInsn(Opcodes.ALOAD, 1);
+        } else {
+            visitor.visitVarInsn(Opcodes.ALOAD, 1);
+            visitor.visitMethodInsn(
+                    Opcodes.INVOKEINTERFACE,
+                    TYPE,
+                    "getTypeName",
+                    "()Ljava/lang/String;",
+                    true
+            );
+        }
+        var iterator = types.iterator();
+        while (iterator.hasNext()) {
+            var entry = iterator.next();
+            if (iterator.hasNext()) {
+                visitor.visitInsn(Opcodes.DUP);
+            }
+            if (map == null) {
+                compareAndSet(visitor, name, entry.getKey(), entry.getValue());
+            } else {
+                var typeField = map.get(entry.getKey());
+                compareAndSet(visitor, name, typeField, entry.getValue());
+            }
+        }
+    }
+
+    private static void generateSetMethod(ClassWriter writer,
+                                          String name,
+                                          Map<Type, String> fields,
+                                          Map<Type, String> types) {
         var visitor = writer.visitMethod(
                 Opcodes.ACC_PUBLIC,
                 "set",
@@ -292,67 +340,63 @@ public final class AsmStubFactory implements StubFactory {
         );
         visitor.visitCode();
         // {
-        var first = new LinkedList<Map.Entry<java.lang.reflect.Type, String>>();
-        var last = new LinkedList<Map.Entry<java.lang.reflect.Type, String>>();
-        for (var entry : map.entrySet()) {
+        var first = new LinkedList<Map.Entry<Type, String>>();
+        var last = new LinkedList<Map.Entry<Type, String>>();
+        for (var entry : fields.entrySet()) {
             if (entry.getKey().getClass() == Class.class) {
                 first.add(entry);
             } else {
                 last.add(entry);
             }
         }
-        for (var entry : first) {
+        visitor.visitVarInsn(Opcodes.ALOAD, 1);
+        var iterator = first.iterator();
+        while (iterator.hasNext()) {
+            var entry = iterator.next();
+            if (iterator.hasNext()) {
+                visitor.visitInsn(Opcodes.DUP);
+            }
             compareAndSet(visitor, name, (Class<?>) entry.getKey(), entry.getValue());
         }
-        if (!last.isEmpty()) {
-            // Prepare type name
-            visitor.visitVarInsn(Opcodes.ALOAD, 1);
-            visitor.visitMethodInsn(
-                    Opcodes.INVOKEINTERFACE,
-                    TYPE,
-                    "getTypeName",
-                    "()Ljava/lang/String;",
-                    true
-            );
-            var iterator = last.iterator();
-            while (iterator.hasNext()) {
-                var entry = iterator.next();
-                if (iterator.hasNext()) {
-                    visitor.visitInsn(Opcodes.DUP);
-                }
-                compareAndSet(visitor, name, entry.getKey(), entry.getValue());
-            }
-        }
+        compareComplexTypes(visitor, name, last, types);
         visitor.visitInsn(Opcodes.RETURN);
         // }
         visitor.visitMaxs(0, 0);
         visitor.visitEnd();
     }
 
-    private static void loadTypeFromField(MethodVisitor visitor,
-                                          String name,
-                                          java.lang.reflect.Type type,
-                                          Map<java.lang.reflect.Type, String> map) {
+    private static void loadTypeFromField(MethodVisitor visitor, String name, String field) {
         // Get factory from field
         visitor.visitVarInsn(Opcodes.ALOAD, 0);
-        visitor.visitFieldInsn(
-                Opcodes.GETFIELD,
-                name,
-                map.get(type),
-                OBJECT_FACTORY_DESCRIPTOR
-        );
-        // Invoke ObjectFactory#create(TypeProvider)
-        visitor.visitVarInsn(Opcodes.ALOAD, 1);
-        visitor.visitMethodInsn(
-                Opcodes.INVOKEINTERFACE,
-                OBJECT_FACTORY,
-                "create",
-                CREATE_METHOD_DESCRIPTOR,
-                true
-        );
+        visitor.visitFieldInsn(Opcodes.GETFIELD, name, field, OBJECT_FACTORY_DESCRIPTOR);
+        invokeCreate(visitor);
     }
 
-    private static byte[] generateCached(String name, ClassSchema schema, Map<java.lang.reflect.Type, String> map) {
+    private static void lazyLoadType(MethodVisitor visitor,
+                                     String name,
+                                     Type type,
+                                     String field,
+                                     Map<Type, String> types) {
+        // field == null ? provider.get(type) : field
+        // Load field to check it
+        visitor.visitVarInsn(Opcodes.ALOAD, 0);
+        visitor.visitFieldInsn(Opcodes.GETFIELD, name, field, OBJECT_FACTORY_DESCRIPTOR);
+        visitor.visitInsn(Opcodes.DUP);
+        // Compare field with null
+        var nonNull = new Label();
+        visitor.visitJumpInsn(Opcodes.IFNONNULL, nonNull);
+        // Load type from provider
+        visitor.visitInsn(Opcodes.POP);
+        lookupType(visitor, name, type, types);
+        // Visit label
+        visitor.visitLabel(nonNull);
+        invokeCreate(visitor);
+    }
+
+    private static byte[] generateCached(String name,
+                                         ClassSchema schema,
+                                         Map<Type, String> fields,
+                                         Map<Type, String> types) {
         var writer = new ClassWriter(ClassWriter.COMPUTE_FRAMES);
         // Declare class
         writer.visit(
@@ -363,50 +407,99 @@ public final class AsmStubFactory implements StubFactory {
                 AsmUtil.OBJECT_NAME,
                 new String[]{CACHED_OBJECT_FACTORY}
         );
-        // Declare fields
-        for (var field : map.values()) {
-            writer.visitField(
-                    Opcodes.ACC_PRIVATE,
-                    field,
-                    OBJECT_FACTORY_DESCRIPTOR,
-                    null,
-                    null
-            );
+        // Declare fields for types
+        if (types != null) {
+            for (var field : types.values()) {
+                writer.visitField(
+                        Opcodes.ACC_PRIVATE | Opcodes.ACC_FINAL,
+                        field,
+                        TYPE_DESCRIPTOR,
+                        null,
+                        null
+                );
+            }
+        }
+        // Declare fields for factories
+        for (var field : fields.values()) {
+            writer.visitField(Opcodes.ACC_PRIVATE, field, OBJECT_FACTORY_DESCRIPTOR, null, null);
         }
         // Generate constructor
-        AsmUtil.createEmptyConstructor(writer);
+        var count = types == null ? 0 : types.size();
+        if (count == 0) {
+            AsmUtil.createEmptyConstructor(writer);
+        } else {
+            generateConstructor(writer, name, count);
+        }
         // Generate set() method
-        generateSetMethod(writer, name, map);
+        generateSetMethod(writer, name, fields, types);
         // Generate create() method
-        generateCreateMethod(writer, schema, (visitor, type) ->
-                loadTypeFromField(visitor, name, type, map)
-        );
+        if (types == null) {
+            generateCreateMethod(writer, schema, (visitor, type) ->
+                    loadTypeFromField(visitor, name, fields.get(type))
+            );
+        } else {
+            generateCreateMethod(writer, schema, (visitor, type) ->
+                    lazyLoadType(visitor, name, type, fields.get(type), types)
+            );
+        }
         // Get bytecode
         writer.visitEnd();
         return writer.toByteArray();
     }
 
-    @Override
-    public ObjectFactory create(ClassSchema schema, boolean cached) {
-        Objects.requireNonNull(schema);
-        var target = schema.getTarget();
-        var types = schema.getTypes();
-        if (cached) {
-            var name = target.getCanonicalName().replace('.', '#') + CACHED_STUB;
-            return factory.create(name, () -> generateCached(name, schema, MapUtil.ofAll(types)));
-        }
-        var name = target.getCanonicalName().replace('.', '#') + STUB;
-        var map = MapUtil.ofComplex(types);
-        return factory.create(name, () -> generateResolved(name, schema, map), clazz -> {
-            if (map.isEmpty()) {
-                return (ObjectFactory) clazz
-                        .getDeclaredConstructor((Class<?>[]) null)
-                        .newInstance((Object[]) null);
-            }
-            var parameters = map.keySet().toArray(new java.lang.reflect.Type[0]);
+    private static String getName(Class<?> clazz, String postfix) {
+        var name = clazz.getCanonicalName().replace('.', '#');
+        return name + postfix;
+    }
+
+    private static ObjectFactory instantiate(Class<?> clazz, Map<Type, String> map) throws Throwable {
+        if (map.isEmpty()) {
             return (ObjectFactory) clazz
-                    .getDeclaredConstructor(java.lang.reflect.Type[].class)
-                    .newInstance((Object) parameters);
-        });
+                    .getDeclaredConstructor((Class<?>[]) null)
+                    .newInstance((Object[]) null);
+        }
+        var parameters = map.keySet().toArray(new Type[0]);
+        return (ObjectFactory) clazz
+                .getDeclaredConstructor(Type[].class)
+                .newInstance((Object) parameters);
+    }
+
+    private ObjectFactory createFull(ClassSchema schema) {
+        var name = getName(schema.getTarget(), CACHED_STUB);
+        return factory.create(name, () ->
+                generateCached(name, schema, MapUtil.ofAll(schema.getTypes(), ""), null)
+        );
+    }
+
+    private ObjectFactory createPartial(ClassSchema schema) {
+        var name = getName(schema.getTarget(), PARTIAL_STUB);
+        var types = MapUtil.ofComplex(schema.getTypes());
+        return factory.create(
+                name,
+                () -> generateCached(name, schema, MapUtil.ofAll(schema.getTypes(), "f"), types),
+                clazz -> instantiate(clazz, types)
+        );
+    }
+
+    private ObjectFactory createNone(ClassSchema schema) {
+        var name = getName(schema.getTarget(), STUB);
+        var map = MapUtil.ofComplex(schema.getTypes());
+        return factory.create(
+                name,
+                () -> generateResolved(name, schema, map),
+                clazz -> instantiate(clazz, map)
+        );
+    }
+
+    @Override
+    public ObjectFactory create(ClassSchema schema, CacheMode mode) {
+        Objects.requireNonNull(schema);
+        if (mode == CacheMode.FULL) {
+            return createFull(schema);
+        }
+        if (mode == CacheMode.PARTIAL) {
+            return createPartial(schema);
+        }
+        return createNone(schema);
     }
 }

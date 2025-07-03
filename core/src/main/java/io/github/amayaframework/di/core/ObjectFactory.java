@@ -3,6 +3,7 @@ package io.github.amayaframework.di.core;
 /**
  * An abstract factory interface for creating object instances using the provided {@link TypeProvider}.
  */
+@FunctionalInterface
 public interface ObjectFactory {
 
     /**

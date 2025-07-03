@@ -22,11 +22,11 @@ final class MapUtil {
         return ret;
     }
 
-    static Map<Type, String> ofAll(Set<Type> types) {
+    static Map<Type, String> ofAll(Set<Type> types, String prefix) {
         var ret = new HashMap<Type, String>();
         var count = 0;
         for (var type : types) {
-            ret.put(type, Integer.toString(count++));
+            ret.put(type, prefix + count++);
         }
         return ret;
     }

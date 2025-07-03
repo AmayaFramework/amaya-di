@@ -7,6 +7,7 @@ import java.lang.reflect.Type;
  * <br>
  * Allows querying for available factories and checking whether instantiation is possible.
  */
+@FunctionalInterface
 public interface TypeProvider {
 
     /**
@@ -24,5 +25,7 @@ public interface TypeProvider {
      * @param type the specified type, must be non-null
      * @return true, if contains, false otherwise
      */
-    boolean canProvide(Type type);
+    default boolean canProvide(Type type) {
+        return get(type) != null;
+    }
 }

@@ -19,21 +19,22 @@ public interface StubFactory {
      * If {@code cached} is {@code true}, a {@link CachedObjectFactory} is returned instead,
      * enabling internal caching of sub-factories and optimizations for repeated resolution.
      *
-     * @param schema   the class schema, must be non-null
-     * @param cached   whether the result should be a {@link CachedObjectFactory}
+     * @param schema the class schema, must be non-null
+     * @param mode   the caching mode to apply when building the factory; controls whether and how
+     *               dependency sub-factories are cached internally
      * @return an {@link ObjectFactory} or {@link CachedObjectFactory}, depending on {@code cached}
      */
-    ObjectFactory create(ClassSchema schema, boolean cached);
+    ObjectFactory create(ClassSchema schema, CacheMode mode);
 
     /**
      * Creates a non-cached factory for the specified schema.
      * <p>
      * Equivalent to {@code create(schema, false)}.
      *
-     * @param schema   the class schema, must be non-null
+     * @param schema the class schema, must be non-null
      * @return a basic {@link ObjectFactory} instance without internal caching
      */
     default ObjectFactory create(ClassSchema schema) {
-        return create(schema, false);
+        return create(schema, CacheMode.NONE);
     }
 }

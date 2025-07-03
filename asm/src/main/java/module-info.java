@@ -8,6 +8,7 @@ module io.github.amayaframework.di.asm {
     requires io.github.amayaframework.di.core;
     requires io.github.amayaframework.di.schema;
     requires io.github.amayaframework.di.stub;
+    requires com.github.romanqed.jtype;
     // Exports
     exports io.github.amayaframework.di.asm;
 }
