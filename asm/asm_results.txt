@@ -1,0 +1,5 @@
+Benchmark                                    Mode  Cnt   Score   Error  Units
+AsmStubBenchmark.benchFullCacheInjection     avgt   25  14,237 ± 0,702  ns/op
+AsmStubBenchmark.benchManualInjection        avgt   25  11,350 ± 0,092  ns/op
+AsmStubBenchmark.benchNoCacheInjection       avgt   25  24,784 ± 0,505  ns/op
+AsmStubBenchmark.benchPartialCacheInjection  avgt   25  17,141 ± 0,649  ns/op
