@@ -1,0 +1,5 @@
+Benchmark                                        Mode  Cnt   Score   Error  Units
+ReflectStubBenchmark.benchFullCacheInjection     avgt   25  66,429 ± 0,723  ns/op
+ReflectStubBenchmark.benchManualInjection        avgt   25  11,435 ± 0,143  ns/op
+ReflectStubBenchmark.benchNoCacheInjection       avgt   25  81,453 ± 1,461  ns/op
+ReflectStubBenchmark.benchPartialCacheInjection  avgt   25  73,374 ± 0,903  ns/op
