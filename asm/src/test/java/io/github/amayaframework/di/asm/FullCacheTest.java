@@ -1,18 +1,22 @@
 package io.github.amayaframework.di.asm;
 
-import com.github.romanqed.jeflect.loader.DefineClassLoader;
-import com.github.romanqed.jeflect.loader.DefineLoader;
 import io.github.amayaframework.di.stub.CacheMode;
 import io.github.amayaframework.di.stub.CachedObjectFactory;
 import org.junit.jupiter.api.Test;
-
-import java.io.FileOutputStream;
-import java.io.IOException;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 public final class FullCacheTest {
+
+    @Test
+    public void testEmptyService() {
+        var factory = new AsmStubFactory();
+        var eF = factory.create(Util.EMPTY_SCHEMA, CacheMode.FULL);
+        var es = Util.get(eF, EmptyService.class);
+        assertNotNull(es);
+    }
+
     @Test
     public void testSimpleService() {
         var factory = new AsmStubFactory();
@@ -23,35 +27,6 @@ public final class FullCacheTest {
         assertNotNull(s1);
         assertEquals(3, s1.i);
         assertEquals("str", s1.str);
-    }
-
-    static final class Dumper implements DefineLoader {
-        final DefineLoader b;
-
-        Dumper(DefineLoader b) {
-            this.b = b;
-        }
-
-        @Override
-        public Class<?> define(String name, byte[] buffer) {
-            try {
-                var out = new FileOutputStream(name + ".class");
-                out.write(buffer);
-                out.close();
-            } catch (IOException ignored) {
-            }
-            return b.define(name, buffer);
-        }
-
-        @Override
-        public Class<?> load(String name) {
-            return b.load(name);
-        }
-
-        @Override
-        public ClassLoader getClassLoader() {
-            return b.getClassLoader();
-        }
     }
 
     @Test

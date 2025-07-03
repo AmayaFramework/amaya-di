@@ -343,6 +343,12 @@ public final class AsmStubFactory implements StubFactory {
         );
         visitor.visitCode();
         // {
+        if (fields.isEmpty()) {
+            visitor.visitInsn(Opcodes.RETURN);
+            visitor.visitMaxs(0, 0);
+            visitor.visitEnd();
+            return;
+        }
         var first = new LinkedList<Map.Entry<Type, String>>();
         var last = new LinkedList<Map.Entry<Type, String>>();
         for (var entry : fields.entrySet()) {

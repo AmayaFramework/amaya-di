@@ -10,6 +10,14 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 public final class PartialCacheTest {
 
     @Test
+    public void testEmptyService() {
+        var factory = new AsmStubFactory();
+        var eF = factory.create(Util.EMPTY_SCHEMA, CacheMode.PARTIAL);
+        var es = Util.get(eF, EmptyService.class);
+        assertNotNull(es);
+    }
+
+    @Test
     public void testSimpleService() {
         var factory = new AsmStubFactory();
         var repo = Util.create("str", 3);

@@ -12,12 +12,15 @@ import io.github.amayaframework.di.schema.SchemaFactory;
 import java.lang.reflect.Type;
 
 final class Util {
-    static final Type S2_STR = new JType<Service2<String>>(){}.getType();
-    static final Type S2_INT = new JType<Service2<Integer>>(){}.getType();
+    static final Type S2_STR = new JType<Service2<String>>() {
+    }.getType();
+    static final Type S2_INT = new JType<Service2<Integer>>() {
+    }.getType();
     static final SchemaFactory SCHEMA_FACTORY = new ReflectSchemaFactory(Inject.class);
     static final ClassSchema S1_SCHEMA = SCHEMA_FACTORY.create(Service1.class);
     static final ClassSchema S3_SCHEMA = SCHEMA_FACTORY.create(Service3.class);
     static final ClassSchema APP_SCHEMA = SCHEMA_FACTORY.create(App.class);
+    static final ClassSchema EMPTY_SCHEMA = SCHEMA_FACTORY.create(EmptyService.class);
 
     @SuppressWarnings("unchecked")
     static <T> T get(TypeProvider provider, Class<T> type) {

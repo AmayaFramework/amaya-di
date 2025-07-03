@@ -2,9 +2,9 @@ package io.github.amayaframework.di.asm;
 
 public class App {
     final Service1 s1;
-    Service2<String> s2String;
     @Inject
     public Service2<Integer> s2Int;
+    Service2<String> s2String;
     Service3 s3;
 
     public App(Service1 s1) {
@@ -12,12 +12,12 @@ public class App {
     }
 
     @Inject
-    public void setS2String(Service2<String> s2String) {
-        this.s2String = s2String;
+    public static void setS3(App app, Service3 s3) {
+        app.s3 = s3;
     }
 
     @Inject
-    public static void setS3(App app, Service3 s3) {
-        app.s3 = s3;
+    public void setS2String(Service2<String> s2String) {
+        this.s2String = s2String;
     }
 }
