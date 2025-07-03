@@ -1,4 +1,4 @@
-package io.github.amayaframework.di.asm;
+package io.github.amayaframework.di.reflect;
 
 import com.github.romanqed.jtype.JType;
 import io.github.amayaframework.di.core.HashTypeRepository;
