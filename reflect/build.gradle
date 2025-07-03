@@ -31,10 +31,9 @@ dependencies {
     jmhImplementation group: 'org.openjdk.jmh', name: 'jmh-core', version: '1.35'
     jmhImplementation group: 'org.openjdk.jmh', name: 'jmh-generator-annprocess', version: '1.35'
     // Dependencies
-    // TODO
-    /*compileOnly*/implementation project(':core')
-    /*compileOnly*/implementation project(':schema')
-    /*compileOnly*/implementation project(':stub')
+    compileOnly project(':core')
+    compileOnly project(':schema')
+    compileOnly project(':stub')
     api group: 'com.github.romanqed', name: 'jeflect-cloner', version: '1.0.0'
 }
 
