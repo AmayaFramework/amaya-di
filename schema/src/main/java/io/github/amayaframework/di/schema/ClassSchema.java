@@ -13,7 +13,7 @@ public final class ClassSchema extends AbstractSchema<Class<?>> {
     private final Set<MethodSchema> methodSchemas;
     private final Set<FieldSchema> fieldSchemas;
     private final ConstructorSchema constructorSchema;
-    private final Set<Type> types;
+    private Set<Type> types;
 
     /**
      * Constructs class scheme for specified class and schemes for its members.
@@ -31,18 +31,6 @@ public final class ClassSchema extends AbstractSchema<Class<?>> {
         this.constructorSchema = Objects.requireNonNull(constructorSchema);
         this.fieldSchemas = Collections.unmodifiableSet(Objects.requireNonNull(fieldSchemas));
         this.methodSchemas = Collections.unmodifiableSet(Objects.requireNonNull(methodSchemas));
-        this.types = Collections.unmodifiableSet(collectTypes());
-    }
-
-    private Set<Type> collectTypes() {
-        var ret = new HashSet<>(constructorSchema.types);
-        for (var scheme : fieldSchemas) {
-            ret.add(scheme.type);
-        }
-        for (var scheme : methodSchemas) {
-            ret.addAll(scheme.types);
-        }
-        return ret;
     }
 
     /**
@@ -72,6 +60,17 @@ public final class ClassSchema extends AbstractSchema<Class<?>> {
         return methodSchemas;
     }
 
+    private Set<Type> collectTypes() {
+        var ret = new HashSet<>(constructorSchema.types);
+        for (var scheme : fieldSchemas) {
+            ret.add(scheme.type);
+        }
+        for (var scheme : methodSchemas) {
+            ret.addAll(scheme.types);
+        }
+        return ret;
+    }
+
     /**
      * Returns all types that class members depend on.
      *
@@ -79,6 +78,9 @@ public final class ClassSchema extends AbstractSchema<Class<?>> {
      */
     @Override
     public Set<Type> getTypes() {
+        if (types == null) {
+            types = Collections.unmodifiableSet(collectTypes());
+        }
         return types;
     }
 
