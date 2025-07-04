@@ -26,6 +26,18 @@ public final class HashTypeRepository implements TypeRepository {
     }
 
     /**
+     * Constructs a repository using a custom map.
+     * <br>
+     * This allows using specialized or preconfigured map implementations.
+     *
+     * @param map a provided internal map
+     */
+    public HashTypeRepository(Map<Type, ObjectFactory> map) {
+        this.body = map;
+        this.keys = map.keySet();
+    }
+
+    /**
      * Constructs an empty repository backed by a {@link HashMap}.
      */
     public HashTypeRepository() {
@@ -44,7 +56,7 @@ public final class HashTypeRepository implements TypeRepository {
     }
 
     @Override
-    public void set(Type type, ObjectFactory factory) {
+    public void put(Type type, ObjectFactory factory) {
         Objects.requireNonNull(type);
         body.put(type, factory);
     }

@@ -16,7 +16,7 @@ public class CycleFoundException extends RuntimeException {
      * @param cycle the found cycle
      */
     public CycleFoundException(List<Type> cycle) {
-        super("A cycle has been found in the dependency graph: " + cycle);
+        super("A cycle has been found in the dependency graph: " + Util.getNames(cycle));
         this.cycle = Collections.unmodifiableList(cycle);
     }
 

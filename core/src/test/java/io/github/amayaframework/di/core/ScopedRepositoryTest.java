@@ -24,9 +24,9 @@ public final class ScopedRepositoryTest {
         assertTrue(scoped.canProvide(Integer.class));
         assertTrue(scoped.canProvide(Character.class));
         // set and remove
-        scoped.set(String.class, v -> "hi");
-        scoped.set(Integer.class, v -> 5);
-        scoped.set(Character.class, v -> 'h');
+        scoped.put(String.class, v -> "hi");
+        scoped.put(Integer.class, v -> 5);
+        scoped.put(Character.class, v -> 'h');
         assertEquals("hi", scoped.get(String.class).create(null));
         assertEquals(5, scoped.get(Integer.class).create(null));
         assertEquals('h', scoped.get(Character.class).create(null));
@@ -124,8 +124,8 @@ public final class ScopedRepositoryTest {
         assertEquals("parent", scoped.get(String.class).create(null));
         assertEquals(5, scoped.get(Integer.class).create(null));
         // set
-        scoped.set(String.class, s);
-        scoped.set(Integer.class, i);
+        scoped.put(String.class, s);
+        scoped.put(Integer.class, i);
         assertTrue(scoped.canProvide(String.class));
         assertTrue(scoped.canProvide(Integer.class));
         assertEquals("current", scoped.get(String.class).create(null));
@@ -163,8 +163,8 @@ public final class ScopedRepositoryTest {
         assertEquals(5, scoped.get(Integer.class).create(null));
         assertEquals('c', scoped.get(Character.class).create(null));
         // set
-        scoped.set(String.class, s);
-        scoped.set(Integer.class, i);
+        scoped.put(String.class, s);
+        scoped.put(Integer.class, i);
         assertTrue(scoped.canProvide(String.class));
         assertTrue(scoped.canProvide(Integer.class));
         assertTrue(scoped.canProvide(Character.class));
@@ -230,7 +230,7 @@ public final class ScopedRepositoryTest {
         var ret = new HashTypeRepository();
         for (var entry : vals.entrySet()) {
             var val = entry.getValue();
-            ret.set(entry.getKey(), v -> val);
+            ret.put(entry.getKey(), v -> val);
         }
         return ret;
     }
@@ -238,7 +238,7 @@ public final class ScopedRepositoryTest {
     static TypeRepository of(Type... types) {
         var ret = new HashTypeRepository();
         for (var type : types) {
-            ret.set(type, v -> null);
+            ret.put(type, v -> null);
         }
         return ret;
     }

@@ -66,8 +66,8 @@ public final class ScopedTypeRepository implements TypeRepository {
      * @param factory the factory to associate, must be non-null
      */
     @Override
-    public void set(Type type, ObjectFactory factory) {
-        current.set(type, factory);
+    public void put(Type type, ObjectFactory factory) {
+        current.put(type, factory);
     }
 
     /**

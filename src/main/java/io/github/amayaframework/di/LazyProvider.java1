@@ -2,7 +2,9 @@ package io.github.amayaframework.di;
 
 import com.github.romanqed.jfunc.Exceptions;
 import com.github.romanqed.jfunc.Function0;
-import io.github.amayaframework.di.stub.TypeProvider;
+import io.github.amayaframework.di.core.ObjectFactory;
+import io.github.amayaframework.di.core.TypeProvider;
+import io.github.amayaframework.di.core.TypeRepository;
 
 import java.lang.reflect.Type;
 import java.util.HashMap;
@@ -14,15 +16,15 @@ import java.util.Objects;
  * the chain of building type implementations.
  */
 public class LazyProvider implements TypeProvider {
-    private final ServiceRepository repository;
-    private final Map<Type, Function0<Function0<Object>>> body;
+    private final TypeRepository repository;
+    private final Map<Type, Function0<ObjectFactory>> body;
 
     /**
      * Constructs {@link LazyProvider} with the specified repository.
      *
      * @param repository the specified repository
      */
-    public LazyProvider(ServiceRepository repository) {
+    public LazyProvider(TypeRepository repository) {
         this.repository = Objects.requireNonNull(repository);
         this.body = new HashMap<>();
     }
@@ -33,7 +35,7 @@ public class LazyProvider implements TypeProvider {
      * @param type the specified type
      * @param task the specified task
      */
-    public void add(Type type, Function0<Function0<Object>> task) {
+    public void add(Type type, Function0<ObjectFactory> task) {
         body.put(type, task);
     }
 
@@ -64,17 +66,17 @@ public class LazyProvider implements TypeProvider {
     public void commit() {
         for (var entry : body.entrySet()) {
             var type = entry.getKey();
-            if (repository.contains(type)) {
+            if (repository.canProvide(type)) {
                 continue;
             }
-            var supplier = Exceptions.suppress(entry.getValue());
-            repository.add(type, supplier);
+            var factory = Exceptions.suppress(entry.getValue());
+            repository.set(type, factory);
         }
         body.clear();
     }
 
     @Override
-    public Function0<Object> apply(Type type) {
+    public ObjectFactory get(Type type) {
         var ret = repository.get(type);
         if (ret != null) {
             return ret;
@@ -83,8 +85,8 @@ public class LazyProvider implements TypeProvider {
         if (provided == null) {
             return null;
         }
-        var function = Exceptions.suppress(provided);
-        repository.add(type, function);
+        var factory = Exceptions.suppress(provided);
+        repository.set(type, factory);
         // It is important to request the type again from the repository so that it can apply the wrapper.
         return repository.get(type);
     }

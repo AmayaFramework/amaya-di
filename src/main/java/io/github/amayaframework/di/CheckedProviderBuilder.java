@@ -1,101 +1,85 @@
 package io.github.amayaframework.di;
 
-import com.github.romanqed.jfunc.Function0;
 import com.github.romanqed.jgraph.Graph;
 import com.github.romanqed.jgraph.GraphUtil;
 import com.github.romanqed.jgraph.HashGraph;
-import io.github.amayaframework.di.scheme.ClassScheme;
-import io.github.amayaframework.di.scheme.SchemeFactory;
+import io.github.amayaframework.di.core.HashTypeRepository;
+import io.github.amayaframework.di.core.ObjectFactory;
+import io.github.amayaframework.di.core.ServiceProvider;
+import io.github.amayaframework.di.core.TypeRepository;
+import io.github.amayaframework.di.schema.ClassSchema;
+import io.github.amayaframework.di.schema.SchemaFactory;
+import io.github.amayaframework.di.stub.CacheMode;
+import io.github.amayaframework.di.stub.CachedObjectFactory;
 import io.github.amayaframework.di.stub.StubFactory;
 
 import java.lang.reflect.Type;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 
-/**
- * A {@link ServiceProviderBuilder} implementation that performs static analysis of the collected set of services.
- * Checks for all required dependencies and analyzes the dependency graph for cycles.
- * Creates {@link ServiceProvider} according to the transaction principle, that is, until the build is successfully
- * completed, no side effects will be applied.
- */
-public class CheckedProviderBuilder extends AbstractProviderBuilder {
-    public static final int VALIDATE_CYCLES = 0b01;
-    public static final int VALIDATE_MISSING_TYPES = 0b10;
-    public static final int VALIDATE_ALL = VALIDATE_CYCLES | VALIDATE_MISSING_TYPES;
-
-    private final SchemeFactory schemeFactory;
-    private final StubFactory stubFactory;
+public class CheckedProviderBuilder extends AbstractServiceProviderBuilder<ServiceProviderBuilder> {
     private final int checks;
 
-    /**
-     * Constructs {@link CheckedProviderBuilder} instance with the specified scheme, stub factories and check set.
-     *
-     * @param schemeFactory the specified scheme factory, must be non-null
-     * @param stubFactory   the specified stub factory, must be non-null
-     * @param checks        the specified set of applied checks
-     */
-    public CheckedProviderBuilder(SchemeFactory schemeFactory, StubFactory stubFactory, int checks) {
-        this.schemeFactory = Objects.requireNonNull(schemeFactory);
-        this.stubFactory = Objects.requireNonNull(stubFactory);
+    public CheckedProviderBuilder(SchemaFactory schemaFactory,
+                                  StubFactory stubFactory,
+                                  CacheMode cacheMode,
+                                  int checks) {
+        super(schemaFactory, stubFactory, cacheMode);
         this.checks = checks;
     }
 
-    /**
-     * Constructs {@link CheckedProviderBuilder} instance with the specified scheme and stub factories.
-     * Enables all available checks {@link CheckedProviderBuilder#VALIDATE_ALL}.
-     *
-     * @param schemeFactory the specified scheme factory, must be non-null
-     * @param stubFactory   the specified stub factory, must be non-null
-     */
-    public CheckedProviderBuilder(SchemeFactory schemeFactory, StubFactory stubFactory) {
-        this(schemeFactory, stubFactory, VALIDATE_ALL);
+    private boolean checkEnabled(int check) {
+        return BuilderChecks.checkEnabled(checks, check);
     }
 
-    protected Graph<Type> makeGraph(Map<Class<?>, ClassScheme> schemes) {
+    private Map<Type, ClassSchema> buildSchemas() {
+        var factory = getSchemaFactory();
+        var ret = new HashMap<Type, ClassSchema>();
+        for (var entry : types.entrySet()) {
+            ret.put(entry.getKey(), factory.create(entry.getValue().impl));
+        }
+        return ret;
+    }
+
+    private boolean canResolve(Type type) {
+        if (repository != null && repository.canProvide(type)) {
+            return true;
+        }
+        return roots.containsKey(type) || types.containsKey(type);
+    }
+
+    private void checkMissingTypes(Map<Type, ClassSchema> schemas) {
+        for (var schema : schemas.values()) {
+            var types = schema.getTypes();
+            for (var type : types) {
+                if (canResolve(type)) {
+                    continue;
+                }
+                throw new TypeNotFoundException(type);
+            }
+        }
+    }
+
+    private Graph<Type> makeGraph(Map<Type, ClassSchema> schemas) {
         var ret = new HashGraph<Type>();
-        for (var entry : any.entrySet()) {
+        for (var entry : schemas.entrySet()) {
             var type = entry.getKey();
-            var types = schemes.get(entry.getValue().implementation).getTypes();
-            types.forEach(e -> {
+            var types = entry.getValue().getTypes();
+            for (var e : types) {
                 if (type.equals(e)) {
                     throw new CycleFoundException(List.of(e));
                 }
                 ret.addEdge(type, e);
-            });
+            }
         }
         return ret;
     }
 
-    protected Map<Class<?>, ClassScheme> makeSchemes() {
-        var ret = new HashMap<Class<?>, ClassScheme>();
-        for (var entry : any.values()) {
-            var type = entry.implementation;
-            var scheme = schemeFactory.create(type);
-            ret.put(type, scheme);
-        }
-        return ret;
-    }
-
-    @SuppressWarnings("unchecked")
-    protected void buildTypes(Map<Class<?>, ClassScheme> schemes, LazyProvider provider) {
-        for (var entry : any.entrySet()) {
-            var type = entry.getKey();
-            var value = entry.getValue();
-            var scheme = schemes.get(value.implementation);
-            var wrapper = value.wrapper;
-            provider.add(type, () -> (Function0<Object>) wrapper.invoke(stubFactory.create(scheme, provider)));
-        }
-    }
-
-    private boolean checkEnabled(int check) {
-        return (checks & check) != 0;
-    }
-
-    protected void checkCycles(Map<Class<?>, ClassScheme> schemes) {
+    private void checkCycles(Map<Type, ClassSchema> schemas) {
         // Build dependency graph
-        var graph = makeGraph(schemes);
+        var graph = makeGraph(schemas);
         // Find for strongly connected components
         var components = GraphUtil.findSCC(graph);
         for (var component : components) {
@@ -105,42 +89,57 @@ public class CheckedProviderBuilder extends AbstractProviderBuilder {
         }
     }
 
-    protected void checkMissingTypes(Map<Class<?>, ClassScheme> schemes, ServiceRepository repository) {
-        for (var scheme : schemes.values()) {
-            var types = scheme.getTypes();
-            for (var type : types) {
-                if (repository.contains(type)) {
-                    continue;
-                }
-                if (canResolve(type)) {
-                    continue;
-                }
-                throw new TypeNotFoundException(type);
+    private TypeRepository buildRepository(TypeRepository repo, Map<Type, ClassSchema> schemas) throws Throwable {
+        var stubFactory = getStubFactory();
+        var mode = getCacheMode();
+        var map = repo == null ? new HashMap<Type, ObjectFactory>() : null;
+        // Add weak types
+        var delayed = new LinkedList<StubEntry>();
+        for (var entry : types.entrySet()) {
+            var type = entry.getKey();
+            var typeEntry = entry.getValue();
+            var schema = schemas.get(type);
+            // Build stub and check if it is cached
+            var stub = stubFactory.create(schema, mode);
+            if (stub instanceof CachedObjectFactory) {
+                delayed.add(new StubEntry(schema.getTypes(), (CachedObjectFactory) stub));
+            }
+            // Apply wrapper
+            if (typeEntry.wrapper != null) {
+                stub = typeEntry.wrapper.invoke(stub);
+            }
+            if (repo == null) {
+                map.put(type, stub);
+            } else {
+                repo.put(type, stub);
             }
         }
+        // Add root types
+        if (repo == null) {
+            map.putAll(roots);
+        } else {
+            roots.forEach(repo::put);
+        }
+        // Handle delayed cached stubs
+        for (var entry : delayed) {
+            for (var type : entry.types) {
+                var found = repo == null ? map.get(type) : repo.get(type);
+                entry.stub.set(type, found);
+            }
+        }
+        return repo == null ? new HashTypeRepository(map) : repo;
     }
 
     @Override
-    protected ServiceProvider checkedBuild() {
-        // Build class schemes
-        var schemes = makeSchemes();
-        // Validate cyclic dependencies
-        if (checkEnabled(VALIDATE_CYCLES)) {
-            checkCycles(schemes);
+    protected ServiceProvider doBuild() throws Throwable {
+        var schemas = buildSchemas();
+        if (checkEnabled(BuilderChecks.VALIDATE_MISSING_TYPES)) {
+            checkMissingTypes(schemas);
         }
-        // Build repository
-        var repository = Objects.requireNonNullElse(this.repository, new RepositoryImpl());
-        // Validate missing types
-        if (checkEnabled(VALIDATE_MISSING_TYPES)) {
-            checkMissingTypes(schemes, repository);
+        if (checkEnabled(BuilderChecks.VALIDATE_CYCLES)) {
+            checkCycles(schemas);
         }
-        // Prepare weak types
-        var provider = new LazyProvider(repository);
-        buildTypes(schemes, provider);
-        // Add strong types
-        strong.forEach(repository::add);
-        // Fire all delayed stub creations
-        provider.commit();
-        return new ServiceProviderImpl(repository);
+        var repository = buildRepository(this.repository, schemas);
+        return new PlainServiceProvider(repository);
     }
 }

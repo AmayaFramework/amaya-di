@@ -10,11 +10,11 @@ public final class ServiceProviderTest {
     public void testTransient() {
         var sp = new SPImpl();
         var r = sp.getRepository();
-        r.set(String.class, v -> "str");
-        r.set(Integer.class, v -> 5);
-        r.set(A.class, ofA());
-        r.set(B.class, ofB());
-        r.set(C.class, ofC());
+        r.put(String.class, v -> "str");
+        r.put(Integer.class, v -> 5);
+        r.put(A.class, ofA());
+        r.put(B.class, ofB());
+        r.put(C.class, ofC());
         var a = sp.get(A.class);
         var b = sp.get(B.class);
         var c = sp.get(C.class);
@@ -42,11 +42,11 @@ public final class ServiceProviderTest {
     public void testSingleton() {
         var sp = new SPImpl();
         var r = sp.getRepository();
-        r.set(String.class, v -> "str");
-        r.set(Integer.class, v -> 5);
-        r.set(A.class, new LazyObjectFactory(ofA()));
-        r.set(B.class, ofB());
-        r.set(C.class, ofC());
+        r.put(String.class, v -> "str");
+        r.put(Integer.class, v -> 5);
+        r.put(A.class, new LazyObjectFactory(ofA()));
+        r.put(B.class, ofB());
+        r.put(C.class, ofC());
         var a = sp.get(A.class);
         var b = sp.get(B.class);
         var c = sp.get(C.class);
@@ -74,11 +74,11 @@ public final class ServiceProviderTest {
     public void testScoped() {
         var sp = new SPImpl();
         var r = sp.getRepository();
-        r.set(A.class, ofA());
-        r.set(String.class, v -> "str");
+        r.put(A.class, ofA());
+        r.put(String.class, v -> "str");
         var sc = sp.createScoped();
         var sr = sc.getRepository();
-        sr.set(String.class, v -> "scopedStr");
+        sr.put(String.class, v -> "scopedStr");
         var a = sp.get(A.class);
         var sa = sc.get(A.class);
         assertNotNull(a);

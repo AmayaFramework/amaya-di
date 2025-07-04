@@ -4,7 +4,7 @@ import java.lang.annotation.*;
 
 /**
  * An annotation that is used as a default marker when building a
- * {@link io.github.amayaframework.di.scheme.ClassScheme}.
+ * {@link io.github.amayaframework.di.schema.ClassSchema}.
  * It can only be applied to constructors, fields, and methods.
  * It is inherited.
  * <br>

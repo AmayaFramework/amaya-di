@@ -18,7 +18,7 @@ public interface TypeRepository extends TypeProvider, Iterable<Type> {
      * @param type     the specified type, must be non-null
      * @param factory the specified instantiator, must be non-null
      */
-    void set(Type type, ObjectFactory factory);
+    void put(Type type, ObjectFactory factory);
 
     /**
      * Removes the instantiator associated with the specified type.

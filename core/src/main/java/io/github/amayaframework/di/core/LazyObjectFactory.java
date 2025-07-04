@@ -33,18 +33,6 @@ public final class LazyObjectFactory implements ObjectFactory {
     }
 
     /**
-     * Resets the cached value, allowing the wrapped factory to be invoked again
-     * on the next {@link #create(TypeProvider)} call.
-     * <br>
-     * Useful in scenarios where the instance needs to be refreshed or recreated.
-     */
-    public void reset() {
-        synchronized (lock) {
-            this.value = null;
-        }
-    }
-
-    /**
      * Returns the cached object if it exists, otherwise creates it by invoking
      * the wrapped factory. Ensures thread-safe lazy initialization.
      *
