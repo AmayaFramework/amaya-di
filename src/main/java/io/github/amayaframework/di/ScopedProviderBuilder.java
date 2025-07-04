@@ -30,6 +30,14 @@ public interface ScopedProviderBuilder extends ServiceProviderBuilder {
 
     // ===
 
+    // Scoped add methods with wrapper
+
+    ScopedProviderBuilder addScoped(Type type, ObjectFactory factory, ServiceWrapper wrapper);
+
+    ScopedProviderBuilder addScoped(JType<?> type, ObjectFactory factory, ServiceWrapper wrapper);
+
+    // ===
+
     // Scoped remove methods
 
     ScopedProviderBuilder removeScoped(Type type);

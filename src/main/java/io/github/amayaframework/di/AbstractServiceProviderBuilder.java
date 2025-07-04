@@ -45,6 +45,16 @@ public abstract class AbstractServiceProviderBuilder<B extends ServiceProviderBu
         this.reset();
     }
 
+    protected static void checkInheritance(Class<?> type, Class<?> impl) {
+        if (!type.isAssignableFrom(impl)) {
+            throw new IllegalTypeException("The implementation is not a child class of the type " + type, impl);
+        }
+    }
+
+    protected static void checkInheritance(Type type, Class<?> impl) {
+        checkInheritance(TypeUtil.getRawType(type), impl);
+    }
+
     // Reset function
     protected void reset() {
         // Reset factories
@@ -102,6 +112,8 @@ public abstract class AbstractServiceProviderBuilder<B extends ServiceProviderBu
         return (B) this;
     }
 
+    // Base methods
+
     @Override
     @SuppressWarnings("unchecked")
     public B withCacheMode(CacheMode mode) {
@@ -115,8 +127,6 @@ public abstract class AbstractServiceProviderBuilder<B extends ServiceProviderBu
         this.repository = repository;
         return (B) this;
     }
-
-    // Base methods
 
     @Override
     @SuppressWarnings("unchecked")
@@ -172,16 +182,6 @@ public abstract class AbstractServiceProviderBuilder<B extends ServiceProviderBu
         types.remove(type);
         roots.put(type, v -> instance);
         return (B) this;
-    }
-
-    protected static void checkInheritance(Class<?> type, Class<?> impl) {
-        if (!type.isAssignableFrom(impl)) {
-            throw new IllegalTypeException("The implementation is not a child class of the type " + type, impl);
-        }
-    }
-
-    protected static void checkInheritance(Type type, Class<?> impl) {
-        checkInheritance(TypeUtil.getRawType(type), impl);
     }
 
     @Override
@@ -316,7 +316,7 @@ public abstract class AbstractServiceProviderBuilder<B extends ServiceProviderBu
         Class<?> impl;
         ServiceWrapper wrapper;
 
-        TypeEntry(Class<?> impl, ServiceWrapper wrapper) {
+        protected TypeEntry(Class<?> impl, ServiceWrapper wrapper) {
             this.impl = impl;
             this.wrapper = wrapper;
         }

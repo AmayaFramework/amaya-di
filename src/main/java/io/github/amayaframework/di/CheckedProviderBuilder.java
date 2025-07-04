@@ -3,19 +3,14 @@ package io.github.amayaframework.di;
 import com.github.romanqed.jgraph.Graph;
 import com.github.romanqed.jgraph.GraphUtil;
 import com.github.romanqed.jgraph.HashGraph;
-import io.github.amayaframework.di.core.HashTypeRepository;
-import io.github.amayaframework.di.core.ObjectFactory;
 import io.github.amayaframework.di.core.ServiceProvider;
-import io.github.amayaframework.di.core.TypeRepository;
 import io.github.amayaframework.di.schema.ClassSchema;
 import io.github.amayaframework.di.schema.SchemaFactory;
 import io.github.amayaframework.di.stub.CacheMode;
-import io.github.amayaframework.di.stub.CachedObjectFactory;
 import io.github.amayaframework.di.stub.StubFactory;
 
 import java.lang.reflect.Type;
 import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
@@ -89,49 +84,8 @@ public class CheckedProviderBuilder extends AbstractServiceProviderBuilder<Servi
         }
     }
 
-    private TypeRepository buildRepository(TypeRepository repo, Map<Type, ClassSchema> schemas) throws Throwable {
-        var stubFactory = getStubFactory();
-        var mode = getCacheMode();
-        var map = repo == null ? new HashMap<Type, ObjectFactory>() : null;
-        // Add weak types
-        var delayed = new LinkedList<StubEntry>();
-        for (var entry : types.entrySet()) {
-            var type = entry.getKey();
-            var typeEntry = entry.getValue();
-            var schema = schemas.get(type);
-            // Build stub and check if it is cached
-            var stub = stubFactory.create(schema, mode);
-            if (stub instanceof CachedObjectFactory) {
-                delayed.add(new StubEntry(schema.getTypes(), (CachedObjectFactory) stub));
-            }
-            // Apply wrapper
-            if (typeEntry.wrapper != null) {
-                stub = typeEntry.wrapper.invoke(stub);
-            }
-            if (repo == null) {
-                map.put(type, stub);
-            } else {
-                repo.put(type, stub);
-            }
-        }
-        // Add root types
-        if (repo == null) {
-            map.putAll(roots);
-        } else {
-            roots.forEach(repo::put);
-        }
-        // Handle delayed cached stubs
-        for (var entry : delayed) {
-            for (var type : entry.types) {
-                var found = repo == null ? map.get(type) : repo.get(type);
-                entry.stub.set(type, found);
-            }
-        }
-        return repo == null ? new HashTypeRepository(map) : repo;
-    }
-
     @Override
-    protected ServiceProvider doBuild() throws Throwable {
+    protected ServiceProvider doBuild() {
         var schemas = buildSchemas();
         if (checkEnabled(BuilderChecks.VALIDATE_MISSING_TYPES)) {
             checkMissingTypes(schemas);
@@ -139,7 +93,9 @@ public class CheckedProviderBuilder extends AbstractServiceProviderBuilder<Servi
         if (checkEnabled(BuilderChecks.VALIDATE_CYCLES)) {
             checkCycles(schemas);
         }
-        var repository = buildRepository(this.repository, schemas);
+        var stubFactory = getStubFactory();
+        var mode = getCacheMode();
+        var repository = BuildUtil.buildRepository(stubFactory, mode, schemas, roots, types, this.repository);
         return new PlainServiceProvider(repository);
     }
 }
