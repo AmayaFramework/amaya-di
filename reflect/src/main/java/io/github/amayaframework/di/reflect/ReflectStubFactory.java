@@ -187,6 +187,9 @@ public final class ReflectStubFactory implements StubFactory {
         }
         var updaters = new HashMap<Type, Consumer<ObjectFactory>>();
         var factory = createFactory(schema, mode, updaters);
+        if (updaters.isEmpty()) {
+            return factory;
+        }
         return new UpdatedObjectFactory(factory, updaters);
     }
 }

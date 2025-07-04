@@ -407,6 +407,7 @@ public final class AsmStubFactory implements StubFactory {
                                          Map<Type, String> fields,
                                          Map<Type, String> types) {
         var writer = new ClassWriter(ClassWriter.COMPUTE_FRAMES);
+        var base = fields.isEmpty() ? OBJECT_FACTORY : CACHED_OBJECT_FACTORY;
         // Declare class
         writer.visit(
                 Opcodes.V11,
@@ -414,7 +415,7 @@ public final class AsmStubFactory implements StubFactory {
                 name,
                 null,
                 AsmUtil.OBJECT_NAME,
-                new String[]{CACHED_OBJECT_FACTORY}
+                new String[]{base}
         );
         // Declare fields for types
         if (types != null) {
@@ -440,7 +441,9 @@ public final class AsmStubFactory implements StubFactory {
             generateConstructor(writer, name, count);
         }
         // Generate set() method
-        generateSetMethod(writer, name, fields, types);
+        if (!fields.isEmpty()) {
+            generateSetMethod(writer, name, fields, types);
+        }
         // Generate create() method
         if (types == null) {
             generateCreateMethod(writer, schema, (visitor, type) ->
