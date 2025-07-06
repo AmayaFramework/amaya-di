@@ -3,17 +3,20 @@ package io.github.amayaframework.di;
 import io.github.amayaframework.di.core.ObjectFactory;
 
 /**
- * An interface that describes an abstract mechanism
- * that allows you to proxy or modify providers of service implementations.
+ * An interface that describes a mechanism for wrapping or proxying
+ * {@link ObjectFactory} instances.
+ * <p>
+ * This is typically used to implement scopes, lazy instantiation,
+ * monitoring, or other behavioral decorations of service providers.
  */
 @FunctionalInterface
 public interface ServiceWrapper {
 
     /**
-     * Applies changes to the specified service factory.
+     * Applies wrapping logic to the given service factory.
      *
-     * @param factory the specified service factory
-     * @return modified service provider
+     * @param factory the factory to wrap, must be non-null
+     * @return the wrapped factory
      */
     ObjectFactory wrap(ObjectFactory factory);
 }

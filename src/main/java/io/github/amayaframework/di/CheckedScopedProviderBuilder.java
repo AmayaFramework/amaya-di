@@ -11,9 +11,30 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
+/**
+ * A {@link ScopedProviderBuilder} implementation that performs validation checks
+ * before building scoped-aware {@link ServiceProvider}.
+ * <p>
+ * This builder supports scoped bindings and performs additional validation, such as:
+ * <ul>
+ *     <li>Checking for unresolved dependencies (if enabled)</li>
+ *     <li>Validating cyclic dependencies between scoped services (if enabled)</li>
+ * </ul>
+ * The builder supports both root-level services and scoped-only services.
+ * If no scoped services are registered, it will fall back to a plain service provider.
+ */
 public class CheckedScopedProviderBuilder extends AbstractScopedProviderBuilder<ScopedProviderBuilder> {
     private final int checks;
 
+    /**
+     * Constructs a new {@code CheckedScopedProviderBuilder}.
+     *
+     * @param schemaFactory the factory used to generate injection schemas
+     * @param stubFactory   the factory used to generate object factories from schemas
+     * @param cacheMode     the default caching strategy for services
+     * @param checks        a bitmask indicating which build-time validations to apply
+     *                      (see {@link BuilderChecks})
+     */
     public CheckedScopedProviderBuilder(SchemaFactory schemaFactory,
                                         StubFactory stubFactory,
                                         CacheMode cacheMode,
@@ -45,14 +66,26 @@ public class CheckedScopedProviderBuilder extends AbstractScopedProviderBuilder<
         return BuilderChecks.checkEnabled(checks, check);
     }
 
-    private boolean canResolve(Type type) {
+    /**
+     * Determines whether the given type can be resolved during schema validation.
+     *
+     * @param type the type to check
+     * @return {@code true} if the type can be resolved; {@code false} otherwise
+     */
+    protected boolean canResolve(Type type) {
         if (repository != null && repository.canProvide(type)) {
             return true;
         }
         return roots.containsKey(type) || types.containsKey(type);
     }
 
-    private boolean canResolveScoped(Type type) {
+    /**
+     * Determines whether the given scoped type can be resolved during schema validation.
+     *
+     * @param type the type to check
+     * @return {@code true} if the type can be resolved; {@code false} otherwise
+     */
+    protected boolean canResolveScoped(Type type) {
         return promised.contains(type)
                 || scopedRoots.containsKey(type)
                 || scopedTypes.containsKey(type)
@@ -60,7 +93,13 @@ public class CheckedScopedProviderBuilder extends AbstractScopedProviderBuilder<
                 || canResolve(type);
     }
 
-    private Map<Type, ClassSchema> buildScopedSchemas(SchemaFactory factory) {
+    /**
+     * Builds class schemas for all scoped types declared via {@code addScoped()} and related methods.
+     *
+     * @param factory the schema factory to use
+     * @return a map from type to its corresponding {@link ClassSchema}, for all scoped types with implementation classes
+     */
+    protected Map<Type, ClassSchema> buildScopedSchemas(SchemaFactory factory) {
         var ret = new HashMap<Type, ClassSchema>();
         for (var entry : scopedTypes.entrySet()) {
             ret.put(entry.getKey(), factory.create(entry.getValue()));
