@@ -5,24 +5,23 @@ import io.github.amayaframework.di.schema.ClassSchema;
 
 /**
  * A factory interface for creating {@link ObjectFactory} instances
- * from class schemas.
- * <br>
- * Typically used to generate dependency-injection stubs for types
- * at runtime using metadata extracted from {@link ClassSchema}.
+ * based on metadata extracted from {@link ClassSchema}.
+ * <p>
+ * Typically used to generate runtime injection stubs for user-defined types.
  */
+@FunctionalInterface
 public interface StubFactory {
 
     /**
-     * Creates a new factory for the given class schema.
+     * Creates a new factory for the given class schema using the specified caching mode.
      * <p>
-     * If {@code cached} is {@code false}, a plain {@link ObjectFactory} is returned.
-     * If {@code cached} is {@code true}, a {@link CachedObjectFactory} is returned instead,
-     * enabling internal caching of sub-factories and optimizations for repeated resolution.
+     * If {@code mode} is {@link CacheMode#NONE}, a plain {@link ObjectFactory} is returned.
+     * Otherwise, a {@link CachedObjectFactory} is returned with internal caching behavior
+     * based on the selected {@link CacheMode}.
      *
-     * @param schema the class schema, must be non-null
-     * @param mode   the caching mode to apply when building the factory; controls whether and how
-     *               dependency sub-factories are cached internally
-     * @return an {@link ObjectFactory} or {@link CachedObjectFactory}, depending on {@code cached}
+     * @param schema the class schema describing the target class and its dependencies, must be non-null
+     * @param mode   the caching strategy to use for dependency resolution
+     * @return an {@link ObjectFactory} or {@link CachedObjectFactory}, depending on the caching mode
      */
     ObjectFactory create(ClassSchema schema, CacheMode mode);
 

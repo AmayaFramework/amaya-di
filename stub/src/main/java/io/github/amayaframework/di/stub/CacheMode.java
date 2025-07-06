@@ -30,8 +30,8 @@ public enum CacheMode {
     /**
      * No caching mode.
      * <p>
-     * The factory does not cache any sub-factories. Each dependency resolution
-     * results in object factory lookup.
+     * The factory performs a fresh lookup for each dependency resolution,
+     * without storing or reusing sub-factories.
      */
     NONE
 }
