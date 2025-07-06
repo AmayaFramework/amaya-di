@@ -14,7 +14,7 @@ public interface ServiceProvider {
      *
      * @return the {@link TypeRepository} instance
      */
-    TypeRepository getRepository();
+    TypeRepository repository();
 
     /**
      * Creates a new scoped instance of this {@link ServiceProvider}.

@@ -24,7 +24,7 @@ public abstract class AbstractServiceProvider implements ServiceProvider {
     }
 
     @Override
-    public TypeRepository getRepository() {
+    public TypeRepository repository() {
         return repository;
     }
 

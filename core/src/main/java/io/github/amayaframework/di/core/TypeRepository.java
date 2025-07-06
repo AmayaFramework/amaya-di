@@ -24,25 +24,33 @@ public interface TypeRepository extends TypeProvider, Iterable<Type> {
     void put(Type type, ObjectFactory factory);
 
     /**
-     * TODO
+     * Adds a provider function associated with the specified type, overwriting any existing factory.
+     * <br>
+     * The function is wrapped into an {@link ObjectFactory} internally.
      *
-     * @param type
-     * @param provider
+     * @param type     the type to associate with the provider, must be non-null
+     * @param provider the provider function that returns an instance of the specified type, must be non-null
      */
     void put(Type type, Function0<?> provider);
 
     /**
-     * TODO
+     * Adds a constant instance associated with the specified type, overwriting any existing factory.
+     * <br>
+     * The instance is wrapped into an {@link ObjectFactory} that always returns it.
      *
-     * @param type
-     * @param instance
+     * @param type     the type to associate with the instance, must be non-null
+     * @param instance the instance to associate, must be non-null
      */
     void put(Type type, Object instance);
 
     /**
-     * TODO
+     * Adds a constant instance associated with its runtime class.
+     * <br>
+     * The instance is wrapped into an {@link ObjectFactory} that always returns it.
+     * <br>
+     * Useful for quickly registering singletons without explicitly specifying the type.
      *
-     * @param instance
+     * @param instance the instance to associate, must be non-null
      */
     void put(Object instance);
 
@@ -55,16 +63,20 @@ public interface TypeRepository extends TypeProvider, Iterable<Type> {
     ObjectFactory remove(Type type);
 
     /**
-     * TODO
+     * Copies all entries from the given {@link TypeRepository} into this repository.
+     * <br>
+     * Existing entries with the same types will be overwritten.
      *
-     * @param repository
+     * @param repository the repository to copy from, must be non-null
      */
     void putAll(TypeRepository repository);
 
     /**
-     * TODO
+     * Copies all entries from the given map into this repository.
+     * <br>
+     * Existing entries with the same types will be overwritten.
      *
-     * @param map
+     * @param map a map containing type-factory pairs to copy, must be non-null
      */
     void putAll(Map<Type, ObjectFactory> map);
 

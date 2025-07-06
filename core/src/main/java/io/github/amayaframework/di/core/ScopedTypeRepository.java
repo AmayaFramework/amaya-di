@@ -73,16 +73,45 @@ public final class ScopedTypeRepository implements TypeRepository {
         current.put(type, factory);
     }
 
+    /**
+     * Associates the given provider function with the specified type in the current (scoped) repository.
+     * <br>
+     * The function is wrapped into an {@link ObjectFactory} internally.
+     * <br>
+     * This change does not affect the parent repository.
+     *
+     * @param type     the type to associate with the provider, must be non-null
+     * @param provider a function that returns an instance of the type, must be non-null
+     */
     @Override
     public void put(Type type, Function0<?> provider) {
         current.put(type, provider);
     }
 
+    /**
+     * Associates the given instance with the specified type in the current (scoped) repository.
+     * <br>
+     * The instance is wrapped into an {@link ObjectFactory} that always returns it.
+     * <br>
+     * This change does not affect the parent repository.
+     *
+     * @param type     the type to associate with the instance, must be non-null
+     * @param instance the instance to register, must be non-null
+     */
     @Override
     public void put(Type type, Object instance) {
         current.put(type, instance);
     }
 
+    /**
+     * Associates the given instance with its runtime class in the current (scoped) repository.
+     * <br>
+     * The instance is wrapped into an {@link ObjectFactory} that always returns it.
+     * <br>
+     * This change does not affect the parent repository.
+     *
+     * @param instance the instance to register, must be non-null
+     */
     @Override
     public void put(Object instance) {
         current.put(instance);
@@ -100,9 +129,11 @@ public final class ScopedTypeRepository implements TypeRepository {
     }
 
     /**
-     * TODO
+     * Copies all entries from the given repository into the current (scoped) repository.
+     * <br>
+     * Entries in the parent repository remain unchanged.
      *
-     * @param repository
+     * @param repository the repository to copy from, must be non-null
      */
     @Override
     public void putAll(TypeRepository repository) {
@@ -110,9 +141,11 @@ public final class ScopedTypeRepository implements TypeRepository {
     }
 
     /**
-     * TODO
+     * Copies all entries from the given map into the current (scoped) repository.
+     * <br>
+     * Entries in the parent repository remain unchanged.
      *
-     * @param map
+     * @param map a map of type-factory pairs to register, must be non-null
      */
     @Override
     public void putAll(Map<Type, ObjectFactory> map) {
