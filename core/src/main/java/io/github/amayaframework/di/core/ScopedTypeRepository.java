@@ -1,5 +1,7 @@
 package io.github.amayaframework.di.core;
 
+import com.github.romanqed.jfunc.Function0;
+
 import java.lang.reflect.Type;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -69,6 +71,21 @@ public final class ScopedTypeRepository implements TypeRepository {
     @Override
     public void put(Type type, ObjectFactory factory) {
         current.put(type, factory);
+    }
+
+    @Override
+    public void put(Type type, Function0<?> provider) {
+        current.put(type, provider);
+    }
+
+    @Override
+    public void put(Type type, Object instance) {
+        current.put(type, instance);
+    }
+
+    @Override
+    public void put(Object instance) {
+        current.put(instance);
     }
 
     /**

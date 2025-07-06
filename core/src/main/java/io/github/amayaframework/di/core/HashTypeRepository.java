@@ -1,5 +1,7 @@
 package io.github.amayaframework.di.core;
 
+import com.github.romanqed.jfunc.Function0;
+
 import java.lang.reflect.Type;
 import java.util.*;
 import java.util.function.BiConsumer;
@@ -61,6 +63,21 @@ public final class HashTypeRepository implements TypeRepository {
     }
 
     @Override
+    public void put(Type type, Function0<?> provider) {
+        body.put(type, v -> provider.invoke());
+    }
+
+    @Override
+    public void put(Type type, Object instance) {
+        body.put(type, v -> instance);
+    }
+
+    @Override
+    public void put(Object instance) {
+        body.put(instance.getClass(), v -> instance);
+    }
+
+    @Override
     public ObjectFactory remove(Type type) {
         return body.remove(type);
     }
@@ -70,7 +87,7 @@ public final class HashTypeRepository implements TypeRepository {
         if (repository == this) {
             return;
         }
-        repository.forEach(this::put);
+        repository.forEach(body::put);
     }
 
     @Override

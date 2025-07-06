@@ -1,8 +1,11 @@
 package io.github.amayaframework.di.core;
 
+import com.github.romanqed.jfunc.Function0;
+
 import java.lang.reflect.Type;
 import java.util.Map;
 import java.util.function.BiConsumer;
+import java.util.function.Function;
 
 /**
  * A mutable repository of {@link ObjectFactory} instances, associated with specific {@link Type}s.
@@ -20,6 +23,26 @@ public interface TypeRepository extends TypeProvider, Iterable<Type> {
      * @param factory the specified instantiator, must be non-null
      */
     void put(Type type, ObjectFactory factory);
+
+    /**
+     * TODO
+     * @param type
+     * @param provider
+     */
+    void put(Type type, Function0<?> provider);
+
+    /**
+     * TODO
+     * @param type
+     * @param instance
+     */
+    void put(Type type, Object instance);
+
+    /**
+     * TODO
+     * @param instance
+     */
+    void put(Object instance);
 
     /**
      * Removes the instantiator associated with the specified type.
