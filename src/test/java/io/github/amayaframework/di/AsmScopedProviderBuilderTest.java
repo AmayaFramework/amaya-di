@@ -66,6 +66,12 @@ public class AsmScopedProviderBuilderTest extends ScopedProviderBuilderTest {
     }
 
     @Test
+    public void testScopedSingleton() {
+        testScopedSingleton(() -> ProviderBuilders.createScoped(FACTORY));
+        testScopedSingleton(() -> ProviderBuilders.createScoped(FACTORY, BuilderChecks.VALIDATE_ALL));
+    }
+
+    @Test
     public void testPromisedType() {
         testPromisedType(() -> ProviderBuilders.createScoped(FACTORY));
         testPromisedType(() -> ProviderBuilders.createScoped(FACTORY, BuilderChecks.VALIDATE_ALL));

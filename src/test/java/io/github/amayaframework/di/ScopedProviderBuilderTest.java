@@ -47,6 +47,20 @@ public class ScopedProviderBuilderTest extends ServiceProviderBuilderTest {
         assertEquals("scoped", sc.get(Dependent.class).is.val());
     }
 
+    public void testScopedSingleton(Supplier<ScopedProviderBuilder> s) {
+        var b = s.get();
+        var sp = b
+                .addTransient(Dependent.class)
+                .addTransient(IService.class, BaseService.class)
+                .addScopedSingleton(IService.class, BaseService.class)
+                .build();
+        var sc = sp.createScoped();
+        assertEquals("base", sp.get(Dependent.class).is.val());
+        assertEquals("base", sc.get(Dependent.class).is.val());
+        assertNotSame(sp.get(Dependent.class).is, sp.get(Dependent.class).is);
+        assertSame(sc.get(Dependent.class).is, sc.get(Dependent.class).is);
+    }
+
     public void testPromisedType(Supplier<ScopedProviderBuilder> s) {
         var b = s.get();
         var sp = b
