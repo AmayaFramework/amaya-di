@@ -32,8 +32,8 @@ dependencies {
     testImplementation project(':stub')
     testImplementation group: 'com.github.romanqed', name: 'jtype', version: '1.0.2'
     // Benchmarks
-    jmhImplementation group: 'org.openjdk.jmh', name: 'jmh-core', version: '1.35'
-    jmhImplementation group: 'org.openjdk.jmh', name: 'jmh-generator-annprocess', version: '1.35'
+    jmhImplementation group: 'org.openjdk.jmh', name: 'jmh-core', version: '1.37'
+    jmhImplementation group: 'org.openjdk.jmh', name: 'jmh-generator-annprocess', version: '1.37'
     jmhImplementation project(':core')
     jmhImplementation project(':schema')
     jmhImplementation project(':stub')
