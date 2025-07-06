@@ -24,41 +24,23 @@ public interface ServiceProviderBuilder {
 
     ServiceProviderBuilder withRepository(Supplier<TypeRepository> supplier);
 
-    // Plain add methods
-
     ServiceProviderBuilder add(Type type, ObjectFactory factory);
 
     ServiceProviderBuilder add(JType<?> type, ObjectFactory factory);
-
-    // ===
-
-    // Common remove methods
 
     ServiceProviderBuilder remove(Type type);
 
     ServiceProviderBuilder remove(JType<?> type);
 
-    // ===
-
-    // Function0 wrapped add methods
-
     ServiceProviderBuilder add(Type type, Function0<?> provider);
 
     <T> ServiceProviderBuilder add(JType<T> type, Function0<T> provider);
-
-    // ===
-
-    // Instance add methods
 
     ServiceProviderBuilder addInstance(Type type, Object instance);
 
     <T> ServiceProviderBuilder addInstance(JType<T> type, T instance);
 
     ServiceProviderBuilder addInstance(Object instance);
-
-    // ===
-
-    // Stubbed add methods with wrapper (the ObjectFactory implementation will be created by StubFactory)
 
     ServiceProviderBuilder add(Type type, Class<?> impl, ServiceWrapper wrapper);
 
@@ -68,10 +50,6 @@ public interface ServiceProviderBuilder {
 
     ServiceProviderBuilder add(Class<?> impl, ServiceWrapper wrapper);
 
-    // ===
-
-    // Stubbed transient add methods (the ObjectFactory implementation will be created by StubFactory)
-
     ServiceProviderBuilder addTransient(Type type, Class<?> impl);
 
     <T> ServiceProviderBuilder addTransient(Class<T> type, Class<? extends T> impl);
@@ -80,10 +58,6 @@ public interface ServiceProviderBuilder {
 
     ServiceProviderBuilder addTransient(Class<?> impl);
 
-    // ===
-
-    // Stubbed singleton add methods (the ObjectFactory implementation will be created by StubFactory)
-
     ServiceProviderBuilder addSingleton(Type type, Class<?> impl);
 
     <T> ServiceProviderBuilder addSingleton(Class<T> type, Class<? extends T> impl);
@@ -91,8 +65,6 @@ public interface ServiceProviderBuilder {
     <T> ServiceProviderBuilder addSingleton(JType<T> type, Class<? extends T> impl);
 
     ServiceProviderBuilder addSingleton(Class<?> impl);
-
-    // ===
 
     ServiceProvider build();
 }

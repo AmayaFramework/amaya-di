@@ -13,49 +13,25 @@ import java.util.function.Supplier;
 
 public interface ScopedProviderBuilder extends ServiceProviderBuilder {
 
-    // ===
-
-    // Scoped no-body add methods (a "promise" to the resolver that scopes will have implementations)
-
     ScopedProviderBuilder addScoped(Type type);
 
     ScopedProviderBuilder addScoped(JType<?> type);
-
-    // ===
-
-    // Scoped add methods (the dependency will only exist inside the scope)
 
     ScopedProviderBuilder addScoped(Type type, ObjectFactory factory);
 
     ScopedProviderBuilder addScoped(JType<?> type, ObjectFactory factory);
 
-    // ===
-
-    // Scoped add methods with wrapper
-
     ScopedProviderBuilder addScoped(Type type, ObjectFactory factory, ServiceWrapper wrapper);
 
     ScopedProviderBuilder addScoped(JType<?> type, ObjectFactory factory, ServiceWrapper wrapper);
-
-    // ===
-
-    // Function0 wrapped scoped add methods
 
     ScopedProviderBuilder addScoped(Type type, Function0<?> provider);
 
     <T> ScopedProviderBuilder addScoped(JType<T> type, Function0<T> provider);
 
-    // ===
-
-    // Function0 wrapped scoped add methods
-
     ScopedProviderBuilder addScoped(Type type, Function0<?> provider, ServiceWrapper wrapper);
 
     <T> ScopedProviderBuilder addScoped(JType<T> type, Function0<T> provider, ServiceWrapper wrapper);
-
-    // ===
-
-    // Scoped instance add methods
 
     ScopedProviderBuilder addScopedInstance(Type type, Object instance);
 
@@ -63,17 +39,9 @@ public interface ScopedProviderBuilder extends ServiceProviderBuilder {
 
     ScopedProviderBuilder addScopedInstance(Object instance);
 
-    // ===
-
-    // Scoped remove methods
-
     ScopedProviderBuilder removeScoped(Type type);
 
     ScopedProviderBuilder removeScoped(JType<?> type);
-
-    // ===
-
-    // Scoped and stubbed add methods with wrapper (StubFactory will create the ObjectFactory implementation)
 
     ScopedProviderBuilder addScoped(Type type, Class<?> impl, ServiceWrapper wrapper);
 
@@ -83,10 +51,6 @@ public interface ScopedProviderBuilder extends ServiceProviderBuilder {
 
     ScopedProviderBuilder addScoped(Class<?> impl, ServiceWrapper wrapper);
 
-    // ===
-
-    // Scoped and stubbed transient add methods (StubFactory will create the ObjectFactory implementation)
-
     ScopedProviderBuilder addScopedTransient(Type type, Class<?> impl);
 
     <T> ScopedProviderBuilder addScopedTransient(Class<T> type, Class<? extends T> impl);
@@ -94,10 +58,6 @@ public interface ScopedProviderBuilder extends ServiceProviderBuilder {
     <T> ScopedProviderBuilder addScopedTransient(JType<T> type, Class<? extends T> impl);
 
     ScopedProviderBuilder addScopedTransient(Class<?> impl);
-
-    // ===
-
-    // Scoped and stubbed singleton add methods (StubFactory will create the ObjectFactory implementation)
 
     ScopedProviderBuilder addScopedSingleton(Type type, Class<?> impl);
 
@@ -107,7 +67,7 @@ public interface ScopedProviderBuilder extends ServiceProviderBuilder {
 
     ScopedProviderBuilder addScopedSingleton(Class<?> impl);
 
-    // ===
+    // Fluent api fixes
 
     @Override
     ScopedProviderBuilder withSchemaFactory(SchemaFactory factory);
