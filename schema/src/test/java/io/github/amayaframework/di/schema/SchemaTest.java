@@ -192,6 +192,10 @@ public class SchemaTest extends Assertions {
         testGenericMethod(REFLECTION_FACTORY);
     }
 
+    @Retention(RetentionPolicy.RUNTIME)
+    public @interface Inject {
+    }
+
     public static final class Empty {
     }
 
@@ -211,10 +215,6 @@ public class SchemaTest extends Assertions {
 
         public ManyConstructors(Object arg) {
         }
-    }
-
-    @Retention(RetentionPolicy.RUNTIME)
-    public @interface Inject {
     }
 
     public static final class AnnotatedConstructor {

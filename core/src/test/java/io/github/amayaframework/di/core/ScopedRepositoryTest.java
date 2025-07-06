@@ -3,12 +3,77 @@ package io.github.amayaframework.di.core;
 import org.junit.jupiter.api.Test;
 
 import java.lang.reflect.Type;
-import java.util.*;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
 import java.util.function.Consumer;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 public final class ScopedRepositoryTest {
+
+    static boolean compareUnordered(List<?> left, List<?> right) {
+        var map = new HashMap<Object, Integer>();
+        var lambda = (Consumer<Object>) o -> {
+            map.putIfAbsent(o, 0);
+            map.put(o, map.get(o) + 1);
+        };
+        left.forEach(lambda);
+        right.forEach(lambda);
+        for (var cnt : map.values()) {
+            if (cnt != 2) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    static List<Type> ofIterator(TypeRepository repository, int count) {
+        var ret = new LinkedList<Type>();
+        var iterator = repository.iterator();
+        for (var i = 0; i < count; ++i) {
+            ret.add(iterator.next());
+        }
+        return ret;
+    }
+
+    static List<Type> ofForEachBiFunc(TypeRepository repository) {
+        var ret = new LinkedList<Type>();
+        repository.forEach((type, factory) -> ret.add(type));
+        return ret;
+    }
+
+    static List<Type> ofForEachFunc(TypeRepository repository) {
+        var ret = new LinkedList<Type>();
+        repository.forEach(type -> ret.add(type));
+        return ret;
+    }
+
+    static List<Type> ofForEachLoop(TypeRepository repository) {
+        var ret = new LinkedList<Type>();
+        for (var type : repository) {
+            ret.add(type);
+        }
+        return ret;
+    }
+
+    static TypeRepository of(Map<Type, Object> vals) {
+        var ret = new HashTypeRepository();
+        for (var entry : vals.entrySet()) {
+            var val = entry.getValue();
+            ret.put(entry.getKey(), v -> val);
+        }
+        return ret;
+    }
+
+    static TypeRepository of(Type... types) {
+        var ret = new HashTypeRepository();
+        for (var type : types) {
+            ret.put(type, v -> null);
+        }
+        return ret;
+    }
 
     @Test
     public void testEmptyCurrent() throws Throwable {
@@ -179,67 +244,5 @@ public final class ScopedRepositoryTest {
         assertTrue(compareUnordered(List.of(String.class, Integer.class, Character.class), ofForEachBiFunc(scoped)));
         // iterator
         assertTrue(compareUnordered(List.of(String.class, Integer.class, Character.class), ofIterator(scoped, 3)));
-    }
-
-    static boolean compareUnordered(List<?> left, List<?> right) {
-        var map = new HashMap<Object, Integer>();
-        var lambda = (Consumer<Object>) o -> {
-            map.putIfAbsent(o, 0);
-            map.put(o, map.get(o) + 1);
-        };
-        left.forEach(lambda);
-        right.forEach(lambda);
-        for (var cnt : map.values()) {
-            if (cnt != 2) {
-                return false;
-            }
-        }
-        return true;
-    }
-
-    static List<Type> ofIterator(TypeRepository repository, int count) {
-        var ret = new LinkedList<Type>();
-        var iterator = repository.iterator();
-        for (var i = 0; i < count; ++i) {
-            ret.add(iterator.next());
-        }
-        return ret;
-    }
-
-    static List<Type> ofForEachBiFunc(TypeRepository repository) {
-        var ret = new LinkedList<Type>();
-        repository.forEach((type, factory) -> ret.add(type));
-        return ret;
-    }
-
-    static List<Type> ofForEachFunc(TypeRepository repository) {
-        var ret = new LinkedList<Type>();
-        repository.forEach(type -> ret.add(type));
-        return ret;
-    }
-
-    static List<Type> ofForEachLoop(TypeRepository repository) {
-        var ret = new LinkedList<Type>();
-        for (var type : repository) {
-            ret.add(type);
-        }
-        return ret;
-    }
-
-    static TypeRepository of(Map<Type, Object> vals) {
-        var ret = new HashTypeRepository();
-        for (var entry : vals.entrySet()) {
-            var val = entry.getValue();
-            ret.put(entry.getKey(), v -> val);
-        }
-        return ret;
-    }
-
-    static TypeRepository of(Type... types) {
-        var ret = new HashTypeRepository();
-        for (var type : types) {
-            ret.put(type, v -> null);
-        }
-        return ret;
     }
 }

@@ -39,16 +39,16 @@ final class BuildUtil {
         }
     }
 
-    static void checkCycles(Map<Type, GraphNode> graph) {
+    static void checkCycles(Map<Type, GraphNode> graph, boolean scoped) {
         // Find for strongly connected components
         var components = TarjanUtil.findSCC(graph.values());
         if (components.isEmpty()) {
             return;
         }
         if (components.size() == 1) {
-            throw new CycleFoundException(components.get(0));
+            throw new CycleFoundException(components.get(0), scoped);
         }
-        throw new CyclesFoundException(components);
+        throw new CyclesFoundException(components, scoped);
     }
 
     static void addEdge(Map<Type, GraphNode> graph, Type from, Type to) {
@@ -83,7 +83,7 @@ final class BuildUtil {
             checkMissingTypes(schemas, canResolve);
         }
         if (BuilderChecks.checkEnabled(checks, BuilderChecks.VALIDATE_CYCLES)) {
-            checkCycles(buildGraph(schemas));
+            checkCycles(buildGraph(schemas), false);
         }
     }
 

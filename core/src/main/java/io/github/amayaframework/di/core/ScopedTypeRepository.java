@@ -101,6 +101,7 @@ public final class ScopedTypeRepository implements TypeRepository {
 
     /**
      * TODO
+     *
      * @param repository
      */
     @Override
@@ -110,6 +111,7 @@ public final class ScopedTypeRepository implements TypeRepository {
 
     /**
      * TODO
+     *
      * @param map
      */
     @Override

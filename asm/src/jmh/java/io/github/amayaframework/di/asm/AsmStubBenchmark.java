@@ -18,7 +18,7 @@ public class AsmStubBenchmark {
     private static final TypeProvider NO_CACHE_PROVIDER = prepareNoCacheProvider();
     private static final TypeProvider PARTIAL_PROVIDER = preparePartialProvider();
     private static final TypeProvider FULL_PROVIDER = prepareFullProvider();
-    
+
     private static TypeProvider prepareManualProvider() {
         var ret = new HashTypeRepository();
         ret.put(App.class, v -> {

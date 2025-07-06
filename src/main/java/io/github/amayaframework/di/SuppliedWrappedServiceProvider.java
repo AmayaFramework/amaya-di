@@ -1,6 +1,9 @@
 package io.github.amayaframework.di;
 
-import io.github.amayaframework.di.core.*;
+import io.github.amayaframework.di.core.AbstractServiceProvider;
+import io.github.amayaframework.di.core.ScopedTypeRepository;
+import io.github.amayaframework.di.core.ServiceProvider;
+import io.github.amayaframework.di.core.TypeRepository;
 
 import java.lang.reflect.Type;
 import java.util.Map;

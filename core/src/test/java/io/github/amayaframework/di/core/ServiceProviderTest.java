@@ -6,6 +6,29 @@ import static org.junit.jupiter.api.Assertions.*;
 
 public final class ServiceProviderTest {
 
+    static ObjectFactory ofA() {
+        return provider -> {
+            var s = (String) provider.get(String.class).create(provider);
+            return new A(s);
+        };
+    }
+
+    static ObjectFactory ofB() {
+        return provider -> {
+            var a = (A) provider.get(A.class).create(provider);
+            var i = (Integer) provider.get(Integer.class).create(provider);
+            return new B(a, i);
+        };
+    }
+
+    static ObjectFactory ofC() {
+        return provider -> {
+            var a = (A) provider.get(A.class).create(provider);
+            var b = (B) provider.get(B.class).create(provider);
+            return new C(a, b);
+        };
+    }
+
     @Test
     public void testTransient() {
         var sp = new SPImpl();
@@ -105,29 +128,6 @@ public final class ServiceProviderTest {
             var scoped = new ScopedTypeRepository(cur, repository);
             return new SPImpl(scoped);
         }
-    }
-
-    static ObjectFactory ofA() {
-        return provider -> {
-            var s = (String) provider.get(String.class).create(provider);
-            return new A(s);
-        };
-    }
-
-    static ObjectFactory ofB() {
-        return provider -> {
-            var a = (A) provider.get(A.class).create(provider);
-            var i = (Integer) provider.get(Integer.class).create(provider);
-            return new B(a, i);
-        };
-    }
-
-    static ObjectFactory ofC() {
-        return provider -> {
-            var a = (A) provider.get(A.class).create(provider);
-            var b = (B) provider.get(B.class).create(provider);
-            return new C(a, b);
-        };
     }
 
     public static final class A {

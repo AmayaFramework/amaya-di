@@ -22,6 +22,25 @@ public class CheckedScopedProviderBuilder extends AbstractScopedProviderBuilder<
         this.checks = checks;
     }
 
+    private static boolean notOverrides(Set<Type> base, Set<Type> scoped) {
+        for (var type : base) {
+            if (scoped.contains(type)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private static void checkCycles(Map<Type, ClassSchema> base, Map<Type, ClassSchema> scoped) {
+        if (notOverrides(base.keySet(), scoped.keySet())) {
+            BuildUtil.checkCycles(BuildUtil.buildGraph(scoped), true);
+            return;
+        }
+        var merged = new HashMap<>(base);
+        merged.putAll(scoped);
+        BuildUtil.checkCycles(BuildUtil.buildGraph(merged), true);
+    }
+
     private boolean checkEnabled(int check) {
         return BuilderChecks.checkEnabled(checks, check);
     }
@@ -54,25 +73,6 @@ public class CheckedScopedProviderBuilder extends AbstractScopedProviderBuilder<
             ret.put(entry.getKey(), factory.create(wrappedEntry.impl));
         }
         return ret;
-    }
-
-    private static boolean notOverrides(Set<Type> base, Set<Type> scoped) {
-        for (var type : base) {
-            if (scoped.contains(type)) {
-                return false;
-            }
-        }
-        return true;
-    }
-
-    private static void checkCycles(Map<Type, ClassSchema> base, Map<Type, ClassSchema> scoped) {
-        if (notOverrides(base.keySet(), scoped.keySet())) {
-            BuildUtil.checkCycles(BuildUtil.buildGraph(scoped));
-            return;
-        }
-        var merged = new HashMap<>(base);
-        merged.putAll(scoped);
-        BuildUtil.checkCycles(BuildUtil.buildGraph(merged));
     }
 
     @Override

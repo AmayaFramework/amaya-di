@@ -64,7 +64,7 @@ public abstract class AbstractServiceProvider implements ServiceProvider {
         }
         try {
             return (T) factory.create(repository);
-        }  catch (Error | RuntimeException e) {
+        } catch (Error | RuntimeException e) {
             throw e;
         } catch (Throwable e) {
             throw new RuntimeException(e);

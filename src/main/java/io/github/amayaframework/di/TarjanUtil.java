@@ -1,7 +1,10 @@
 package io.github.amayaframework.di;
 
 import java.lang.reflect.Type;
-import java.util.*;
+import java.util.Collection;
+import java.util.Deque;
+import java.util.LinkedList;
+import java.util.List;
 
 final class TarjanUtil {
     private TarjanUtil() {

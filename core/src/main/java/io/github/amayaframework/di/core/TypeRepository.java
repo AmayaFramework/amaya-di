@@ -5,7 +5,6 @@ import com.github.romanqed.jfunc.Function0;
 import java.lang.reflect.Type;
 import java.util.Map;
 import java.util.function.BiConsumer;
-import java.util.function.Function;
 
 /**
  * A mutable repository of {@link ObjectFactory} instances, associated with specific {@link Type}s.
@@ -26,6 +25,7 @@ public interface TypeRepository extends TypeProvider, Iterable<Type> {
 
     /**
      * TODO
+     *
      * @param type
      * @param provider
      */
@@ -33,6 +33,7 @@ public interface TypeRepository extends TypeProvider, Iterable<Type> {
 
     /**
      * TODO
+     *
      * @param type
      * @param instance
      */
@@ -40,6 +41,7 @@ public interface TypeRepository extends TypeProvider, Iterable<Type> {
 
     /**
      * TODO
+     *
      * @param instance
      */
     void put(Object instance);
@@ -54,12 +56,14 @@ public interface TypeRepository extends TypeProvider, Iterable<Type> {
 
     /**
      * TODO
+     *
      * @param repository
      */
     void putAll(TypeRepository repository);
 
     /**
      * TODO
+     *
      * @param map
      */
     void putAll(Map<Type, ObjectFactory> map);
