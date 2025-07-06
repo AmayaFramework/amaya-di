@@ -15,13 +15,13 @@ public class SchemaTest extends Assertions {
     private static final SchemaFactory REFLECTION_FACTORY = new ReflectSchemaFactory(Inject.class);
 
     public void testEmptyClass(SchemaFactory factory) {
-        var scheme = factory.create(Empty.class);
+        var schema = factory.create(Empty.class);
         assertAll(
-                () -> assertEquals(Empty.class, scheme.getTarget()),
-                () -> assertTrue(scheme.getTypes().isEmpty()),
-                () -> assertTrue(scheme.getFieldSchemas().isEmpty()),
-                () -> assertTrue(scheme.getMethodSchemas().isEmpty()),
-                () -> assertEquals(Empty.class.getConstructor(), scheme.getConstructorSchema().getTarget())
+                () -> assertEquals(Empty.class, schema.getTarget()),
+                () -> assertTrue(schema.getTypes().isEmpty()),
+                () -> assertTrue(schema.getFieldSchemas().isEmpty()),
+                () -> assertTrue(schema.getMethodSchemas().isEmpty()),
+                () -> assertEquals(Empty.class.getConstructor(), schema.getConstructorSchema().getTarget())
         );
     }
 
@@ -40,17 +40,17 @@ public class SchemaTest extends Assertions {
     }
 
     public void testOneConstructor(SchemaFactory factory) {
-        var scheme = factory.create(OneConstructor.class);
+        var schema = factory.create(OneConstructor.class);
         assertAll(
-                () -> assertEquals(OneConstructor.class, scheme.getTarget()),
-                () -> assertEquals(1, scheme.getTypes().size()),
-                () -> assertTrue(scheme.getFieldSchemas().isEmpty()),
-                () -> assertTrue(scheme.getMethodSchemas().isEmpty()),
+                () -> assertEquals(OneConstructor.class, schema.getTarget()),
+                () -> assertEquals(1, schema.getTypes().size()),
+                () -> assertTrue(schema.getFieldSchemas().isEmpty()),
+                () -> assertTrue(schema.getMethodSchemas().isEmpty()),
                 () -> assertEquals(
                         OneConstructor.class.getConstructor(Object.class),
-                        scheme.getConstructorSchema().getTarget()
+                        schema.getConstructorSchema().getTarget()
                 ),
-                () -> assertEquals(Set.of(Object.class), scheme.getConstructorSchema().getTypes())
+                () -> assertEquals(Set.of(Object.class), schema.getConstructorSchema().getTypes())
         );
     }
 
@@ -69,17 +69,17 @@ public class SchemaTest extends Assertions {
     }
 
     public void testAnnotatedConstructor(SchemaFactory factory) {
-        var scheme = factory.create(AnnotatedConstructor.class);
+        var schema = factory.create(AnnotatedConstructor.class);
         assertAll(
-                () -> assertEquals(AnnotatedConstructor.class, scheme.getTarget()),
-                () -> assertEquals(1, scheme.getTypes().size()),
-                () -> assertTrue(scheme.getFieldSchemas().isEmpty()),
-                () -> assertTrue(scheme.getMethodSchemas().isEmpty()),
+                () -> assertEquals(AnnotatedConstructor.class, schema.getTarget()),
+                () -> assertEquals(1, schema.getTypes().size()),
+                () -> assertTrue(schema.getFieldSchemas().isEmpty()),
+                () -> assertTrue(schema.getMethodSchemas().isEmpty()),
                 () -> assertEquals(
                         AnnotatedConstructor.class.getConstructor(Object.class),
-                        scheme.getConstructorSchema().getTarget()
+                        schema.getConstructorSchema().getTarget()
                 ),
-                () -> assertEquals(Set.of(Object.class), scheme.getConstructorSchema().getTypes())
+                () -> assertEquals(Set.of(Object.class), schema.getConstructorSchema().getTypes())
         );
     }
 
@@ -89,13 +89,13 @@ public class SchemaTest extends Assertions {
     }
 
     public void testFields(SchemaFactory factory) throws NoSuchFieldException {
-        var scheme = factory.create(Fields.class);
+        var schema = factory.create(Fields.class);
         var type = Object.class;
-        var schemes = Set.of(new FieldSchema(Fields.class.getField("f1"), type));
+        var schemas = Set.of(new FieldSchema(Fields.class.getField("f1"), type));
         assertAll(
-                () -> assertEquals(Fields.class, scheme.getTarget()),
-                () -> assertEquals(Set.of(type), scheme.getTypes()),
-                () -> assertEquals(schemes, scheme.getFieldSchemas())
+                () -> assertEquals(Fields.class, schema.getTarget()),
+                () -> assertEquals(Set.of(type), schema.getTypes()),
+                () -> assertEquals(schemas, schema.getFieldSchemas())
         );
     }
 
@@ -105,18 +105,18 @@ public class SchemaTest extends Assertions {
     }
 
     public void testMethods(SchemaFactory factory) throws NoSuchMethodException {
-        var scheme = factory.create(Methods.class);
+        var schema = factory.create(Methods.class);
         var type = (Type) Object.class;
         var types = Set.of(type);
         var mapping = new Type[]{type};
-        var schemes = Set.of(
+        var schemas = Set.of(
                 new MethodSchema(Methods.class.getMethod("psm2", Methods.class, Object.class), types, mapping),
                 new MethodSchema(Methods.class.getMethod("pm2", Object.class), types, mapping)
         );
         assertAll(
-                () -> assertEquals(Methods.class, scheme.getTarget()),
-                () -> assertEquals(types, scheme.getTypes()),
-                () -> assertEquals(schemes, scheme.getMethodSchemas())
+                () -> assertEquals(Methods.class, schema.getTarget()),
+                () -> assertEquals(types, schema.getTypes()),
+                () -> assertEquals(schemas, schema.getMethodSchemas())
         );
     }
 
@@ -135,15 +135,15 @@ public class SchemaTest extends Assertions {
     }
 
     public void testWildcards(SchemaFactory factory) {
-        var scheme = factory.create(Wildcards.class);
+        var schema = factory.create(Wildcards.class);
         var types = Set.of(
                 Types.of(List.class, Object.class),
                 Types.of(BiConsumer.class, Object.class, Object.class),
                 Types.of(List.class, String.class)
         );
         assertAll(
-                () -> assertEquals(Wildcards.class, scheme.getTarget()),
-                () -> assertEquals(types, scheme.getTypes())
+                () -> assertEquals(Wildcards.class, schema.getTarget()),
+                () -> assertEquals(types, schema.getTypes())
         );
     }
 
@@ -153,7 +153,7 @@ public class SchemaTest extends Assertions {
     }
 
     public void testGenerics(SchemaFactory factory) {
-        var scheme = factory.create(Generics.class);
+        var schema = factory.create(Generics.class);
         var types = Set.of(
                 Types.of(List.class, String.class),
                 Types.of(BiConsumer.class,
@@ -164,8 +164,8 @@ public class SchemaTest extends Assertions {
                 Types.of(List.class, Types.of(Types.of(List.class, Types.of(List.class, String[].class)), 2))
         );
         assertAll(
-                () -> assertEquals(Generics.class, scheme.getTarget()),
-                () -> assertEquals(types, scheme.getTypes())
+                () -> assertEquals(Generics.class, schema.getTarget()),
+                () -> assertEquals(types, schema.getTypes())
         );
     }
 

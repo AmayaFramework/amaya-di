@@ -3,7 +3,7 @@ package io.github.amayaframework.di.schema;
 import java.lang.reflect.Member;
 
 /**
- * Thrown to indicate that some member of the class, intended as a target for the injection scheme, cannot be one.
+ * Thrown to indicate that some member of the class, intended as a target for the injection schema, cannot be one.
  */
 public class IllegalMemberException extends RuntimeException {
     private final Member member;

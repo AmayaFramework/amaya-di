@@ -12,7 +12,7 @@ public final class FieldSchema extends AbstractSchema<Field> {
     final Type type;
 
     /**
-     * Constructs field scheme for specified field and type.
+     * Constructs field schema for specified field and type.
      *
      * @param target the specified field, must be non-null
      * @param type   the specified type, must be non-null

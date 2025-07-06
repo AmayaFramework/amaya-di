@@ -19,12 +19,12 @@ public final class ClassSchema extends AbstractSchema<Class<?>> {
     private Set<Type> types;
 
     /**
-     * Constructs class scheme for specified class and schemes for its members.
+     * Constructs class schema for specified class and schemas for its members.
      *
      * @param clazz             the specified class, must be non-null
-     * @param constructorSchema the constructor scheme, may be null
-     * @param fieldSchemas      the set of field schemes, must be non-null
-     * @param methodSchemas     the set of method schemes, must be non-null
+     * @param constructorSchema the constructor schema, may be null
+     * @param fieldSchemas      the set of field schemas, must be non-null
+     * @param methodSchemas     the set of method schemas, must be non-null
      */
     public ClassSchema(Class<?> clazz,
                        ConstructorSchema constructorSchema,
@@ -65,11 +65,11 @@ public final class ClassSchema extends AbstractSchema<Class<?>> {
 
     private Set<Type> collectTypes() {
         var ret = new HashSet<>(constructorSchema.types);
-        for (var scheme : fieldSchemas) {
-            ret.add(scheme.type);
+        for (var schema : fieldSchemas) {
+            ret.add(schema.type);
         }
-        for (var scheme : methodSchemas) {
-            ret.addAll(scheme.types);
+        for (var schema : methodSchemas) {
+            ret.addAll(schema.types);
         }
         return ret;
     }

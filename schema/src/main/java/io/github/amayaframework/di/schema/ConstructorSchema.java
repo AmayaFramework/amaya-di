@@ -11,7 +11,7 @@ import java.util.Set;
 public final class ConstructorSchema extends AbstractExecutableSchema<Constructor<?>> {
 
     /**
-     * Constructs constructor scheme for specified constructor, type set and its mapping.
+     * Constructs constructor schema for specified constructor, type set and its mapping.
      *
      * @param target  the specified constructor, must be non-null
      * @param types   the type set, must be non-null

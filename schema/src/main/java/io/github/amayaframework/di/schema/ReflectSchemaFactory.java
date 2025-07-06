@@ -103,7 +103,7 @@ public final class ReflectSchemaFactory implements SchemaFactory {
     private ConstructorSchema findConstructor(Class<?> clazz) {
         // Get all public constructors
         var constructors = clazz.getConstructors();
-        // If there is no public constructors, then we cannot build class scheme
+        // If there is no public constructors, then we cannot build class schema
         if (constructors.length == 0) {
             throw new IllegalClassException("No public constructor was found", clazz);
         }
@@ -186,28 +186,28 @@ public final class ReflectSchemaFactory implements SchemaFactory {
         // Check class
         var modifiers = clazz.getModifiers();
         if (!Modifier.isPublic(modifiers)) {
-            throw new IllegalClassException("Cannot create scheme of non-public class", clazz);
+            throw new IllegalClassException("Cannot create schema of non-public class", clazz);
         }
         if (Modifier.isAbstract(modifiers)) {
-            throw new IllegalClassException("Cannot create scheme of abstract class", clazz);
+            throw new IllegalClassException("Cannot create schema of abstract class", clazz);
         }
         if (clazz.isEnum()) {
-            throw new IllegalClassException("Cannot create scheme of enum class", clazz);
+            throw new IllegalClassException("Cannot create schema of enum class", clazz);
         }
         if (clazz.isPrimitive()) {
-            throw new IllegalClassException("Cannot create scheme of primitive class", clazz);
+            throw new IllegalClassException("Cannot create schema of primitive class", clazz);
         }
         if (clazz.isArray()) {
-            throw new IllegalClassException("Cannot create scheme of array class", clazz);
+            throw new IllegalClassException("Cannot create schema of array class", clazz);
         }
         if (clazz.isAnnotation()) {
-            throw new IllegalClassException("Cannot create scheme of annotation class", clazz);
+            throw new IllegalClassException("Cannot create schema of annotation class", clazz);
         }
         if (clazz.isAnonymousClass()) {
-            throw new IllegalClassException("Cannot create scheme of anonymous class", clazz);
+            throw new IllegalClassException("Cannot create schema of anonymous class", clazz);
         }
         if (clazz.getDeclaringClass() != null && !Modifier.isStatic(modifiers)) {
-            throw new IllegalClassException("Cannot create scheme of non-static member class", clazz);
+            throw new IllegalClassException("Cannot create schema of non-static member class", clazz);
         }
         var constructor = findConstructor(clazz);
         var fields = findFields(clazz);

@@ -13,7 +13,7 @@ import java.util.Set;
 public final class MethodSchema extends AbstractExecutableSchema<Method> {
 
     /**
-     * Constructs method scheme for specified method, type set and its mapping.
+     * Constructs method schema for specified method, type set and its mapping.
      *
      * @param target  the specified method, must be non-null
      * @param types   the type set, must be non-null

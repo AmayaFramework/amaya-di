@@ -1,7 +1,7 @@
 package io.github.amayaframework.di.schema;
 
 /**
- * Thrown to indicate that it is not possible to build an injection scheme for the specified class.
+ * Thrown to indicate that it is not possible to build an injection schema for the specified class.
  */
 public class IllegalClassException extends RuntimeException {
     private final Class<?> clazz;
