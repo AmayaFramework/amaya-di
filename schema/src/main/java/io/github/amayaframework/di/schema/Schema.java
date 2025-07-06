@@ -4,10 +4,9 @@ import java.lang.reflect.Type;
 import java.util.Set;
 
 /**
- * An interface describing some abstract scheme that defines
- * the correspondence between types and a dependent entity.
+ * A schema that describes a class member or entity that depends on external types.
  *
- * @param <T> dependent entity type
+ * @param <T> the type of the annotated member or target
  */
 public interface Schema<T> {
 

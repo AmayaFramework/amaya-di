@@ -1,7 +1,7 @@
 package io.github.amayaframework.di.schema;
 
 /**
- * An interface describing an abstract factory that creates scheme for the specified class.
+ * A factory interface for producing {@link ClassSchema} instances based on Java class metadata.
  */
 public interface SchemaFactory {
 

@@ -7,7 +7,10 @@ import java.util.Objects;
 import java.util.Set;
 
 /**
- * A scheme that defines the correspondence between set of types and class.
+ * A schema that describes a class and its dependency injection metadata.
+ * <p>
+ * It aggregates constructor, field, and method schemas to describe all
+ * injectable members of the class.
  */
 public final class ClassSchema extends AbstractSchema<Class<?>> {
     private final Set<MethodSchema> methodSchemas;
@@ -34,27 +37,27 @@ public final class ClassSchema extends AbstractSchema<Class<?>> {
     }
 
     /**
-     * Returns the constructor scheme for class constructor.
+     * Returns the constructor schema describing how to create an instance of the class.
      *
-     * @return the constructor scheme.
+     * @return non-null {@link ConstructorSchema} for the class
      */
     public ConstructorSchema getConstructorSchema() {
         return constructorSchema;
     }
 
     /**
-     * Returns the set of field schemes for class fields.
+     * Returns an unmodifiable set of {@link FieldSchema} describing the injectable fields.
      *
-     * @return the set of field schemes
+     * @return non-null, immutable set of field schemas
      */
     public Set<FieldSchema> getFieldSchemas() {
         return fieldSchemas;
     }
 
     /**
-     * Returns the set of method schemes for class methods.
+     * Returns an unmodifiable set of {@link MethodSchema} describing the injectable methods.
      *
-     * @return the set of method schemes
+     * @return non-null, immutable set of method schemas
      */
     public Set<MethodSchema> getMethodSchemas() {
         return methodSchemas;
@@ -72,9 +75,10 @@ public final class ClassSchema extends AbstractSchema<Class<?>> {
     }
 
     /**
-     * Returns all types that class members depend on.
+     * Returns all types that are required by this class via constructor,
+     * field, and method injection. Computed once and then cached.
      *
-     * @return the set of types
+     * @return non-null, immutable set of required {@link Type}s
      */
     @Override
     public Set<Type> getTypes() {

@@ -6,7 +6,9 @@ import java.util.Arrays;
 import java.util.Set;
 
 /**
- * A scheme that defines the correspondence between set of types and class method.
+ * A schema that describes a method and the types required to invoke it.
+ * <p>
+ * For static methods, the first parameter must be assignable from the declaring class.
  */
 public final class MethodSchema extends AbstractExecutableSchema<Method> {
 

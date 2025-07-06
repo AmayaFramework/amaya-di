@@ -4,8 +4,8 @@ import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Type;
 
 /**
- * An interface describing an abstract type processor
- * that performs their processing for subsequent use in the injection schema.
+ * A processor that normalizes Java types (e.g., resolves generics, wildcards, etc.)
+ * for consistent use in dependency injection schemas.
  */
 public interface TypeProcessor {
 

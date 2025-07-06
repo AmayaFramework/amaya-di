@@ -6,7 +6,7 @@ import java.util.Arrays;
 import java.util.Set;
 
 /**
- * A scheme that defines the correspondence between set of types and class constructor.
+ * A schema that describes a class constructor and the types required to invoke it.
  */
 public final class ConstructorSchema extends AbstractExecutableSchema<Constructor<?>> {
 

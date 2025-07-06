@@ -6,51 +6,25 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 /**
- * A factory that creates a class scheme based on information obtained through a java reflection api.
- * The scheme is based on the following rules:
- * <br>
- * 1. The constructor is selected from the public ones,
- * and this choice is made strictly unambiguously, i.e. the following cases will be incorrect:
- * <pre>
- *
- *     class Service1 {
- *         private Service1() {}
- *     }
- *     ...
- *     class Service2 {
- *         public Service2(int i) {}
- *         public Service2() {}
- *     }
- * </pre>
- * However, if the class contains several public constructors,
- * you can specify the necessary one using a marker annotation:
- * <pre>
- *     class Service {
- *         public Service(int i) {}
- *
- *        {@literal @}Inject
- *         public Service() {}
- *     }
- * </pre>
- * 2. The fields are selected exclusively from the virtual and public ones marked with a marker annotation.
- * 3. Methods are selected from public ones marked with a marker annotation and containing at least 1 parameter,
- * otherwise, even if there is an annotation, the method will be discarded.
- * <br>
- * If the method is static, it must match the following pattern:
- * <pre>
- *     class Service {
- *         public static void setter(? super Service, Dependency d, ...) {}
- *     }
- * </pre>
- * Parameterized constructors and methods are not supported,
- * and super-wildcards are not supported for statically defined generics.
- * In other cases, type inference for wildcards will work as follows:
- * <br>
- * {@code ? => Object}
- * <br>
- * {@code ? extends Object => Object}
- * <br>
- * {@code ? extends Type => Type}
+ * A reflection-based implementation of {@link SchemaFactory}, which scans
+ * class constructors, fields, and methods to build a dependency schema.
+ * <p>
+ * It respects a given marker annotation to identify injectable elements.
+ * <p>
+ * Rules:
+ * <ul>
+ *     <li>One public constructor must be annotated (or there must be exactly one public constructor).</li>
+ *     <li>Only public, non-static, non-final fields annotated with the marker are included.</li>
+ *     <li>Only public methods with at least one parameter and annotated with the marker are included.</li>
+ *     <li>Static methods must have the first parameter assignable from the declaring class.</li>
+ * </ul>
+ * <p>
+ * Unsupported features:
+ * <ul>
+ *     <li>Parameterized constructors and methods</li>
+ *     <li>Enum types, primitives, annotations, arrays, anonymous and non-static member classes</li>
+ *     <li>Static generic methods with super wildcards</li>
+ * </ul>
  */
 public final class ReflectSchemaFactory implements SchemaFactory {
     private static final TypeProcessor TYPE_PROCESSOR = new ReflectTypeProcessor();
@@ -196,6 +170,16 @@ public final class ReflectSchemaFactory implements SchemaFactory {
         return ret;
     }
 
+    /**
+     * Creates a {@link ClassSchema} representing all injectable members
+     * of the given class based on the configured annotation and rules.
+     *
+     * @param clazz non-null class to analyze
+     * @return non-null class schema for injection
+     * @throws IllegalClassException if class is unsupported (e.g., abstract, enum, inner non-static,
+     * no suitable constructor)
+     * @throws IllegalMemberException if a constructor, field, or method is found but invalid for injection
+     */
     @Override
     public ClassSchema create(Class<?> clazz) {
         Objects.requireNonNull(clazz);

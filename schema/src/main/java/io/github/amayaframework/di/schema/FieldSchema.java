@@ -6,7 +6,7 @@ import java.util.Objects;
 import java.util.Set;
 
 /**
- * A scheme that defines the correspondence between type and class field.
+ * A schema that describes a field and the type required to inject into it.
  */
 public final class FieldSchema extends AbstractSchema<Field> {
     final Type type;
@@ -23,14 +23,19 @@ public final class FieldSchema extends AbstractSchema<Field> {
     }
 
     /**
-     * Returns the type associated with this field.
+     * Returns the {@link Type} to be injected into the target field.
      *
-     * @return the type associated with this field
+     * @return non-null type of the field dependency
      */
     public Type getType() {
         return type;
     }
 
+    /**
+     * Returns a set containing exactly this field's injection type.
+     *
+     * @return non-null, single-element immutable set of types
+     */
     @Override
     public Set<Type> getTypes() {
         return Set.of(type);
