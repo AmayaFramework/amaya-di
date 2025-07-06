@@ -32,7 +32,7 @@ public final class ServiceProviderTest {
     @Test
     public void testTransient() {
         var sp = new SPImpl();
-        var r = sp.getRepository();
+        var r = sp.repository();
         r.put(String.class, v -> "str");
         r.put(Integer.class, v -> 5);
         r.put(A.class, ofA());
@@ -64,7 +64,7 @@ public final class ServiceProviderTest {
     @Test
     public void testSingleton() {
         var sp = new SPImpl();
-        var r = sp.getRepository();
+        var r = sp.repository();
         r.put(String.class, v -> "str");
         r.put(Integer.class, v -> 5);
         r.put(A.class, new LazyObjectFactory(ofA()));
@@ -96,11 +96,11 @@ public final class ServiceProviderTest {
     @Test
     public void testScoped() {
         var sp = new SPImpl();
-        var r = sp.getRepository();
+        var r = sp.repository();
         r.put(A.class, ofA());
         r.put(String.class, v -> "str");
         var sc = sp.createScoped();
-        var sr = sc.getRepository();
+        var sr = sc.repository();
         sr.put(String.class, v -> "scopedStr");
         var a = sp.get(A.class);
         var sa = sc.get(A.class);
