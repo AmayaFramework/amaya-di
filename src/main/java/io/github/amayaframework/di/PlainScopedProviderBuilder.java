@@ -5,7 +5,7 @@ import io.github.amayaframework.di.schema.SchemaFactory;
 import io.github.amayaframework.di.stub.CacheMode;
 import io.github.amayaframework.di.stub.StubFactory;
 
-public class PlainScopedProviderBuilder extends AbstractScopedProviderBuilder {
+public class PlainScopedProviderBuilder extends AbstractScopedProviderBuilder<ScopedProviderBuilder> {
 
     public PlainScopedProviderBuilder(SchemaFactory schemaFactory, StubFactory stubFactory, CacheMode cacheMode) {
         super(schemaFactory, stubFactory, cacheMode);
@@ -16,14 +16,15 @@ public class PlainScopedProviderBuilder extends AbstractScopedProviderBuilder {
         var schemaFactory = getSchemaFactory();
         var stubFactory = getStubFactory();
         var mode = getCacheMode();
-        // Build base repo
         var repository = getRepository();
-        buildRepository(repository, stubFactory, (t, impl) -> schemaFactory.create(impl), mode);
-        if (!hasScoped()) {
+        // noinspection DuplicatedCode
+        var provider = (SchemaProvider) (t, impl) -> schemaFactory.create(impl);
+        buildRepository(repository, provider, stubFactory, mode);
+        if (noScoped()) {
             return repositorySupplier == null
                     ? new PlainServiceProvider(repository)
                     : new SuppliedPlainServiceProvider(repository, repositorySupplier);
         }
-        return BuildUtil.buildScopedProvider(this, schemaFactory, stubFactory, repository, mode);
+        return BuildUtil.buildScopedProvider(this, provider, stubFactory, repository, mode);
     }
 }

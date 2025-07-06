@@ -39,6 +39,32 @@ public interface ScopedProviderBuilder extends ServiceProviderBuilder {
 
     // ===
 
+    // Function0 wrapped scoped add methods
+
+    ScopedProviderBuilder addScoped(Type type, Function0<?> provider);
+
+    <T> ScopedProviderBuilder addScoped(JType<T> type, Function0<T> provider);
+
+    // ===
+
+    // Function0 wrapped scoped add methods
+
+    ScopedProviderBuilder addScoped(Type type, Function0<?> provider, ServiceWrapper wrapper);
+
+    <T> ScopedProviderBuilder addScoped(JType<T> type, Function0<T> provider, ServiceWrapper wrapper);
+
+    // ===
+
+    // Scoped instance add methods
+
+    ScopedProviderBuilder addScopedInstance(Type type, Object instance);
+
+    <T> ScopedProviderBuilder addScopedInstance(JType<T> type, T instance);
+
+    ScopedProviderBuilder addScopedInstance(Object instance);
+
+    // ===
+
     // Scoped remove methods
 
     ScopedProviderBuilder removeScoped(Type type);
@@ -47,7 +73,7 @@ public interface ScopedProviderBuilder extends ServiceProviderBuilder {
 
     // ===
 
-    // Scoped and stubbed add methods with wrapper (the ObjectFactory implementation will be created by StubFactory)
+    // Scoped and stubbed add methods with wrapper (StubFactory will create the ObjectFactory implementation)
 
     ScopedProviderBuilder addScoped(Type type, Class<?> impl, ServiceWrapper wrapper);
 
@@ -59,7 +85,7 @@ public interface ScopedProviderBuilder extends ServiceProviderBuilder {
 
     // ===
 
-    // Scoped and stubbed transient add methods (the ObjectFactory implementation will be created by StubFactory)
+    // Scoped and stubbed transient add methods (StubFactory will create the ObjectFactory implementation)
 
     ScopedProviderBuilder addScopedTransient(Type type, Class<?> impl);
 
@@ -71,7 +97,7 @@ public interface ScopedProviderBuilder extends ServiceProviderBuilder {
 
     // ===
 
-    // Scoped and stubbed singleton add methods (the ObjectFactory implementation will be created by StubFactory)
+    // Scoped and stubbed singleton add methods (StubFactory will create the ObjectFactory implementation)
 
     ScopedProviderBuilder addScopedSingleton(Type type, Class<?> impl);
 
@@ -114,16 +140,10 @@ public interface ScopedProviderBuilder extends ServiceProviderBuilder {
     ScopedProviderBuilder add(Type type, Function0<?> provider);
 
     @Override
-    <T> ScopedProviderBuilder add(Class<T> type, Function0<T> provider);
-
-    @Override
     <T> ScopedProviderBuilder add(JType<T> type, Function0<T> provider);
 
     @Override
     ScopedProviderBuilder addInstance(Type type, Object instance);
-
-    @Override
-    <T> ScopedProviderBuilder addInstance(Class<T> type, T instance);
 
     @Override
     <T> ScopedProviderBuilder addInstance(JType<T> type, T instance);

@@ -13,7 +13,6 @@ import io.github.amayaframework.di.stub.StubFactory;
 
 import java.lang.reflect.Type;
 import java.util.*;
-import java.util.function.BiFunction;
 import java.util.function.Supplier;
 
 public abstract class AbstractServiceProviderBuilder<B extends ServiceProviderBuilder> implements ServiceProviderBuilder {
@@ -179,26 +178,7 @@ public abstract class AbstractServiceProviderBuilder<B extends ServiceProviderBu
 
     @Override
     @SuppressWarnings("unchecked")
-    public <T> B add(Class<T> type, Function0<T> provider) {
-        Objects.requireNonNull(type);
-        Objects.requireNonNull(provider);
-        types.remove(type);
-        roots.put(type, v -> provider.invoke());
-        return (B) this;
-    }
-
-    @Override
-    @SuppressWarnings("unchecked")
     public B addInstance(Type type, Object instance) {
-        Objects.requireNonNull(type);
-        types.remove(type);
-        roots.put(type, v -> instance);
-        return (B) this;
-    }
-
-    @Override
-    @SuppressWarnings("unchecked")
-    public <T> B addInstance(Class<T> type, T instance) {
         Objects.requireNonNull(type);
         types.remove(type);
         roots.put(type, v -> instance);
@@ -336,8 +316,8 @@ public abstract class AbstractServiceProviderBuilder<B extends ServiceProviderBu
     }
 
     protected void buildRepository(TypeRepository repository,
+                                   SchemaProvider schemaProvider,
                                    StubFactory stubFactory,
-                                   BiFunction<Type, Class<?>, ClassSchema> schemaProvider,
                                    CacheMode mode) {
         // Add weak types
         var delayed = new LinkedList<StubEntry>();
@@ -345,7 +325,7 @@ public abstract class AbstractServiceProviderBuilder<B extends ServiceProviderBu
             var type = entry.getKey();
             var typeEntry = entry.getValue();
             // Build schema
-            var schema = schemaProvider.apply(type, typeEntry.impl);
+            var schema = schemaProvider.get(type, typeEntry.impl);
             // Build stub
             var stub = buildStub(typeEntry, schema, stubFactory, mode, delayed);
             repository.put(type, stub);

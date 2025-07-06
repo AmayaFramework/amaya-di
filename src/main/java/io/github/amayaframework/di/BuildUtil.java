@@ -87,14 +87,15 @@ final class BuildUtil {
         }
     }
 
+    @SuppressWarnings({"rawtypes", "unchecked"})
     static ServiceProvider buildScopedProvider(AbstractScopedProviderBuilder builder,
-                                               SchemaFactory schemaFactory,
+                                               SchemaProvider schemaProvider,
                                                StubFactory stubFactory,
                                                TypeRepository repository,
                                                CacheMode mode) {
         var delayed = new LinkedList<StubEntry>();
         // Build scoped provider
-        var scoped = builder.buildScoped(schemaFactory, stubFactory, delayed, mode);
+        var scoped = builder.buildScoped(schemaProvider, stubFactory, delayed, mode);
         if (builder.wrapped.isEmpty()) {
             builder.handleDelayed(delayed, scoped, repository);
             return builder.repositorySupplier == null
@@ -102,7 +103,7 @@ final class BuildUtil {
                     : new SuppliedScopedServiceProvider(repository, scoped, builder.repositorySupplier);
         }
         // Add wrapped types
-        var wrapped = builder.buildWrapped(schemaFactory, stubFactory, delayed, mode);
+        var wrapped = builder.buildWrapped(schemaProvider, stubFactory, delayed, mode);
         builder.handleDelayed(delayed, scoped, repository);
         if (scoped.isEmpty()) {
             return builder.repositorySupplier == null

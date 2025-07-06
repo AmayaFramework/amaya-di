@@ -44,8 +44,6 @@ public interface ServiceProviderBuilder {
 
     ServiceProviderBuilder add(Type type, Function0<?> provider);
 
-    <T> ServiceProviderBuilder add(Class<T> type, Function0<T> provider);
-
     <T> ServiceProviderBuilder add(JType<T> type, Function0<T> provider);
 
     // ===
@@ -53,8 +51,6 @@ public interface ServiceProviderBuilder {
     // Instance add methods
 
     ServiceProviderBuilder addInstance(Type type, Object instance);
-
-    <T> ServiceProviderBuilder addInstance(Class<T> type, T instance);
 
     <T> ServiceProviderBuilder addInstance(JType<T> type, T instance);
 

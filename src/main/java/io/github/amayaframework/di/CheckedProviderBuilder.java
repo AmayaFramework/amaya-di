@@ -33,7 +33,7 @@ public class CheckedProviderBuilder extends AbstractServiceProviderBuilder<Servi
         var stubFactory = getStubFactory();
         var mode = getCacheMode();
         var repository = getRepository();
-        buildRepository(repository, stubFactory, (type, v) -> schemas.get(type), mode);
+        buildRepository(repository, (type, v) -> schemas.get(type), stubFactory, mode);
         if (repositorySupplier != null) {
             return new SuppliedPlainServiceProvider(repository, repositorySupplier);
         }

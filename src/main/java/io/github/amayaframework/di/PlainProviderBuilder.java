@@ -17,7 +17,7 @@ public class PlainProviderBuilder extends AbstractServiceProviderBuilder<Service
         var stubFactory = getStubFactory();
         var mode = getCacheMode();
         var repository = getRepository();
-        buildRepository(repository, stubFactory, (t, impl) -> schemaFactory.create(impl), mode);
+        buildRepository(repository, (t, impl) -> schemaFactory.create(impl), stubFactory, mode);
         if (repositorySupplier != null) {
             return new SuppliedPlainServiceProvider(repository, repositorySupplier);
         }
