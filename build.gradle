@@ -90,9 +90,7 @@ publishing {
             // Configure pom
             pom {
                 name.set(archivesBaseName)
-                description.set(
-                        'A framework responsible for monitoring and automating the dependency injection process.'
-                )
+                description.set('A modern, lightweight and fast DI framework.')
                 url.set('https://github.com/AmayaFramework/amaya-di')
 
                 organization {
