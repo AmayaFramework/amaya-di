@@ -14,9 +14,21 @@ import java.util.concurrent.TimeUnit;
 @OutputTimeUnit(TimeUnit.NANOSECONDS)
 @Warmup
 public class ReflectStubBenchmark {
+    private static final TypeProvider MANUAL_PROVIDER = prepareManualProvider();
     private static final TypeProvider NO_CACHE_PROVIDER = prepareNoCacheProvider();
     private static final TypeProvider PARTIAL_PROVIDER = preparePartialProvider();
     private static final TypeProvider FULL_PROVIDER = prepareFullProvider();
+
+    private static TypeProvider prepareManualProvider() {
+        var ret = new HashTypeRepository();
+        ret.put(App.class, v -> {
+            var app = new App(new Service1());
+            app.s2 = new Service2();
+            app.setS3(new Service3(new Service1()));
+            return app;
+        });
+        return ret;
+    }
 
     private static TypeProvider prepareNoCacheProvider() {
         var factory = new ReflectStubFactory();
@@ -26,10 +38,10 @@ public class ReflectStubBenchmark {
         var s3F = factory.create(sf.create(Service3.class), CacheMode.NONE);
         var appF = factory.create(sf.create(App.class), CacheMode.NONE);
         var ret = new HashTypeRepository();
-        ret.set(Service1.class, s1F);
-        ret.set(Service2.class, s2F);
-        ret.set(Service3.class, s3F);
-        ret.set(App.class, appF);
+        ret.put(Service1.class, s1F);
+        ret.put(Service2.class, s2F);
+        ret.put(Service3.class, s3F);
+        ret.put(App.class, appF);
         return ret;
     }
 
@@ -44,8 +56,8 @@ public class ReflectStubBenchmark {
         appF.set(Service1.class, s1F);
         appF.set(Service3.class, s3F);
         var ret = new HashTypeRepository();
-        ret.set(Service2.class, s2F);
-        ret.set(App.class, appF);
+        ret.put(Service2.class, s2F);
+        ret.put(App.class, appF);
         return ret;
     }
 
@@ -61,16 +73,13 @@ public class ReflectStubBenchmark {
         appF.set(Service2.class, s2F);
         appF.set(Service3.class, s3F);
         var ret = new HashTypeRepository();
-        ret.set(App.class, appF);
+        ret.put(App.class, appF);
         return ret;
     }
 
     @Benchmark
-    public void benchManualInjection(Blackhole blackhole) {
-        var app = new App(new Service1());
-        app.s2 = new Service2();
-        app.setS3(new Service3(new Service1()));
-        blackhole.consume(app);
+    public void benchManualInjection(Blackhole blackhole) throws Throwable {
+        blackhole.consume(MANUAL_PROVIDER.get(App.class).create(MANUAL_PROVIDER));
     }
 
     @Benchmark
