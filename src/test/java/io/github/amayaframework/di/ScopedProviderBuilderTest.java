@@ -35,6 +35,18 @@ public class ScopedProviderBuilderTest extends ServiceProviderBuilderTest {
         assertEquals("scoped", sc.get(IService.class).val());
     }
 
+    public void testComplexScopeOverridesService(Supplier<ScopedProviderBuilder> s) {
+        var b = s.get();
+        var sp = b
+                .addTransient(Dependent.class)
+                .addTransient(IService.class, BaseService.class)
+                .addScopedTransient(IService.class, ScopedService.class)
+                .build();
+        var sc = sp.createScoped();
+        assertEquals("base", sp.get(Dependent.class).is.val());
+        assertEquals("scoped", sc.get(Dependent.class).is.val());
+    }
+
     public void testPromisedType(Supplier<ScopedProviderBuilder> s) {
         var b = s.get();
         var sp = b
@@ -110,13 +122,18 @@ public class ScopedProviderBuilderTest extends ServiceProviderBuilderTest {
         assertTrue(isS);
     }
 
-    public static final class IntS1 {
+    public static final class Dependent {
         @Inject
-        public Integer i;
+        public IService is;
     }
 
     public interface IService {
         String val();
+    }
+
+    public static final class IntS1 {
+        @Inject
+        public Integer i;
     }
 
     public static final class BaseService implements IService {

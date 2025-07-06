@@ -60,6 +60,12 @@ public class AsmScopedProviderBuilderTest extends ScopedProviderBuilderTest {
     }
 
     @Test
+    public void testComplexScopeOverridesService() {
+        testComplexScopeOverridesService(() -> ProviderBuilders.createScoped(FACTORY));
+        testComplexScopeOverridesService(() -> ProviderBuilders.createScoped(FACTORY, BuilderChecks.VALIDATE_ALL));
+    }
+
+    @Test
     public void testPromisedType() {
         testPromisedType(() -> ProviderBuilders.createScoped(FACTORY));
         testPromisedType(() -> ProviderBuilders.createScoped(FACTORY, BuilderChecks.VALIDATE_ALL));

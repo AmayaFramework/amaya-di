@@ -13,7 +13,7 @@ public class TypeNotFoundException extends IllegalTypeException {
     /**
      * Constructs an {@link TypeNotFoundException} with the missing type.
      *
-     * @param type the missing type
+     * @param type   the missing type
      * @param scoped whether the type was missing in scoped services
      */
     public TypeNotFoundException(Type type, boolean scoped) {

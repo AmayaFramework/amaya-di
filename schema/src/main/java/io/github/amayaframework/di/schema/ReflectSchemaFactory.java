@@ -176,8 +176,8 @@ public final class ReflectSchemaFactory implements SchemaFactory {
      *
      * @param clazz non-null class to analyze
      * @return non-null class schema for injection
-     * @throws IllegalClassException if class is unsupported (e.g., abstract, enum, inner non-static,
-     * no suitable constructor)
+     * @throws IllegalClassException  if class is unsupported (e.g., abstract, enum, inner non-static,
+     *                                no suitable constructor)
      * @throws IllegalMemberException if a constructor, field, or method is found but invalid for injection
      */
     @Override
