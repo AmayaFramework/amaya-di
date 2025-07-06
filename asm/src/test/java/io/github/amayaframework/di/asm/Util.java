@@ -45,15 +45,15 @@ final class Util {
 
     static TypeRepository create(String s, Integer i) {
         var ret = new HashTypeRepository();
-        ret.set(String.class, v -> s);
-        ret.set(Integer.class, v -> i);
+        ret.put(String.class, v -> s);
+        ret.put(Integer.class, v -> i);
         return ret;
     }
 
     static TypeRepository create(String s, Integer i, String s2, Integer i2) {
         var ret = create(s, i);
-        ret.set(S2_STR, v -> new Service2<>(s2));
-        ret.set(S2_INT, v -> new Service2<>(i2));
+        ret.put(S2_STR, v -> new Service2<>(s2));
+        ret.put(S2_INT, v -> new Service2<>(i2));
         return ret;
     }
 }

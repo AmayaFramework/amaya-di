@@ -20,7 +20,7 @@ public final class NoCacheTest {
     public void testSimpleService() {
         var factory = new AsmStubFactory();
         var repo = Util.create("str", 3);
-        repo.set(Service1.class, factory.create(Util.S1_SCHEMA, CacheMode.NONE));
+        repo.put(Service1.class, factory.create(Util.S1_SCHEMA, CacheMode.NONE));
         var s1 = Util.get(repo, Service1.class);
         assertNotNull(s1);
         assertEquals(3, s1.i);
@@ -31,8 +31,8 @@ public final class NoCacheTest {
     public void testNestedService() {
         var factory = new AsmStubFactory();
         var repo = Util.create("str", 3);
-        repo.set(Service1.class, factory.create(Util.S1_SCHEMA, CacheMode.NONE));
-        repo.set(Service3.class, factory.create(Util.S3_SCHEMA, CacheMode.NONE));
+        repo.put(Service1.class, factory.create(Util.S1_SCHEMA, CacheMode.NONE));
+        repo.put(Service3.class, factory.create(Util.S3_SCHEMA, CacheMode.NONE));
         var s3 = Util.get(repo, Service3.class);
         assertNotNull(s3);
         assertNotNull(s3.s1);
@@ -44,9 +44,9 @@ public final class NoCacheTest {
     public void testComplexService() {
         var factory = new AsmStubFactory();
         var repo = Util.create("str", 3, "str2", 5);
-        repo.set(Service1.class, factory.create(Util.S1_SCHEMA, CacheMode.NONE));
-        repo.set(Service3.class, factory.create(Util.S3_SCHEMA, CacheMode.NONE));
-        repo.set(App.class, factory.create(Util.APP_SCHEMA, CacheMode.NONE));
+        repo.put(Service1.class, factory.create(Util.S1_SCHEMA, CacheMode.NONE));
+        repo.put(Service3.class, factory.create(Util.S3_SCHEMA, CacheMode.NONE));
+        repo.put(App.class, factory.create(Util.APP_SCHEMA, CacheMode.NONE));
         var app = Util.get(repo, App.class);
         assertNotNull(app);
         assertNotNull(app.s1);
