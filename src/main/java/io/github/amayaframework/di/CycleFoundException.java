@@ -1,7 +1,6 @@
 package io.github.amayaframework.di;
 
 import java.lang.reflect.Type;
-import java.util.Collections;
 import java.util.List;
 
 /**
@@ -17,13 +16,13 @@ public class CycleFoundException extends RuntimeException {
      */
     public CycleFoundException(List<Type> cycle) {
         super("A cycle has been found in the dependency graph: " + FormatUtil.getNames(cycle));
-        this.cycle = Collections.unmodifiableList(cycle);
+        this.cycle = cycle;
     }
 
     /**
      * Returns {@link List}, containing found cycle.
      *
-     * @return unmodifiable {@link List}, containing found cycle
+     * @return {@link List}, containing found cycle
      */
     public List<Type> getCycle() {
         return cycle;
