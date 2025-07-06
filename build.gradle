@@ -36,12 +36,13 @@ dependencies {
     jmhImplementation project(':asm')
     jmhImplementation project(':reflect')
     // Dependencies
-    // TODO replace with mvn
-    implementation project(':core')
-    implementation project(':schema')
-    implementation project(':stub')
+    // Base
     api group: 'com.github.romanqed', name: 'jtype', version: '1.0.2'
     api group: 'com.github.romanqed', name: 'jfunc', version: '1.1.4'
+    // Modules
+    api group: 'io.github.amayaframework', name: 'amaya-di-core', version: '1.0.0'
+    api group: 'io.github.amayaframework', name: 'amaya-di-schema', version: '1.0.1'
+    api group: 'io.github.amayaframework', name: 'amaya-di-stub', version: '1.0.0'
 }
 
 test {

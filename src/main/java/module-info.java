@@ -1,7 +1,4 @@
 module io.github.amayaframework.di {
-    // TODO remove
-    requires io.github.amayaframework.di.asm;
-    requires io.github.amayaframework.di.reflect;
     // Imports
     // DI Modules
     requires io.github.amayaframework.di.core;

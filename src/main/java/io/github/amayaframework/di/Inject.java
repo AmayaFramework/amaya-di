@@ -22,7 +22,7 @@ import java.lang.annotation.*;
  *         public Service2 service2;
  *
  *         &#64;Inject
- *         public void setService3(Service3 dep) {...}
+ *         public void setService3(Service3 service3) {...}
  *     }
  * </pre>
  */
