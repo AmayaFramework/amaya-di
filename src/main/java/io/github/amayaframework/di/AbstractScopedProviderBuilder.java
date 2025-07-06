@@ -3,8 +3,11 @@ package io.github.amayaframework.di;
 import com.github.romanqed.jtype.JType;
 import io.github.amayaframework.di.core.LazyObjectFactory;
 import io.github.amayaframework.di.core.ObjectFactory;
+import io.github.amayaframework.di.core.TypeRepository;
+import io.github.amayaframework.di.schema.ClassSchema;
 import io.github.amayaframework.di.schema.SchemaFactory;
 import io.github.amayaframework.di.stub.CacheMode;
+import io.github.amayaframework.di.stub.CachedObjectFactory;
 import io.github.amayaframework.di.stub.StubFactory;
 
 import java.lang.reflect.Type;
@@ -221,6 +224,149 @@ public abstract class AbstractScopedProviderBuilder
     @Override
     public ScopedProviderBuilder addScopedSingleton(Class<?> impl) {
         return addScoped(impl, LazyObjectFactory::new);
+    }
+
+    // Utility methods
+
+    protected CacheMode deduceCacheMode(ClassSchema schema, CacheMode mode, Set<Type> cached) {
+        // Max safe cache mode is CacheMode.PARTIAL
+        var types = schema.getTypes();
+        for (var type : types) {
+            // Skip all overwritten types
+            if (promised.contains(type)
+                    || scopedRoots.containsKey(type)
+                    || scopedTypes.containsKey(type)
+                    || wrapped.containsKey(type)) {
+                mode = CacheMode.PARTIAL;
+                continue;
+            }
+            cached.add(type);
+        }
+        return cached.isEmpty() ? CacheMode.NONE : mode;
+    }
+
+    @Override
+    protected ObjectFactory buildStub(TypeEntry entry,
+                                      ClassSchema schema,
+                                      StubFactory factory,
+                                      CacheMode mode,
+                                      List<StubEntry> delayed) {
+        // If we have wrapper, then just build stub with given cache mode
+        if (entry.wrapper != null) {
+            var stub = factory.create(schema, mode);
+            if (stub instanceof CachedObjectFactory) {
+                delayed.add(new StubEntry(schema.getTypes(), (CachedObjectFactory) stub));
+            }
+            return entry.wrapper.wrap(stub);
+        }
+        // Otherwise, we must deduce cache mode
+        // If type depends on type redefined by scope, maximum cache mode is partial
+        if (mode == CacheMode.NONE) {
+            return factory.create(schema, CacheMode.NONE);
+        }
+        var cached = new HashSet<Type>();
+        var deduced = deduceCacheMode(schema, mode, cached);
+        var stub = factory.create(schema, deduced);
+        if (stub instanceof CachedObjectFactory) {
+            delayed.add(new StubEntry(cached, (CachedObjectFactory) stub));
+        }
+        return stub;
+    }
+
+    protected CacheMode deduceCacheMode(ClassSchema schema, CacheMode mode) {
+        // Max safe cache mode is CacheMode.PARTIAL
+        if (mode != CacheMode.FULL) {
+            return mode;
+        }
+        var types = schema.getTypes();
+        for (var type : types) {
+            if (promised.contains(type) || wrapped.containsKey(type)) {
+                return CacheMode.PARTIAL;
+            }
+        }
+        return CacheMode.FULL;
+    }
+
+    protected boolean hasScoped() {
+        return !promised.isEmpty() || !scopedRoots.isEmpty() || !scopedTypes.isEmpty() || !wrapped.isEmpty();
+    }
+
+    @SuppressWarnings("unchecked")
+    protected Map<Type, ObjectFactory> buildScoped(SchemaFactory schemaFactory,
+                                                   StubFactory stubFactory,
+                                                   List<StubEntry> delayed,
+                                                   CacheMode mode) {
+        if (scopedRoots.isEmpty() && scopedTypes.isEmpty()) {
+            return Collections.EMPTY_MAP;
+        }
+        // Add scoped weak types
+        var ret = new HashMap<Type, ObjectFactory>();
+        for (var entry : scopedTypes.entrySet()) {
+            // Build schema
+            var schema = schemaFactory.create(entry.getValue());
+            // Build stub and check if it is cached
+            var deduced = deduceCacheMode(schema, mode);
+            var stub = stubFactory.create(schema, deduced);
+            if (stub instanceof CachedObjectFactory) {
+                delayed.add(new StubEntry(schema.getTypes(), (CachedObjectFactory) stub));
+            }
+            ret.put(entry.getKey(), stub);
+        }
+        // Add root types
+        ret.putAll(scopedRoots);
+        return ret;
+    }
+
+    @SuppressWarnings("unchecked")
+    protected Map<Type, WrappedEntry> buildWrapped(SchemaFactory schemaFactory,
+                                                   StubFactory stubFactory,
+                                                   List<StubEntry> delayed,
+                                                   CacheMode mode) {
+        if (wrapped.isEmpty()) {
+            return Collections.EMPTY_MAP;
+        }
+        var ret = new HashMap<Type, WrappedEntry>();
+        for (var wrappedEntry : wrapped.entrySet()) {
+            var type = wrappedEntry.getKey();
+            var entry = wrappedEntry.getValue();
+            // Handle wrapped root type
+            if (entry.impl == null) {
+                ret.put(type, new WrappedEntry(entry.factory, entry.wrapper));
+                continue;
+            }
+            // Build schema
+            var schema = schemaFactory.create(entry.impl);
+            // Build stub and check it
+            var deduced = deduceCacheMode(schema, mode);
+            var stub = stubFactory.create(schema, deduced);
+            if (stub instanceof CachedObjectFactory) {
+                delayed.add(new StubEntry(schema.getTypes(), (CachedObjectFactory) stub));
+            }
+            ret.put(type, new WrappedEntry(stub, entry.wrapper));
+        }
+        return ret;
+    }
+
+    protected ObjectFactory findType(Type type, Map<Type, ObjectFactory> scoped, TypeRepository repository) {
+        if (promised.contains(type)) {
+            return null;
+        }
+        if (wrapped.containsKey(type)) {
+            return null;
+        }
+        var ret = scoped.get(type);
+        if (ret != null) {
+            return ret;
+        }
+        return repository.get(type);
+    }
+
+    protected void handleDelayed(List<StubEntry> delayed, Map<Type, ObjectFactory> scoped, TypeRepository repository) {
+        for (var entry : delayed) {
+            for (var type : entry.types) {
+                entry.stub.set(type, findType(type, scoped, repository));
+            }
+        }
     }
 
     protected static final class ScopedTypeEntry {

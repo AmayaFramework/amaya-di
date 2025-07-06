@@ -10,8 +10,6 @@ final class PlainServiceProvider extends AbstractServiceProvider {
 
     @Override
     public ServiceProvider createScoped() {
-        var provided = new HashTypeRepository();
-        var scoped = new ScopedTypeRepository(provided, repository);
-        return new PlainServiceProvider(scoped);
+        return new PlainServiceProvider(new ScopedTypeRepository(new HashTypeRepository(), repository));
     }
 }

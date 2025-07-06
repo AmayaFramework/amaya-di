@@ -1,6 +1,7 @@
 package io.github.amayaframework.di.core;
 
 import java.lang.reflect.Type;
+import java.util.Map;
 import java.util.function.BiConsumer;
 
 /**
@@ -15,7 +16,7 @@ public interface TypeRepository extends TypeProvider, Iterable<Type> {
     /**
      * Adds an instantiator associated with the specified type, overwriting the previous one.
      *
-     * @param type     the specified type, must be non-null
+     * @param type    the specified type, must be non-null
      * @param factory the specified instantiator, must be non-null
      */
     void put(Type type, ObjectFactory factory);
@@ -27,6 +28,18 @@ public interface TypeRepository extends TypeProvider, Iterable<Type> {
      * @return the removed {@link ObjectFactory} instance
      */
     ObjectFactory remove(Type type);
+
+    /**
+     * TODO
+     * @param repository
+     */
+    void putAll(TypeRepository repository);
+
+    /**
+     * TODO
+     * @param map
+     */
+    void putAll(Map<Type, ObjectFactory> map);
 
     /**
      * Clears this repository.

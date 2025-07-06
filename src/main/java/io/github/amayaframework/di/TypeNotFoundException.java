@@ -15,6 +15,6 @@ public class TypeNotFoundException extends IllegalTypeException {
      * @param type the missing type
      */
     public TypeNotFoundException(Type type) {
-        super("The type " + Util.getName(type) + " was not found", type);
+        super("The type " + FormatUtil.getName(type) + " was not found", type);
     }
 }

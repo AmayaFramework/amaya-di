@@ -4,10 +4,19 @@ import java.lang.reflect.Type;
 import java.util.List;
 import java.util.regex.Pattern;
 
-final class Util {
+final class FormatUtil {
     private static final Pattern QUALIFIER_REGEX = Pattern.compile("(?:[^.<>$,?]+\\.)+");
 
-    private Util() {
+    private FormatUtil() {
+    }
+
+    static String getName(Class<?> clazz) {
+        var ret = clazz.getName();
+        var index = ret.lastIndexOf('.');
+        if (index < 0) {
+            return ret;
+        }
+        return ret.substring(index + 1);
     }
 
     static String getName(Type type) {
@@ -15,7 +24,7 @@ final class Util {
             return "null";
         }
         if (type.getClass() == Class.class) {
-            return ((Class<?>) type).getSimpleName();
+            return getName((Class<?>) type);
         }
         var ret = type.getTypeName();
         if (ret.indexOf('.') < 0) {

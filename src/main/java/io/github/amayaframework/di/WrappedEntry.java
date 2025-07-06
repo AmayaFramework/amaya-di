@@ -2,11 +2,11 @@ package io.github.amayaframework.di;
 
 import io.github.amayaframework.di.core.ObjectFactory;
 
-final class WrappedEntry {
-    final ObjectFactory factory;
-    final ServiceWrapper wrapper;
+public final class WrappedEntry {
+    public final ObjectFactory factory;
+    public final ServiceWrapper wrapper;
 
-    WrappedEntry(ObjectFactory factory, ServiceWrapper wrapper) {
+    public WrappedEntry(ObjectFactory factory, ServiceWrapper wrapper) {
         this.factory = factory;
         this.wrapper = wrapper;
     }

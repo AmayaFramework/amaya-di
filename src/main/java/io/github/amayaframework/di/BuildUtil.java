@@ -1,12 +1,10 @@
 package io.github.amayaframework.di;
 
-import io.github.amayaframework.di.core.HashTypeRepository;
-import io.github.amayaframework.di.core.ObjectFactory;
+import io.github.amayaframework.di.core.ServiceProvider;
 import io.github.amayaframework.di.core.TypeRepository;
 import io.github.amayaframework.di.schema.ClassSchema;
 import io.github.amayaframework.di.schema.SchemaFactory;
 import io.github.amayaframework.di.stub.CacheMode;
-import io.github.amayaframework.di.stub.CachedObjectFactory;
 import io.github.amayaframework.di.stub.StubFactory;
 
 import java.lang.reflect.Type;
@@ -14,101 +12,105 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Predicate;
 
 final class BuildUtil {
     private BuildUtil() {
     }
 
-    static ObjectFactory buildStub(AbstractServiceProviderBuilder.TypeEntry entry,
-                                   ClassSchema schema,
-                                   StubFactory factory,
-                                   CacheMode mode,
-                                   List<StubEntry> delayed) {
-        // Build stub and check if it is cached
-        var stub = factory.create(schema, mode);
-        if (stub instanceof CachedObjectFactory) {
-            delayed.add(new StubEntry(schema.getTypes(), (CachedObjectFactory) stub));
+    static Map<Type, ClassSchema> buildSchemas(SchemaFactory factory,
+                                               Map<Type, AbstractServiceProviderBuilder.TypeEntry> types) {
+        var ret = new HashMap<Type, ClassSchema>();
+        for (var entry : types.entrySet()) {
+            ret.put(entry.getKey(), factory.create(entry.getValue().impl));
         }
-        // Apply wrapper
-        if (entry.wrapper != null) {
-            stub = entry.wrapper.wrap(stub);
-        }
-        return stub;
+        return ret;
     }
 
-    static TypeRepository buildRepository(SchemaFactory schemaFactory,
-                                          StubFactory stubFactory,
-                                          CacheMode mode,
-                                          Map<Type, ObjectFactory> roots,
-                                          Map<Type, AbstractServiceProviderBuilder.TypeEntry> types,
-                                          TypeRepository repo) {
-        var map = repo == null ? new HashMap<Type, ObjectFactory>() : null;
-        // Add weak types
-        var delayed = new LinkedList<StubEntry>();
-        for (var entry : types.entrySet()) {
-            var typeEntry = entry.getValue();
-            // Build schema
-            var schema = schemaFactory.create(typeEntry.impl);
-            // Build stub
-            var stub = buildStub(typeEntry, schema, stubFactory, mode, delayed);
-            if (repo == null) {
-                map.put(entry.getKey(), stub);
-            } else {
-                repo.put(entry.getKey(), stub);
-            }
-        }
-        // Add root types
-        if (repo == null) {
-            map.putAll(roots);
-        } else {
-            roots.forEach(repo::put);
-        }
-        // Handle delayed cached stubs
-        for (var entry : delayed) {
-            for (var type : entry.types) {
-                var found = repo == null ? map.get(type) : repo.get(type);
-                if (found == null) {
-                    throw new TypeNotFoundException(type);
+    static void checkMissingTypes(Map<Type, ClassSchema> schemas, Predicate<Type> canResolve) {
+        for (var schema : schemas.values()) {
+            var types = schema.getTypes();
+            for (var type : types) {
+                if (canResolve.test(type)) {
+                    continue;
                 }
-                entry.stub.set(type, found);
+                throw new TypeNotFoundException(type);
             }
         }
-        return repo == null ? new HashTypeRepository(map) : repo;
     }
 
-    static TypeRepository buildRepository(StubFactory stubFactory,
-                                          CacheMode mode,
-                                          Map<Type, ClassSchema> schemas,
-                                          Map<Type, ObjectFactory> roots,
-                                          Map<Type, AbstractServiceProviderBuilder.TypeEntry> types,
-                                          TypeRepository repo) {
-        var map = repo == null ? new HashMap<Type, ObjectFactory>() : null;
-        // Add weak types
-        var delayed = new LinkedList<StubEntry>();
-        for (var entry : types.entrySet()) {
+    static void checkCycles(Map<Type, GraphNode> graph) {
+        // Find for strongly connected components
+        var components = TarjanUtil.findSCC(graph.values());
+        if (components.isEmpty()) {
+            return;
+        }
+        if (components.size() == 1) {
+            throw new CycleFoundException(components.get(0));
+        }
+        throw new CyclesFoundException(components);
+    }
+
+    static void addEdge(Map<Type, GraphNode> graph, Type from, Type to) {
+        var fromNode = graph.computeIfAbsent(from, GraphNode::new);
+        var toNode = graph.computeIfAbsent(to, GraphNode::new);
+        if (fromNode.adjacents == null) {
+            fromNode.adjacents = new LinkedList<>();
+        }
+        fromNode.adjacents.add(toNode);
+    }
+
+    static Map<Type, GraphNode> buildGraph(Map<Type, ClassSchema> schemas) {
+        var ret = new HashMap<Type, GraphNode>();
+        for (var entry : schemas.entrySet()) {
             var type = entry.getKey();
-            var typeEntry = entry.getValue();
-            // Build stub
-            var stub = buildStub(typeEntry, schemas.get(type), stubFactory, mode, delayed);
-            if (repo == null) {
-                map.put(type, stub);
-            } else {
-                repo.put(type, stub);
+            var types = entry.getValue().getTypes();
+            for (var e : types) {
+                if (type.equals(e)) {
+                    throw new CycleFoundException(List.of(e));
+                }
+                addEdge(ret, type, e);
             }
         }
-        // Add root types
-        if (repo == null) {
-            map.putAll(roots);
-        } else {
-            roots.forEach(repo::put);
+        return ret;
+    }
+
+    static void doChecks(int checks, Map<Type, ClassSchema> schemas, Predicate<Type> canResolve) {
+        if (checks == BuilderChecks.NO_CHECKS) {
+            return;
         }
-        // Handle delayed cached stubs
-        for (var entry : delayed) {
-            for (var type : entry.types) {
-                var found = repo == null ? map.get(type) : repo.get(type);
-                entry.stub.set(type, found);
-            }
+        if (BuilderChecks.checkEnabled(checks, BuilderChecks.VALIDATE_MISSING_TYPES)) {
+            checkMissingTypes(schemas, canResolve);
         }
-        return repo == null ? new HashTypeRepository(map) : repo;
+        if (BuilderChecks.checkEnabled(checks, BuilderChecks.VALIDATE_CYCLES)) {
+            checkCycles(buildGraph(schemas));
+        }
+    }
+
+    static ServiceProvider buildScopedProvider(AbstractScopedProviderBuilder builder,
+                                               SchemaFactory schemaFactory,
+                                               StubFactory stubFactory,
+                                               TypeRepository repository,
+                                               CacheMode mode) {
+        var delayed = new LinkedList<StubEntry>();
+        // Build scoped provider
+        var scoped = builder.buildScoped(schemaFactory, stubFactory, delayed, mode);
+        if (builder.wrapped.isEmpty()) {
+            builder.handleDelayed(delayed, scoped, repository);
+            return builder.repositorySupplier == null
+                    ? new ScopedServiceProvider(repository, scoped)
+                    : new SuppliedScopedServiceProvider(repository, scoped, builder.repositorySupplier);
+        }
+        // Add wrapped types
+        var wrapped = builder.buildWrapped(schemaFactory, stubFactory, delayed, mode);
+        builder.handleDelayed(delayed, scoped, repository);
+        if (scoped.isEmpty()) {
+            return builder.repositorySupplier == null
+                    ? new WrappedServiceProvider(repository, wrapped)
+                    : new SuppliedWrappedServiceProvider(repository, wrapped, builder.repositorySupplier);
+        }
+        return builder.repositorySupplier == null
+                ? new WrappedScopedServiceProvider(repository, scoped, wrapped)
+                : new SuppliedWrappedScopedServiceProvider(repository, scoped, wrapped, builder.repositorySupplier);
     }
 }

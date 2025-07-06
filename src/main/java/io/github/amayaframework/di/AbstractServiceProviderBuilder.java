@@ -4,18 +4,17 @@ import com.github.romanqed.jfunc.Function0;
 import com.github.romanqed.jtype.IllegalTypeException;
 import com.github.romanqed.jtype.JType;
 import com.github.romanqed.jtype.TypeUtil;
-import io.github.amayaframework.di.core.LazyObjectFactory;
-import io.github.amayaframework.di.core.ObjectFactory;
-import io.github.amayaframework.di.core.ServiceProvider;
-import io.github.amayaframework.di.core.TypeRepository;
+import io.github.amayaframework.di.core.*;
+import io.github.amayaframework.di.schema.ClassSchema;
 import io.github.amayaframework.di.schema.SchemaFactory;
 import io.github.amayaframework.di.stub.CacheMode;
+import io.github.amayaframework.di.stub.CachedObjectFactory;
 import io.github.amayaframework.di.stub.StubFactory;
 
 import java.lang.reflect.Type;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
+import java.util.function.BiFunction;
+import java.util.function.Supplier;
 
 public abstract class AbstractServiceProviderBuilder<B extends ServiceProviderBuilder> implements ServiceProviderBuilder {
     // Defaults
@@ -31,6 +30,7 @@ public abstract class AbstractServiceProviderBuilder<B extends ServiceProviderBu
     protected CacheMode cacheMode;
 
     // Repository
+    protected Supplier<TypeRepository> repositorySupplier;
     protected TypeRepository repository;
 
     // Root types
@@ -64,6 +64,7 @@ public abstract class AbstractServiceProviderBuilder<B extends ServiceProviderBu
         this.cacheMode = null;
         // Reset repository
         this.repository = null;
+        this.repositorySupplier = null;
         // Reset type maps
         this.roots = new HashMap<>();
         this.types = new HashMap<>();
@@ -98,6 +99,17 @@ public abstract class AbstractServiceProviderBuilder<B extends ServiceProviderBu
         return defaultCacheMode;
     }
 
+    // Inner repository getters
+    protected TypeRepository getRepository() {
+        if (repository != null) {
+            return repository;
+        }
+        if (repositorySupplier != null) {
+            return repositorySupplier.get();
+        }
+        return new HashTypeRepository();
+    }
+
     @Override
     @SuppressWarnings("unchecked")
     public B withSchemaFactory(SchemaFactory factory) {
@@ -112,8 +124,6 @@ public abstract class AbstractServiceProviderBuilder<B extends ServiceProviderBu
         return (B) this;
     }
 
-    // Base methods
-
     @Override
     @SuppressWarnings("unchecked")
     public B withCacheMode(CacheMode mode) {
@@ -124,9 +134,20 @@ public abstract class AbstractServiceProviderBuilder<B extends ServiceProviderBu
     @Override
     @SuppressWarnings("unchecked")
     public B withRepository(TypeRepository repository) {
+        this.repositorySupplier = null;
         this.repository = repository;
         return (B) this;
     }
+
+    @Override
+    @SuppressWarnings("unchecked")
+    public B withRepository(Supplier<TypeRepository> supplier) {
+        this.repository = null;
+        this.repositorySupplier = supplier;
+        return (B) this;
+    }
+
+    // Base methods
 
     @Override
     @SuppressWarnings("unchecked")
@@ -293,6 +314,54 @@ public abstract class AbstractServiceProviderBuilder<B extends ServiceProviderBu
     @Override
     public B addSingleton(Class<?> impl) {
         return add(impl, LazyObjectFactory::new);
+    }
+
+    // Utility methods
+
+    protected ObjectFactory buildStub(TypeEntry entry,
+                                      ClassSchema schema,
+                                      StubFactory factory,
+                                      CacheMode mode,
+                                      List<StubEntry> delayed) {
+        // Build stub and check if it is cached
+        var stub = factory.create(schema, mode);
+        if (stub instanceof CachedObjectFactory) {
+            delayed.add(new StubEntry(schema.getTypes(), (CachedObjectFactory) stub));
+        }
+        // Apply wrapper
+        if (entry.wrapper != null) {
+            stub = entry.wrapper.wrap(stub);
+        }
+        return stub;
+    }
+
+    protected void buildRepository(TypeRepository repository,
+                                   StubFactory stubFactory,
+                                   BiFunction<Type, Class<?>, ClassSchema> schemaProvider,
+                                   CacheMode mode) {
+        // Add weak types
+        var delayed = new LinkedList<StubEntry>();
+        for (var entry : types.entrySet()) {
+            var type = entry.getKey();
+            var typeEntry = entry.getValue();
+            // Build schema
+            var schema = schemaProvider.apply(type, typeEntry.impl);
+            // Build stub
+            var stub = buildStub(typeEntry, schema, stubFactory, mode, delayed);
+            repository.put(type, stub);
+        }
+        // Add root types
+        roots.forEach(repository::put);
+        // Handle delayed cached stubs
+        for (var entry : delayed) {
+            for (var type : entry.types) {
+                var found = repository.get(type);
+                if (found == null) {
+                    throw new TypeNotFoundException(type);
+                }
+                entry.stub.set(type, found);
+            }
+        }
     }
 
     // Build methods

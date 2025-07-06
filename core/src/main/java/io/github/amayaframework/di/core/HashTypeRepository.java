@@ -57,13 +57,25 @@ public final class HashTypeRepository implements TypeRepository {
 
     @Override
     public void put(Type type, ObjectFactory factory) {
-        Objects.requireNonNull(type);
         body.put(type, factory);
     }
 
     @Override
     public ObjectFactory remove(Type type) {
         return body.remove(type);
+    }
+
+    @Override
+    public void putAll(TypeRepository repository) {
+        if (repository == this) {
+            return;
+        }
+        repository.forEach(this::put);
+    }
+
+    @Override
+    public void putAll(Map<Type, ObjectFactory> map) {
+        body.putAll(map);
     }
 
     @Override

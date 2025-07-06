@@ -3,6 +3,7 @@ package io.github.amayaframework.di.core;
 import java.lang.reflect.Type;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.Map;
 import java.util.Set;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
@@ -79,6 +80,24 @@ public final class ScopedTypeRepository implements TypeRepository {
     @Override
     public ObjectFactory remove(Type type) {
         return current.remove(type);
+    }
+
+    /**
+     * TODO
+     * @param repository
+     */
+    @Override
+    public void putAll(TypeRepository repository) {
+        current.putAll(repository);
+    }
+
+    /**
+     * TODO
+     * @param map
+     */
+    @Override
+    public void putAll(Map<Type, ObjectFactory> map) {
+        current.putAll(map);
     }
 
     /**

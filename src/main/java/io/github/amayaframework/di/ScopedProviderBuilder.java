@@ -9,6 +9,7 @@ import io.github.amayaframework.di.stub.CacheMode;
 import io.github.amayaframework.di.stub.StubFactory;
 
 import java.lang.reflect.Type;
+import java.util.function.Supplier;
 
 public interface ScopedProviderBuilder extends ServiceProviderBuilder {
 
@@ -93,6 +94,9 @@ public interface ScopedProviderBuilder extends ServiceProviderBuilder {
 
     @Override
     ScopedProviderBuilder withRepository(TypeRepository repository);
+
+    @Override
+    ScopedProviderBuilder withRepository(Supplier<TypeRepository> supplier);
 
     @Override
     ScopedProviderBuilder add(Type type, ObjectFactory factory);

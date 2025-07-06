@@ -10,7 +10,6 @@ module io.github.amayaframework.di {
     // External imports
     requires com.github.romanqed.jtype;
     requires com.github.romanqed.jfunc;
-    requires com.github.romanqed.jgraph;
     // Exports
     exports io.github.amayaframework.di;
 }

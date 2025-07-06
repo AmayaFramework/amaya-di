@@ -5,11 +5,11 @@ import io.github.amayaframework.di.stub.CachedObjectFactory;
 import java.lang.reflect.Type;
 import java.util.Set;
 
-final class StubEntry {
-    final Set<Type> types;
-    final CachedObjectFactory stub;
+public final class StubEntry {
+    public final Set<Type> types;
+    public final CachedObjectFactory stub;
 
-    StubEntry(Set<Type> types, CachedObjectFactory stub) {
+    public StubEntry(Set<Type> types, CachedObjectFactory stub) {
         this.types = types;
         this.stub = stub;
     }

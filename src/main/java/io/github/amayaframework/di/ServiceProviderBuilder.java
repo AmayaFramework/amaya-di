@@ -10,6 +10,7 @@ import io.github.amayaframework.di.stub.CacheMode;
 import io.github.amayaframework.di.stub.StubFactory;
 
 import java.lang.reflect.Type;
+import java.util.function.Supplier;
 
 public interface ServiceProviderBuilder {
 
@@ -20,6 +21,8 @@ public interface ServiceProviderBuilder {
     ServiceProviderBuilder withCacheMode(CacheMode mode);
 
     ServiceProviderBuilder withRepository(TypeRepository repository);
+
+    ServiceProviderBuilder withRepository(Supplier<TypeRepository> supplier);
 
     // Plain add methods
 
