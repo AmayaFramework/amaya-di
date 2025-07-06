@@ -140,14 +140,15 @@ public abstract class AbstractServiceProviderBuilder<B extends ServiceProviderBu
     /**
      * Gets the configured or default {@link SchemaFactory}.
      *
+     * @param require determines whether the result is strictly required, or whether it can be null
      * @return a schema factory instance
      * @throws IllegalStateException if none is available
      */
-    protected SchemaFactory getSchemaFactory() {
+    protected SchemaFactory getSchemaFactory(boolean require) {
         if (schemaFactory != null) {
             return schemaFactory;
         }
-        if (defaultSchemaFactory == null) {
+        if (require && defaultSchemaFactory == null) {
             throw new IllegalStateException("No SchemaFactory is set or available by default");
         }
         return defaultSchemaFactory;
@@ -156,14 +157,15 @@ public abstract class AbstractServiceProviderBuilder<B extends ServiceProviderBu
     /**
      * Gets the configured or default {@link StubFactory}.
      *
+     * @param require determines whether the result is strictly required, or whether it can be null
      * @return a stub factory instance
      * @throws IllegalStateException if none is available
      */
-    protected StubFactory getStubFactory() {
+    protected StubFactory getStubFactory(boolean require) {
         if (stubFactory != null) {
             return stubFactory;
         }
-        if (defaultStubFactory == null) {
+        if (require && defaultStubFactory == null) {
             throw new IllegalStateException("No StubFactory is set or available by default");
         }
         return defaultStubFactory;
@@ -431,6 +433,11 @@ public abstract class AbstractServiceProviderBuilder<B extends ServiceProviderBu
                                    SchemaProvider schemaProvider,
                                    StubFactory stubFactory,
                                    CacheMode mode) {
+        // Add root types
+        roots.forEach(repository::put);
+        if (schemaProvider == null || stubFactory == null) {
+            return;
+        }
         // Add weak types
         var delayed = new LinkedList<StubEntry>();
         for (var entry : types.entrySet()) {
@@ -442,8 +449,6 @@ public abstract class AbstractServiceProviderBuilder<B extends ServiceProviderBu
             var stub = buildStub(typeEntry, schema, stubFactory, mode, delayed);
             repository.put(type, stub);
         }
-        // Add root types
-        roots.forEach(repository::put);
         // Handle delayed cached stubs
         for (var entry : delayed) {
             for (var type : entry.types) {

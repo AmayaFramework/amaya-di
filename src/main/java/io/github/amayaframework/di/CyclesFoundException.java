@@ -17,7 +17,7 @@ public class CyclesFoundException extends RuntimeException {
     private final boolean scoped;
 
     /**
-     * Constructs a {@link CyclesFoundException} with the given list of cycles and scope context.
+     * Constructs a {@link CyclesFoundException} with the given list of cycles and the scoped flag.
      *
      * @param cycles a list of detected cycles, where each cycle is a list of types forming a circular dependency
      * @param scoped whether the cycles were detected in scoped services

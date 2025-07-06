@@ -27,14 +27,14 @@ final class BuildUtil {
         return ret;
     }
 
-    static void checkMissingTypes(Map<Type, ClassSchema> schemas, Predicate<Type> canResolve) {
+    static void checkMissingTypes(Map<Type, ClassSchema> schemas, Predicate<Type> canResolve, boolean scoped) {
         for (var schema : schemas.values()) {
             var types = schema.getTypes();
             for (var type : types) {
                 if (canResolve.test(type)) {
                     continue;
                 }
-                throw new TypeNotFoundException(type);
+                throw new TypeNotFoundException(type, scoped);
             }
         }
     }
@@ -80,7 +80,7 @@ final class BuildUtil {
             return;
         }
         if (BuilderChecks.checkEnabled(checks, BuilderChecks.VALIDATE_MISSING_TYPES)) {
-            checkMissingTypes(schemas, canResolve);
+            checkMissingTypes(schemas, canResolve, false);
         }
         if (BuilderChecks.checkEnabled(checks, BuilderChecks.VALIDATE_CYCLES)) {
             checkCycles(buildGraph(schemas), false);

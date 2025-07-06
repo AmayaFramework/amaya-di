@@ -29,11 +29,11 @@ public class PlainScopedProviderBuilder extends AbstractScopedProviderBuilder<Sc
 
     @Override
     protected ServiceProvider doBuild() {
-        var schemaFactory = getSchemaFactory();
-        var stubFactory = getStubFactory();
+        var schemaFactory = getSchemaFactory(true);
+        var stubFactory = getStubFactory(true);
         var mode = getCacheMode();
-        var repository = getRepository();
         // noinspection DuplicatedCode
+        var repository = getRepository();
         var provider = (SchemaProvider) (t, impl) -> schemaFactory.create(impl);
         buildRepository(repository, provider, stubFactory, mode);
         if (noScoped()) {

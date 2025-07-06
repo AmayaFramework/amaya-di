@@ -116,14 +116,14 @@ public class CheckedScopedProviderBuilder extends AbstractScopedProviderBuilder<
 
     @Override
     protected ServiceProvider doBuild() {
-        var schemaFactory = getSchemaFactory();
-        var stubFactory = getStubFactory();
+        var schemaFactory = getSchemaFactory(true);
+        var stubFactory = getStubFactory(true);
         var mode = getCacheMode();
         var schemas = BuildUtil.buildSchemas(schemaFactory, types);
         BuildUtil.doChecks(checks, schemas, this::canResolve);
         var scopedSchemas = buildScopedSchemas(schemaFactory);
         if (checkEnabled(BuilderChecks.VALIDATE_MISSING_TYPES)) {
-            BuildUtil.checkMissingTypes(scopedSchemas, this::canResolveScoped);
+            BuildUtil.checkMissingTypes(scopedSchemas, this::canResolveScoped, true);
         }
         if (checkEnabled(BuilderChecks.VALIDATE_CYCLES)) {
             checkCycles(schemas, scopedSchemas);

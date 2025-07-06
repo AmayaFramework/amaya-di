@@ -22,10 +22,10 @@ public class CycleFoundException extends RuntimeException {
     private final boolean scoped;
 
     /**
-     * Constructs an {@link CycleFoundException} with the found cycle and scoped a flag.
+     * Constructs an {@link CycleFoundException} with the found cycle and the scoped flag.
      *
      * @param cycle  the found cycle
-     * @param scoped the scoped flag
+     * @param scoped whether the cycles were detected in scoped services
      */
     public CycleFoundException(List<Type> cycle, boolean scoped) {
         super(getMessage(cycle, scoped));
