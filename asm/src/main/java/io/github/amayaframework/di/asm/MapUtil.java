@@ -1,23 +1,23 @@
 package io.github.amayaframework.di.asm;
 
 import java.lang.reflect.Type;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 final class MapUtil {
     private MapUtil() {
     }
 
     static Map<Type, String> ofComplex(Set<Type> types) {
-        var ret = new HashMap<Type, String>();
-        var count = 0;
+        var ret = new TreeMap<Type, String>(Comparator.comparing(Type::getTypeName));
         for (var type : types) {
             if (type.getClass() == Class.class) {
                 continue;
             }
-            var field = Integer.toString(count++);
-            ret.put(type, field);
+            ret.put(type, null);
+        }
+        var count = 0;
+        for (var entry : ret.entrySet()) {
+            entry.setValue(Integer.toString(count++));
         }
         return ret;
     }
