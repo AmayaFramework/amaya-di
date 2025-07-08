@@ -1,7 +1,7 @@
 module io.github.amayaframework.di {
     // Imports
     // DI Modules
-    requires io.github.amayaframework.di.core;
+    requires transitive io.github.amayaframework.di.core;
     requires io.github.amayaframework.di.schema;
     requires io.github.amayaframework.di.stub;
     // External imports
