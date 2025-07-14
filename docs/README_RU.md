@@ -51,9 +51,9 @@ Amaya DI — современный взгляд на то, каким долж�
 
 ```Groovy
 dependencies {
-    implementation group: 'io.github.amayaframework', name: 'amaya-di', version: '3.0.1'
+    implementation group: 'io.github.amayaframework', name: 'amaya-di', version: '3.0.2'
     // ASM stub implementation
-    implementation group: 'io.github.amayaframework', name: 'amaya-di-asm', version: '2.0.1'
+    implementation group: 'io.github.amayaframework', name: 'amaya-di-asm', version: '2.0.2'
     // Или reflect stub implementation
     implementation group: 'io.github.amayaframework', name: 'amaya-di-reflect', version: '2.0.0'
 }
@@ -65,13 +65,13 @@ dependencies {
 <dependency>
     <groupId>io.github.amayaframework</groupId>
     <artifactId>amaya-di</artifactId>
-    <version>3.0.1</version>
+    <version>3.0.2</version>
 </dependency>
 <!--ASM stub implementation-->
 <dependency>
     <groupId>io.github.amayaframework</groupId>
     <artifactId>amaya-di-asm</artifactId>
-    <version>2.0.1</version>
+    <version>2.0.2</version>
 </dependency>
 <!--Или reflect stub implementation-->
 <dependency>
@@ -97,7 +97,6 @@ dependencies {
 ```Java
 module com.github.romanqed.di.examples {
     requires io.github.amayaframework.di; // Основной модуль
-    requires io.github.amayaframework.di.reflect; // Используем рефлективную реализацию
     exports com.github.romanqed.di.examples;
 }
 ```
@@ -108,7 +107,6 @@ module com.github.romanqed.di.examples {
 package com.github.romanqed.di.examples;
 
 import io.github.amayaframework.di.ProviderBuilders;
-import io.github.amayaframework.di.reflect.ReflectStubFactory;
 
 public final class SimpleHelloWorld {
 
@@ -152,6 +150,16 @@ public final class ScopedGreeter implements IGreeter {
     public String sayHello(String name) {
         return "Hello from scope '" + scope + "', " + name + "!";
     }
+}
+```
+
+Добавим в `module-info.java` рефлективный генератор фабрик объектов:
+
+```java
+module com.github.romanqed.di.examples {
+    requires io.github.amayaframework.di; // Основной модуль
+    requires io.github.amayaframework.di.reflect; // Используем рефлективную реализацию
+    exports com.github.romanqed.di.examples;
 }
 ```
 
