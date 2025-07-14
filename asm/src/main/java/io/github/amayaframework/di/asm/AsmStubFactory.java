@@ -466,14 +466,10 @@ public final class AsmStubFactory implements StubFactory {
 
     private static ObjectFactory instantiate(Class<?> clazz, Map<Type, String> map) throws Throwable {
         if (map.isEmpty()) {
-            return (ObjectFactory) clazz
-                    .getDeclaredConstructor((Class<?>[]) null)
-                    .newInstance((Object[]) null);
+            return (ObjectFactory) clazz.getConstructor((Class<?>[]) null).newInstance((Object[]) null);
         }
         var parameters = map.keySet().toArray(new Type[0]);
-        return (ObjectFactory) clazz
-                .getDeclaredConstructor(Type[].class)
-                .newInstance((Object) parameters);
+        return (ObjectFactory) clazz.getConstructor(Type[].class).newInstance((Object) parameters);
     }
 
     private ObjectFactory createFull(ClassSchema schema) {
