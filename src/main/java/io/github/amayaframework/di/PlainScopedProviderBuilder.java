@@ -29,8 +29,9 @@ public class PlainScopedProviderBuilder extends AbstractScopedProviderBuilder<Sc
 
     @Override
     protected ServiceProvider doBuild() {
-        var schemaFactory = getSchemaFactory(true);
-        var stubFactory = getStubFactory(true);
+        var required = BuildUtil.needFactories(this);
+        var schemaFactory = getSchemaFactory(required);
+        var stubFactory = getStubFactory(required);
         var mode = getCacheMode();
         // noinspection DuplicatedCode
         var repository = getRepository();

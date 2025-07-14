@@ -31,12 +31,12 @@ public class PlainProviderBuilder extends AbstractServiceProviderBuilder<Service
 
     @Override
     protected ServiceProvider doBuild() {
-        var require = !types.isEmpty();
-        var schemaFactory = getSchemaFactory(require);
-        var stubFactory = getStubFactory(require);
+        var required = !types.isEmpty();
+        var schemaFactory = getSchemaFactory(required);
+        var stubFactory = getStubFactory(required);
         var mode = getCacheMode();
         var repository = getRepository();
-        var provider = require ? (SchemaProvider) (t, impl) -> schemaFactory.create(impl) : null;
+        var provider = required ? (SchemaProvider) (t, impl) -> schemaFactory.create(impl) : null;
         buildRepository(repository, provider, stubFactory, mode);
         if (repositorySupplier != null) {
             return new SuppliedPlainServiceProvider(repository, repositorySupplier);

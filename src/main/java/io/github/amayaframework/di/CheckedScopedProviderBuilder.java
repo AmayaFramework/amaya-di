@@ -116,8 +116,9 @@ public class CheckedScopedProviderBuilder extends AbstractScopedProviderBuilder<
 
     @Override
     protected ServiceProvider doBuild() {
-        var schemaFactory = getSchemaFactory(true);
-        var stubFactory = getStubFactory(true);
+        var required = BuildUtil.needFactories(this);
+        var schemaFactory = getSchemaFactory(required);
+        var stubFactory = getStubFactory(required);
         var mode = getCacheMode();
         var schemas = BuildUtil.buildSchemas(schemaFactory, types);
         BuildUtil.doChecks(checks, schemas, this::canResolve);

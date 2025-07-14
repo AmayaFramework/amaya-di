@@ -462,8 +462,9 @@ public abstract class AbstractScopedProviderBuilder<B extends ScopedProviderBuil
         if (scopedRoots.isEmpty() && scopedTypes.isEmpty()) {
             return Collections.EMPTY_MAP;
         }
+        // Add root types
+        var ret = new HashMap<>(scopedRoots);
         // Add scoped weak types
-        var ret = new HashMap<Type, ObjectFactory>();
         for (var entry : scopedTypes.entrySet()) {
             var type = entry.getKey();
             // Build schema
@@ -476,8 +477,6 @@ public abstract class AbstractScopedProviderBuilder<B extends ScopedProviderBuil
             }
             ret.put(type, stub);
         }
-        // Add root types
-        ret.putAll(scopedRoots);
         return ret;
     }
 

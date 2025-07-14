@@ -140,15 +140,15 @@ public abstract class AbstractServiceProviderBuilder<B extends ServiceProviderBu
     /**
      * Gets the configured or default {@link SchemaFactory}.
      *
-     * @param require determines whether the result is strictly required, or whether it can be null
+     * @param required determines whether the result is strictly required, or whether it can be null
      * @return a schema factory instance
      * @throws IllegalStateException if none is available
      */
-    protected SchemaFactory getSchemaFactory(boolean require) {
+    protected SchemaFactory getSchemaFactory(boolean required) {
         if (schemaFactory != null) {
             return schemaFactory;
         }
-        if (require && defaultSchemaFactory == null) {
+        if (required && defaultSchemaFactory == null) {
             throw new IllegalStateException("No SchemaFactory is set or available by default");
         }
         return defaultSchemaFactory;
@@ -157,15 +157,15 @@ public abstract class AbstractServiceProviderBuilder<B extends ServiceProviderBu
     /**
      * Gets the configured or default {@link StubFactory}.
      *
-     * @param require determines whether the result is strictly required, or whether it can be null
+     * @param required determines whether the result is strictly required, or whether it can be null
      * @return a stub factory instance
      * @throws IllegalStateException if none is available
      */
-    protected StubFactory getStubFactory(boolean require) {
+    protected StubFactory getStubFactory(boolean required) {
         if (stubFactory != null) {
             return stubFactory;
         }
-        if (require && defaultStubFactory == null) {
+        if (required && defaultStubFactory == null) {
             throw new IllegalStateException("No StubFactory is set or available by default");
         }
         return defaultStubFactory;

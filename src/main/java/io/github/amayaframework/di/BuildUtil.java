@@ -114,4 +114,22 @@ final class BuildUtil {
                 ? new WrappedScopedServiceProvider(repository, scoped, wrapped)
                 : new SuppliedWrappedScopedServiceProvider(repository, scoped, wrapped, builder.repositorySupplier);
     }
+
+    static <T extends ScopedProviderBuilder> boolean needFactories(AbstractScopedProviderBuilder<T> builder) {
+        if (!builder.types.isEmpty()) {
+            return true;
+        }
+        if (!builder.scopedTypes.isEmpty()) {
+            return true;
+        }
+        if (builder.wrapped.isEmpty()) {
+            return false;
+        }
+        for (var entry : builder.wrapped.entrySet()) {
+            if (entry.getValue().impl != null) {
+                return true;
+            }
+        }
+        return false;
+    }
 }

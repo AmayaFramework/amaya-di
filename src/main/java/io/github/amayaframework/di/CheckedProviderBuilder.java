@@ -63,14 +63,14 @@ public class CheckedProviderBuilder extends AbstractServiceProviderBuilder<Servi
 
     @Override
     protected ServiceProvider doBuild() {
-        var require = !types.isEmpty();
-        var schemaFactory = getSchemaFactory(require);
+        var required = !types.isEmpty();
+        var schemaFactory = getSchemaFactory(required);
         var schemas = BuildUtil.buildSchemas(schemaFactory, types);
         BuildUtil.doChecks(checks, schemas, this::canResolve);
-        var stubFactory = getStubFactory(require);
+        var stubFactory = getStubFactory(required);
         var mode = getCacheMode();
         var repository = getRepository();
-        var provider = require ? (SchemaProvider) (type, v) -> schemas.get(type) : null;
+        var provider = required ? (SchemaProvider) (type, v) -> schemas.get(type) : null;
         buildRepository(repository, provider, stubFactory, mode);
         if (repositorySupplier != null) {
             return new SuppliedPlainServiceProvider(repository, repositorySupplier);
