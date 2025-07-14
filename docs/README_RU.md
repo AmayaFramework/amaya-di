@@ -507,6 +507,8 @@ public interface TypeProcessor {
 
 # Сборка контейнера
 
+## Базовый сценарий использования
+
 ## Generic-типы
 
 ## Валидация графа зависимостей
@@ -533,6 +535,19 @@ public interface TypeProcessor {
 
 # Создано с помощью
 
+* [Gradle](https://gradle.org) - Управление зависимостями
+* [ASM](https://asm.ow2.io) - Генерация `ObjectFactory`
+* [jeflect-loader](https://github.com/RomanQed/jeflect) - Загрузка байт-кода в рантайме
+* [jfunc](https://github.com/RomanQed/jfunc) - Функциональные интерфейсы, утилиты
+* [jtype](https://github.com/RomanQed/jtype) - Утилиты для работы с дженериками
+
 # Авторы
 
+* [RomanQed](https://github.com/RomanQed) - *Основная работа*
+
+Загляните также в список [участников](https://github.com/AmayaFramework/amaya-di/contributors), которые внесли вклад
+в этот проект.
+
 # Лицензия
+
+Этот проект лицензирован под Apache License Version 2.0 - см. [LICENSE](LICENSE) файл для подробностей.
