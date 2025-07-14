@@ -45,7 +45,7 @@ Amaya DI — современный взгляд на то, каким долж�
 
 Для использования фреймворка необходимо установить два модуля: базовый (`io.github.amayaframework:amaya-di`) и 
 реализацию stub-фабрики (`:amaya-di-asm` или `:amaya-di-reflect`). 
-Подробнее о выборе см. раздел [Выбор реализации](#выбор-реализации).
+Подробнее о выборе см. раздел [выбор реализации](#выбор-реализации).
 
 ### Gradle
 
@@ -113,7 +113,7 @@ import io.github.amayaframework.di.reflect.ReflectStubFactory;
 public final class SimpleHelloWorld {
 
   public static void main(String[] args) {
-    var provider = ProviderBuilders.create(new ReflectStubFactory())
+    var provider = ProviderBuilders.create()
             .addInstance("Hello, world!")
             .build();
     System.out.println(provider.get(String.class));
@@ -246,10 +246,163 @@ public final class ComplexHelloWorld {
 
 ## Ядро
 
-- ObjectFactory
-- TypeProvider
-- TypeRepository
-- ServiceProvider
+### ObjectFactory и TypeProvider
+
+Основным механизмом, лежащим в основе контейнера, являются интерфейсы `ObjectFactory` и `TypeProvider`. Они имеют
+следующий вид:
+
+```java
+@FunctionalInterface
+public interface ObjectFactory {
+    Object create(TypeProvider provider) throws Throwable;
+}
+```
+
+```java
+@FunctionalInterface
+public interface TypeProvider {
+    ObjectFactory get(Type type);
+    
+    default boolean canProvide(Type type) {
+        return get(type) != null;
+    }
+}
+```
+
+`ObjectFactory` выполняет создание инстанса типа, зависимости которого поставляет `TypeProvider`. Данный дизайн удобен
+по двум причинам:
+
+1) фабрика объектов не имеет жесткой зависимости от поставщика типов и может оборачивать и модифицировать его перед
+передачей нижележащим фабрикам, что позволяет реализовать любые сценарии;
+2) получение фабрики напрямую вместо созданного инстанса позволяет избежать лишних лукапов и кэшировать фабрику,
+не теряя остальных преимуществ.
+
+Что касается на первый взгляд бесполезного метода `TypeProvider#canProvide`, он нужен в ситуациях, когда мы хотим
+**однозначно** убедится в способности провайдера предоставить нам фабрику объектов. Потому что сравнение с `null` 
+не сработает в тех случаях, когда реализация контейнера для каких-либо целей предоставляет обёртки над фабриками. То
+есть, допустим, `get(Type.class)` будет возвращать реализацию `ObjectFactory`, которая будет всегда возвращать `null`.
+
+Именно для предотвращения таких ситуаций существует однозначно определимый `canProvide`. Если он вернул `true` - значит
+`get` вернёт **не `null`** инстанс `ObjectFactory`. Причём с гарантией (с точки зрения контейнера!), что это 
+изначально предоставленная пользователем фабрика, а не заглушка/временная обёртка.
+
+Без автоматической генерации `ObjectFactory` пример `ComplexHelloWorld` будет 
+выглядеть следующим образом (`ManualHelloWorld`):
+
+```java
+public final class ManualHelloWorld {
+
+    public static void main(String[] args) {
+        var provider = ProviderBuilders.createScoped()
+                .add(IGreeter.class, (ObjectFactory) tp -> new GlobalGreeter())
+                .addScoped(IGreeter.class, (ObjectFactory) tp -> {
+                    var scope = (String) tp.get(String.class).create(tp);
+                    return new ScopedGreeter(scope);
+                })
+                .build();
+        var scope1 = provider.createScoped();
+        scope1.repository().put("Scope One");
+        var scope2 = provider.createScoped();
+        scope2.repository().put("Scope Two");
+        System.out.println(provider.get(IGreeter.class).sayHello("Roman"));
+        System.out.println(scope1.get(IGreeter.class).sayHello("Roman"));
+        System.out.println(scope2.get(IGreeter.class).sayHello("Roman"));
+    }
+    // IGreeter and its impls
+}
+```
+
+Причём `addScoped(String.class)`, бывший в `ComplexHelloWorld`, здесь можно убрать, поскольку валидация предоставленных
+пользователем фабрик не выполняется. Такие зависимости (в том числе instance и `Function0` версии) считаются корневыми,
+поскольку для них невозможно определить множество зависимых типов за конечное время (т.е. без их запуска).
+
+### Расширение TypeProvider: TypeRepository
+
+`TypeRepository` расширяет `TypeProvider`, превращая его в полноценное CRUD-хранилище типов. Он выглядит следующим
+образом:
+
+```java
+public interface TypeRepository extends TypeProvider, Iterable<Type> {
+    void put(Type type, ObjectFactory factory);
+    
+    void put(Type type, Function0<?> provider);
+    
+    void put(Type type, Object instance);
+    
+    void put(Object instance);
+    
+    ObjectFactory remove(Type type);
+    
+    void putAll(TypeRepository repository);
+    
+    void putAll(Map<Type, ObjectFactory> map);
+    
+    void clear();
+    
+    void forEach(BiConsumer<Type, ObjectFactory> action);
+}
+```
+
+Методы `put(type, provider)`, `put(type, instance)`, `put(instance)` условно (зависит от реализации репозитория) 
+являются аналогами `put(type, p -> provider.invoke())`, `put(type, p -> instance)` 
+и `put(instance.getClass(), p -> instance)` соответственно.
+
+Метод `remove(type)` удаляет из репозитория запись о типе и возвращает хранимую для него `ObjectFactory` или `null`,
+если такого типа не было.
+
+Обе вариации `putAll(...)` выполняют копирование записей вида `тип->фабрика` в репозиторий.
+
+Метод `clear()` полностью очищает репозиторию, удаляя все его содержимое.
+
+Метод `forEach(BiConsumer)` применяется для каждой записи `тип->фабрика`, а методы интерфейса `Iterable<Type>` 
+ведут себя так же, как если бы это был изменяемый `Set<Type>`.
+
+На основе `TypeRepository` строятся все разновидности контейнеров, и через него осуществляется управление 
+содержимым контейнера. Обратите внимание – **нет никакой гарантии**, что переданный в `ObjectFactory#create()` инстанс
+`TypeProvider` является инстансом `TypeRepository`. В общем случае попытка получить доступ к репозиторию внутри фабрики
+некорректна с точки зрения дизайна фреймворка. Подобный функционал никогда не будет реализован.
+
+### Универсальный контейнер: ServiceProvider
+
+Интерфейс `ServiceProvider` описывает абстрактный di-контейнер, предоставляющий интерфейс как для получения готовых
+реализаций запрошенных типов, так и для управления содержимым. Он выглядит так:
+```java
+public interface ServiceProvider {
+    TypeRepository repository();
+    
+    ServiceProvider createScoped();
+    
+    <T> T get(Type type);
+    
+    <T> T get(Class<T> type);
+    
+    <T> T get(JType<T> type);
+}
+```
+
+Методы `get(type)` выполняют поиск `ObjectFactory` для запрошенного типа и:
+
+1) если таковая существует, создают инстанс для запрошенного типа;
+2) иначе возвращают `null`.
+
+Метод `repository()` возвращает изменяемый инстанс `TypeRepository`, используемый данным контейнером. 
+
+Метод `createScoped()` создаёт новый контейнер, использующий при поиске типов fallthrough в родительский контейнер,
+из которого был вызван метод. То есть, если при запросе типа он не был найден в этом контейнере, запрос направляется в 
+нижележащий. Скопинг можно выполнять бесконечно, создавая связанную цепочку контейнеров.
+
+### Остальные утилиты ядра
+
+Кроме вышеописанных интерфейсов ядро включает:
+
+* абстрактную реализацию `ServiceProvider` (`AbstractServiceProvider`), содержащую поле `repository` и все методы,
+кроме `createScoped()`;
+* реализацию `TypeRepository` на основе `Map<Type, ObjectFactory>` (`HashTypeRepository`);
+* потокобезопасную ленивую обёртку над `ObjectFactory`, что используется для singleton-политик (`LazyObjectFactory`);
+* универсальную scoped-реализацию `TypeRepository`, соединяющую между собой любую пару 
+scoped- и parent- репозиториев (`ScopedTypeRepository`).
+
+Для подробностей см. javadoc.
 
 ## Схемы
 
