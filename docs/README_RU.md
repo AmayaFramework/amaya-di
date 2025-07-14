@@ -550,4 +550,4 @@ public interface TypeProcessor {
 
 # Лицензия
 
-Этот проект лицензирован под Apache License Version 2.0 - см. [LICENSE](LICENSE) файл для подробностей.
+Этот проект лицензирован под Apache License Version 2.0 - см. [LICENSE](../LICENSE) файл для подробностей.
