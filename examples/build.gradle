@@ -18,4 +18,5 @@ repositories {
 dependencies {
     implementation group: 'io.github.amayaframework', name: 'amaya-di', version: '3.0.2'
     implementation group: 'io.github.amayaframework', name: 'amaya-di-reflect', version: '2.0.0'
+    implementation group: 'io.github.amayaframework', name: 'amaya-di-asm', version: '2.0.1'
 }
