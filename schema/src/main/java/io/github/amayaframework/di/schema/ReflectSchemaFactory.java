@@ -20,7 +20,6 @@ import java.util.stream.Collectors;
  *     <li>Only public methods with at least one parameter and annotated with the marker are included.</li>
  *     <li>Static methods must have the first parameter assignable from the declaring class.</li>
  * </ul>
- * <p>
  */
 public final class ReflectSchemaFactory implements SchemaFactory {
     private static final TypeProcessor TYPE_PROCESSOR = new ReflectTypeProcessor();
