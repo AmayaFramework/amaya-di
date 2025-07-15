@@ -500,10 +500,11 @@ public interface TypeProcessor {
 * `List<? super String>` => `List<Object>`;
 * `List<?>` => `List<Object>`.
 
+Type variable полностью запрещены.
+
 ## Генерация ObjectFactory
 
-- StubFactory
-- CachedObjectFactory + CacheMode
+### 
 
 # Сборка контейнера
 
