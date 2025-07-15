@@ -20,6 +20,18 @@ public class IllegalMemberException extends RuntimeException {
     }
 
     /**
+     * Constructs an {@link IllegalMemberException} with the specified detail message, cause and illegal member.
+     *
+     * @param message the detail message
+     * @param cause   the cause
+     * @param member  the illegal member
+     */
+    public IllegalMemberException(String message, Throwable cause, Member member) {
+        super(message, cause);
+        this.member = member;
+    }
+
+    /**
      * Returns the illegal class member.
      *
      * @return the illegal class member

@@ -1,5 +1,7 @@
 package io.github.amayaframework.di.schema;
 
+import com.github.romanqed.jtype.IllegalTypeException;
+
 import java.lang.annotation.Annotation;
 import java.lang.reflect.*;
 import java.util.*;
@@ -19,12 +21,6 @@ import java.util.stream.Collectors;
  *     <li>Static methods must have the first parameter assignable from the declaring class.</li>
  * </ul>
  * <p>
- * Unsupported features:
- * <ul>
- *     <li>Parameterized constructors and methods</li>
- *     <li>Enum types, primitives, annotations, arrays, anonymous and non-static member classes</li>
- *     <li>Static generic methods with super wildcards</li>
- * </ul>
  */
 public final class ReflectSchemaFactory implements SchemaFactory {
     private static final TypeProcessor TYPE_PROCESSOR = new ReflectTypeProcessor();
@@ -53,18 +49,23 @@ public final class ReflectSchemaFactory implements SchemaFactory {
         this(TYPE_PROCESSOR, annotation);
     }
 
-    private void process(Parameter[] parameters, int start, Set<Type> types, Type[] mapping) {
-        for (var i = start; i < parameters.length; ++i) {
-            var parameter = parameters[i];
-            var type = parameter.getParameterizedType();
-            var processed = processor.process(type, parameter);
-            types.add(processed);
-            mapping[i - start] = processed;
+    private void process(Executable executable, int start, Set<Type> types, Type[] mapping) {
+        var parameters = executable.getParameters();
+        try {
+            for (var i = start; i < parameters.length; ++i) {
+                var parameter = parameters[i];
+                var type = parameter.getParameterizedType();
+                var processed = processor.process(type, parameter);
+                types.add(processed);
+                mapping[i - start] = processed;
+            }
+        } catch (IllegalTypeException e) {
+            throw new IllegalMemberException("Cannot use executable with illegal type " + e.getType(), e, executable);
         }
     }
 
-    private void process(Parameter[] parameters, Set<Type> types, Type[] mapping) {
-        process(parameters, 0, types, mapping);
+    private void process(Executable executable, Set<Type> types, Type[] mapping) {
+        process(executable, 0, types, mapping);
     }
 
     private ConstructorSchema create(Constructor<?> constructor) {
@@ -73,7 +74,7 @@ public final class ReflectSchemaFactory implements SchemaFactory {
         }
         var types = new HashSet<Type>();
         var mapping = new Type[constructor.getParameterCount()];
-        process(constructor.getParameters(), types, mapping);
+        process(constructor, types, mapping);
         return new ConstructorSchema(constructor, types, mapping);
     }
 
@@ -84,7 +85,7 @@ public final class ReflectSchemaFactory implements SchemaFactory {
         var types = new HashSet<Type>();
         if (!Modifier.isStatic(method.getModifiers())) {
             var mapping = new Type[method.getParameterCount()];
-            process(method.getParameters(), types, mapping);
+            process(method, types, mapping);
             return new MethodSchema(method, types, mapping);
         }
         var first = method.getParameterTypes()[0];
@@ -96,8 +97,20 @@ public final class ReflectSchemaFactory implements SchemaFactory {
             );
         }
         var mapping = new Type[method.getParameterCount() - 1];
-        process(method.getParameters(), 1, types, mapping);
+        process(method, 1, types, mapping);
         return new MethodSchema(method, types, mapping);
+    }
+
+    private FieldSchema create(Field field) {
+        var type = field.getGenericType();
+        if (type instanceof TypeVariable<?>) {
+            throw new IllegalMemberException("Cannot use generic field", field);
+        }
+        try {
+            return new FieldSchema(field, processor.process(type, field));
+        } catch (IllegalTypeException e) {
+            throw new IllegalMemberException("Cannot use field with illegal type " + type, e, field);
+        }
     }
 
     private ConstructorSchema findConstructor(Class<?> clazz) {
@@ -140,7 +153,7 @@ public final class ReflectSchemaFactory implements SchemaFactory {
             return Collections.emptySet();
         }
         var ret = new HashSet<FieldSchema>();
-        fields.forEach(field -> ret.add(new FieldSchema(field, processor.process(field.getGenericType(), field))));
+        fields.forEach(field -> ret.add(create(field)));
         return ret;
     }
 

@@ -12,100 +12,69 @@ import java.util.Set;
 import java.util.function.BiConsumer;
 
 public class SchemaTest extends Assertions {
-    private static final SchemaFactory REFLECTION_FACTORY = new ReflectSchemaFactory(Inject.class);
+    private static final SchemaFactory FACTORY = new ReflectSchemaFactory(Inject.class);
 
-    public void testEmptyClass(SchemaFactory factory) {
-        var schema = factory.create(Empty.class);
-        assertAll(
-                () -> assertEquals(Empty.class, schema.getTarget()),
-                () -> assertTrue(schema.getTypes().isEmpty()),
-                () -> assertTrue(schema.getFieldSchemas().isEmpty()),
-                () -> assertTrue(schema.getMethodSchemas().isEmpty()),
-                () -> assertEquals(Empty.class.getConstructor(), schema.getConstructorSchema().getTarget())
+    @Test
+    public void testEmptyClass() throws NoSuchMethodException {
+        var schema = FACTORY.create(Empty.class);
+        assertEquals(Empty.class, schema.getTarget());
+        assertTrue(schema.getTypes().isEmpty());
+        assertTrue(schema.getFieldSchemas().isEmpty());
+        assertTrue(schema.getMethodSchemas().isEmpty());
+        assertEquals(Empty.class.getConstructor(), schema.getConstructorSchema().getTarget());
+    }
+
+    @Test
+    public void testNoConstructors() {
+        assertThrows(IllegalClassException.class, () -> FACTORY.create(NoConstructors.class));
+    }
+
+    @Test
+    public void testOneConstructor() throws NoSuchMethodException {
+        var schema = FACTORY.create(OneConstructor.class);
+        assertEquals(OneConstructor.class, schema.getTarget());
+        assertEquals(1, schema.getTypes().size());
+        assertTrue(schema.getFieldSchemas().isEmpty());
+        assertTrue(schema.getMethodSchemas().isEmpty());
+        assertEquals(
+                OneConstructor.class.getConstructor(Object.class),
+                schema.getConstructorSchema().getTarget()
         );
+        assertEquals(Set.of(Object.class), schema.getConstructorSchema().getTypes());
     }
 
     @Test
-    public void testReflectionEmptyClass() {
-        testEmptyClass(REFLECTION_FACTORY);
-    }
-
-    public void testNoConstructors(SchemaFactory factory) {
-        assertThrows(IllegalClassException.class, () -> factory.create(NoConstructors.class));
+    public void testManyConstructors() {
+        assertThrows(IllegalClassException.class, () -> FACTORY.create(ManyConstructors.class));
     }
 
     @Test
-    public void testReflectionNoConstructors() {
-        testNoConstructors(REFLECTION_FACTORY);
-    }
-
-    public void testOneConstructor(SchemaFactory factory) {
-        var schema = factory.create(OneConstructor.class);
-        assertAll(
-                () -> assertEquals(OneConstructor.class, schema.getTarget()),
-                () -> assertEquals(1, schema.getTypes().size()),
-                () -> assertTrue(schema.getFieldSchemas().isEmpty()),
-                () -> assertTrue(schema.getMethodSchemas().isEmpty()),
-                () -> assertEquals(
-                        OneConstructor.class.getConstructor(Object.class),
-                        schema.getConstructorSchema().getTarget()
-                ),
-                () -> assertEquals(Set.of(Object.class), schema.getConstructorSchema().getTypes())
+    public void testAnnotatedConstructor() throws NoSuchMethodException {
+        var schema = FACTORY.create(AnnotatedConstructor.class);
+        assertEquals(AnnotatedConstructor.class, schema.getTarget());
+        assertEquals(1, schema.getTypes().size());
+        assertTrue(schema.getFieldSchemas().isEmpty());
+        assertTrue(schema.getMethodSchemas().isEmpty());
+        assertEquals(
+                AnnotatedConstructor.class.getConstructor(Object.class),
+                schema.getConstructorSchema().getTarget()
         );
+        assertEquals(Set.of(Object.class), schema.getConstructorSchema().getTypes());
     }
 
     @Test
-    public void testReflectionOneConstructor() {
-        testOneConstructor(REFLECTION_FACTORY);
-    }
-
-    public void testManyConstructors(SchemaFactory factory) {
-        assertThrows(IllegalClassException.class, () -> factory.create(ManyConstructors.class));
-    }
-
-    @Test
-    public void testReflectionManyConstructors() {
-        testManyConstructors(REFLECTION_FACTORY);
-    }
-
-    public void testAnnotatedConstructor(SchemaFactory factory) {
-        var schema = factory.create(AnnotatedConstructor.class);
-        assertAll(
-                () -> assertEquals(AnnotatedConstructor.class, schema.getTarget()),
-                () -> assertEquals(1, schema.getTypes().size()),
-                () -> assertTrue(schema.getFieldSchemas().isEmpty()),
-                () -> assertTrue(schema.getMethodSchemas().isEmpty()),
-                () -> assertEquals(
-                        AnnotatedConstructor.class.getConstructor(Object.class),
-                        schema.getConstructorSchema().getTarget()
-                ),
-                () -> assertEquals(Set.of(Object.class), schema.getConstructorSchema().getTypes())
-        );
-    }
-
-    @Test
-    public void testReflectionAnnotatedConstructor() {
-        testAnnotatedConstructor(REFLECTION_FACTORY);
-    }
-
-    public void testFields(SchemaFactory factory) throws NoSuchFieldException {
-        var schema = factory.create(Fields.class);
+    public void testFields() throws NoSuchFieldException {
+        var schema = FACTORY.create(Fields.class);
         var type = Object.class;
         var schemas = Set.of(new FieldSchema(Fields.class.getField("f1"), type));
-        assertAll(
-                () -> assertEquals(Fields.class, schema.getTarget()),
-                () -> assertEquals(Set.of(type), schema.getTypes()),
-                () -> assertEquals(schemas, schema.getFieldSchemas())
-        );
+        assertEquals(Fields.class, schema.getTarget());
+        assertEquals(Set.of(type), schema.getTypes());
+        assertEquals(schemas, schema.getFieldSchemas());
     }
 
     @Test
-    public void testReflectionFields() throws NoSuchFieldException {
-        testFields(REFLECTION_FACTORY);
-    }
-
-    public void testMethods(SchemaFactory factory) throws NoSuchMethodException {
-        var schema = factory.create(Methods.class);
+    public void testMethods() throws NoSuchMethodException {
+        var schema = FACTORY.create(Methods.class);
         var type = (Type) Object.class;
         var types = Set.of(type);
         var mapping = new Type[]{type};
@@ -113,47 +82,31 @@ public class SchemaTest extends Assertions {
                 new MethodSchema(Methods.class.getMethod("psm2", Methods.class, Object.class), types, mapping),
                 new MethodSchema(Methods.class.getMethod("pm2", Object.class), types, mapping)
         );
-        assertAll(
-                () -> assertEquals(Methods.class, schema.getTarget()),
-                () -> assertEquals(types, schema.getTypes()),
-                () -> assertEquals(schemas, schema.getMethodSchemas())
-        );
+        assertEquals(Methods.class, schema.getTarget());
+        assertEquals(types, schema.getTypes());
+        assertEquals(schemas, schema.getMethodSchemas());
     }
 
     @Test
-    public void testReflectionMethods() throws NoSuchMethodException {
-        testMethods(REFLECTION_FACTORY);
-    }
-
-    public void testInvalidStaticSetter(SchemaFactory factory) {
-        assertThrows(IllegalClassException.class, () -> factory.create(InvalidStaticSetter.class));
+    public void testInvalidStaticSetter() {
+        assertThrows(IllegalClassException.class, () -> FACTORY.create(InvalidStaticSetter.class));
     }
 
     @Test
-    public void testReflectionInvalidStaticSetter() {
-        testInvalidStaticSetter(REFLECTION_FACTORY);
-    }
-
-    public void testWildcards(SchemaFactory factory) {
-        var schema = factory.create(Wildcards.class);
+    public void testWildcards() {
+        var schema = FACTORY.create(Wildcards.class);
         var types = Set.of(
                 Types.of(List.class, Object.class),
                 Types.of(BiConsumer.class, Object.class, Object.class),
                 Types.of(List.class, String.class)
         );
-        assertAll(
-                () -> assertEquals(Wildcards.class, schema.getTarget()),
-                () -> assertEquals(types, schema.getTypes())
-        );
+        assertEquals(Wildcards.class, schema.getTarget());
+        assertEquals(types, schema.getTypes());
     }
 
     @Test
-    public void testReflectionWildcards() {
-        testWildcards(REFLECTION_FACTORY);
-    }
-
-    public void testGenerics(SchemaFactory factory) {
-        var schema = factory.create(Generics.class);
+    public void testGenerics() {
+        var schema = FACTORY.create(Generics.class);
         var types = Set.of(
                 Types.of(List.class, String.class),
                 Types.of(BiConsumer.class,
@@ -163,33 +116,49 @@ public class SchemaTest extends Assertions {
                 Types.of(List.class, Types.of(Types.of(List.class, String.class))),
                 Types.of(List.class, Types.of(Types.of(List.class, Types.of(List.class, String[].class)), 2))
         );
-        assertAll(
-                () -> assertEquals(Generics.class, schema.getTarget()),
-                () -> assertEquals(types, schema.getTypes())
-        );
+        assertEquals(Generics.class, schema.getTarget());
+        assertEquals(types, schema.getTypes());
     }
 
     @Test
-    public void testReflectionGenerics() {
-        testGenerics(REFLECTION_FACTORY);
+    public void testGenericClassWithField() {
+        assertThrows(IllegalMemberException.class, () -> FACTORY.create(GenericClassWithField.class));
+    }
+    
+    @Test
+    public void testGenericClassWithConstructor() {
+        assertThrows(IllegalMemberException.class, () -> FACTORY.create(GenericClassWithCtor.class));
+    }
+    
+    @Test
+    public void testGenericClassWithMethod() {
+        assertThrows(IllegalMemberException.class, () -> FACTORY.create(GenericClassWithMethod.class));
     }
 
-    public void testGenericConstructor(SchemaFactory factory) {
-        assertThrows(IllegalMemberException.class, () -> factory.create(GenericConstructor.class));
+    public static final class GenericClassWithField<T> {
+        @Inject
+        public T field;
+    }
+    
+    public static final class GenericClassWithCtor<T> {
+        public GenericClassWithCtor(T v) {
+        }
+    }
+    
+    public static final class GenericClassWithMethod<T> {
+        @Inject
+        public void setField(T v) {
+        }
     }
 
     @Test
-    public void testReflectionGenericConstructor() {
-        testGenericConstructor(REFLECTION_FACTORY);
-    }
-
-    public void testGenericMethod(SchemaFactory factory) {
-        assertThrows(IllegalMemberException.class, () -> factory.create(GenericMethod.class));
+    public void testGenericConstructor() {
+        assertThrows(IllegalMemberException.class, () -> FACTORY.create(GenericConstructor.class));
     }
 
     @Test
-    public void testReflectionGenericMethod() {
-        testGenericMethod(REFLECTION_FACTORY);
+    public void testGenericMethod() {
+        assertThrows(IllegalMemberException.class, () -> FACTORY.create(GenericMethod.class));
     }
 
     @Retention(RetentionPolicy.RUNTIME)

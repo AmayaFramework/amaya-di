@@ -1,5 +1,6 @@
 package io.github.amayaframework.di.schema;
 
+import com.github.romanqed.jtype.IllegalTypeException;
 import com.github.romanqed.jtype.Types;
 
 import java.lang.reflect.*;
@@ -47,6 +48,10 @@ public class ReflectTypeProcessor implements TypeProcessor {
         // Turn wildcards to its upper bounds
         if (type instanceof WildcardType) {
             return process(((WildcardType) type).getUpperBounds()[0]);
+        }
+        // Variables are restricted
+        if (type instanceof TypeVariable) {
+            throw new IllegalTypeException("Cannot process type variable", type);
         }
         return type;
     }
