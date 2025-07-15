@@ -15,6 +15,7 @@ import java.util.stream.Collectors;
  * <p>
  * Rules:
  * <ul>
+ *     <li>No generic types</li>
  *     <li>One public constructor must be annotated (or there must be exactly one public constructor).</li>
  *     <li>Only public, non-static, non-final fields annotated with the marker are included.</li>
  *     <li>Only public methods with at least one parameter and annotated with the marker are included.</li>
