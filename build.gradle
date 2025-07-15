@@ -37,7 +37,7 @@ dependencies {
     jmhImplementation project(':reflect')
     // Dependencies
     // Base
-    api group: 'com.github.romanqed', name: 'jtype', version: '1.0.2'
+    api group: 'com.github.romanqed', name: 'jtype', version: '1.1.0'
     api group: 'com.github.romanqed', name: 'jfunc', version: '1.1.4'
     // Modules
     api group: 'io.github.amayaframework', name: 'amaya-di-core', version: '1.0.0'
