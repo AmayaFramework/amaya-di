@@ -51,20 +51,6 @@ public class ReflectTypeProcessor implements TypeProcessor {
         return type;
     }
 
-    /**
-     * Process the given type (possibly generic, wildcard, array, primitive, etc.)
-     * and return a version normalized for DI usage:
-     * <ul>
-     *     <li>Primitives boxed</li>
-     *     <li>Type arguments recursively processed</li>
-     *     <li>Wildcards replaced with upper bounds</li>
-     *     <li>Generic arrays unwrapped to an element type</li>
-     * </ul>
-     *
-     * @param type    non-null type to process
-     * @param element the associated annotated element, for context
-     * @return non-null, normalized {@link Type} for injection purposes
-     */
     @Override
     public Type process(Type type, AnnotatedElement element) {
         if (type instanceof Class) {
