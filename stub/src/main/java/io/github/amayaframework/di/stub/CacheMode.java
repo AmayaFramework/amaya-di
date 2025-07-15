@@ -23,7 +23,7 @@ public enum CacheMode {
      * <p>
      * The factory first attempts to resolve dependencies from its internal cache.
      * If a dependency is not found, it falls back to resolving it from the underlying
-     * source and caches the result.
+     * source.
      */
     PARTIAL,
 
