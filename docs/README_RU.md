@@ -52,7 +52,7 @@ Amaya DI — современный взгляд на то, каким долж�
 
 ```Groovy
 dependencies {
-    implementation group: 'io.github.amayaframework', name: 'amaya-di', version: '3.0.2'
+    implementation group: 'io.github.amayaframework', name: 'amaya-di', version: '3.0.4'
     // ASM stub implementation
     implementation group: 'io.github.amayaframework', name: 'amaya-di-asm', version: '2.0.2'
     // Или reflect stub implementation
@@ -66,7 +66,7 @@ dependencies {
 <dependency>
     <groupId>io.github.amayaframework</groupId>
     <artifactId>amaya-di</artifactId>
-    <version>3.0.2</version>
+    <version>3.0.4</version>
 </dependency>
 <!--ASM stub implementation-->
 <dependency>
@@ -500,17 +500,120 @@ public interface TypeProcessor {
 * `List<? super String>` => `List<Object>`;
 * `List<?>` => `List<Object>`.
 
-Type variable полностью запрещены.
+Type variable полностью запрещены, поскольку невозможно однозначно выполнить их приведение. Например, если приводить их
+к первому типу в upper bounds (`<T>` => `Object`, `<T extends Number>` => `Number`), то в случае цикла 
+`class A<T extends A<T>>` невозможно однозначно определить, как его разорвать.
 
 ## Генерация ObjectFactory
 
-### 
+### Фабрика stub'ов
+
+Stub'ами в контексте фреймворка называются реализации `ObjectFactory`, автоматически генерируемые в соответствии со
+схемой внедрения класса. Stub'ы создаются с помощью `StubFactory`, чей базовый интерфейс выглядит следующим образом:
+
+```java
+@FunctionalInterface
+public interface StubFactory {
+    ObjectFactory create(ClassSchema schema, CacheMode mode);
+    
+    default ObjectFactory create(ClassSchema schema) {
+        return create(schema, CacheMode.NONE);
+    }
+}
+```
+
+Все реализации **обязаны** строго следовать указанной схеме внедрения и режиму кэширования. Если по каким-либо причинам
+создать **готовый к использованию** инстанс `ObjectFactory` невозможно, или же невозможно внедрение части зависимостей (
+например, целевое поле каким-то образом оказалось приватным), фабрика должна выбросить исключение. Возврат `null` и/или
+возврат примитивной реализации вроде `provider -> null` не допускаются.
+
+### Кэширование ObjectFactory
+
+В большинстве сценариев собранный контейнер используется только в режиме read-only. Следовательно, для сгенерированных
+`ObjectFactory` в таких случаях имеет смысл напрямую сохранить реализации фабрик для тех типов, от которых они зависят.
+Это позволит минимизировать (или вовсе избежать) лишние вызовы `TypeProvider#get(type)`, что значительно сокращает
+накладные расходы.
+
+Для явного управления кэшированием вводятся следующие режимы:
+
+* `CacheMode.FULL` – запрос в `TypeProvider` не осуществляется вообще, необходимые фабрики берутся напрямую из
+внутренного кэша;
+* `CacheMode.PARTIAL` – запрос в `TypeProvider` осуществляется в том случае, если во внутреннем кэше нет нужной фабрики;
+результат запроса **не сохраняется** (для потокобезопасного доступа к контейнеру);
+* `CacheMode.NONE` – запрос в `TypeProvider` осуществляется всегда, внутреннего кэша не существует.
+
+Также все `ObjectFactory` с внутренним кэшем должны реализовывать интерфейс `CachedObjectFactory`, позволяющий 
+инициализировать или обновить содержимое:
+
+```java
+public interface CachedObjectFactory extends ObjectFactory {
+    void set(Type type, ObjectFactory factory);
+}
+```
 
 # Сборка контейнера
 
-## Базовый сценарий использования
+Создание и заполнение контейнера может производиться как напрямую (путём реализации и инстанциации всех необходимых 
+сущностей), так и с помощью пользовательских утилит. 
+
+По умолчанию фреймворк предоставляет механизм сборки, основанный на паттерне "builder". Его функционал включает:
+
+* работу с generic-типами с помощью [jtype](https://github.com/RomanQed/jtype);
+* добавление пользовательских реализаций `ObjectFactory`;
+* добавление transient и singleton типов по их классу;
+* добавление scoped типов;
+* валидацию графа зависимостей на предмет циклов и отсутствующих типов.
+
+## Базовые сценарии использования
+
+Варианты билдеров представлены интерфейсами `ServiceProviderBuilder` и его расширением `ScopedProviderBuilder`, которое
+добавляет scoped-фичи. Получение их инстансов предусмотрено с помощью утилитного класса `ProviderBuilders`. Он
+предоставляет статические методы для создания всех реализаций, включенных в состав фреймворка, и, по сути, является 
+точкой входа в API.
+
+Существуют следующие основные методы (перегрузки см. в javadoc):
+
+```java
+// Создаёт билдер с указанными фабриками и проверками
+// Если checks == BuilderChecks.NO_CHECKS, используется реализация, не имеющая механизмов валидации
+public static ServiceProviderBuilder create(SchemaFactory schemaFactory, StubFactory stubFactory, int checks) {...}
+
+// Создаёт билдер с фабрикой схем внедрения и cache mode по умолчанию (ProviderBuilders#SCHEMA_FACTORY и #CACHE_MODE)
+// Если checks == BuilderChecks.NO_CHECKS, используется реализация, не имеющая механизмов валидации 
+public static ServiceProviderBuilder create(int checks) {...}
+
+// Создаёт билдер с указанными фабриками, ProviderBuilders#CACHE_MODE и без проверок
+public static ServiceProviderBuilder create(SchemaFactory schemaFactory, StubFactory stubFactory) {}
+
+// Создаёт билдер с ProviderBuilders#SCHEMA_FACTORY, #CACHE_MODE и без проверок.
+public static ServiceProviderBuilder create() {...}
+
+// Создаёт билдер с ProviderBuilders#SCHEMA_FACTORY, #CACHE_MODE и BuilderChecks.VALIDATE_ALL.
+public static ServiceProviderBuilder createChecked() {...}
+
+// Создаёт scoped-билдер с указанными фабриками и проверками
+// Если checks == BuilderChecks.NO_CHECKS, используется реализация, не имеющая механизмов валидации
+public static ScopedProviderBuilder createScoped(SchemaFactory schemaFactory, StubFactory stubFactory, int checks) {...}
+
+// Создаёт scoped-билдер с фабрикой схем внедрения и cache mode по умолчанию (ProviderBuilders#SCHEMA_FACTORY и #CACHE_MODE)
+// Если checks == BuilderChecks.NO_CHECKS, используется реализация, не имеющая механизмов валидации 
+public static ScopedProviderBuilder createScoped(int checks) {...}
+
+// Создаёт scoped-билдер с указанными фабриками, ProviderBuilders#CACHE_MODE и без проверок
+public static ScopedProviderBuilder createScoped(SchemaFactory schemaFactory, StubFactory stubFactory) {...}
+
+// Создаёт scoped-билдер с ProviderBuilders#SCHEMA_FACTORY, #CACHE_MODE и без проверок.
+public static ScopedProviderBuilder createScoped() {...}
+
+// Создаёт scoped-билдер с ProviderBuilders#SCHEMA_FACTORY, #CACHE_MODE и BuilderChecks.VALIDATE_ALL.
+public static ScopedProviderBuilder createCheckedScoped() {...}
+```
+
+Пример, показывающий все возможности билдеров, см. [тут](../examples/src/main/java/com/github/romanqed/di/examples/AllMethods.java).
 
 ## Generic-типы
+
+
 
 ## Валидация графа зависимостей
 
