@@ -41,6 +41,9 @@ public final class ProviderBuilders {
      * @return a new instance of {@link ServiceProviderBuilder} with checking enabled
      */
     public static ServiceProviderBuilder create(SchemaFactory schemaFactory, StubFactory stubFactory, int checks) {
+        if (checks == BuilderChecks.NO_CHECKS) {
+            return new PlainProviderBuilder(schemaFactory, stubFactory, CACHE_MODE);
+        }
         return new CheckedProviderBuilder(schemaFactory, stubFactory, CACHE_MODE, checks);
     }
 
@@ -52,6 +55,9 @@ public final class ProviderBuilders {
      * @return a new instance of {@link ServiceProviderBuilder} with checking enabled
      */
     public static ServiceProviderBuilder create(int checks) {
+        if (checks == BuilderChecks.NO_CHECKS) {
+            return new PlainProviderBuilder(SCHEMA_FACTORY, null, CACHE_MODE);
+        }
         return new CheckedProviderBuilder(SCHEMA_FACTORY, null, CACHE_MODE, checks);
     }
 
@@ -97,6 +103,9 @@ public final class ProviderBuilders {
      * @return a new instance of {@link ScopedProviderBuilder} with checking enabled
      */
     public static ScopedProviderBuilder createScoped(SchemaFactory schemaFactory, StubFactory stubFactory, int checks) {
+        if (checks == BuilderChecks.NO_CHECKS) {
+            return new PlainScopedProviderBuilder(schemaFactory, stubFactory, CACHE_MODE);
+        }
         return new CheckedScopedProviderBuilder(schemaFactory, stubFactory, CACHE_MODE, checks);
     }
 
@@ -108,6 +117,9 @@ public final class ProviderBuilders {
      * @return a new instance of {@link ScopedProviderBuilder} with checking enabled
      */
     public static ScopedProviderBuilder createScoped(int checks) {
+        if (checks == BuilderChecks.NO_CHECKS) {
+            return new PlainScopedProviderBuilder(SCHEMA_FACTORY, null, CACHE_MODE);
+        }
         return new CheckedScopedProviderBuilder(SCHEMA_FACTORY, null, CACHE_MODE, checks);
     }
 
