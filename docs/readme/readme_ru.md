@@ -103,7 +103,7 @@ dependencies {
 
 Сначала, в случае использования модулей укажем зависимости для `module-info.java`:
 
-```Java
+```java
 module com.github.romanqed.di.examples {
     requires io.github.amayaframework.di; // Основной модуль
     exports com.github.romanqed.di.examples;
@@ -112,11 +112,7 @@ module com.github.romanqed.di.examples {
 
 Теперь соберем простейший контейнер:
 
-```Java
-package com.github.romanqed.di.examples;
-
-import io.github.amayaframework.di.ProviderBuilders;
-
+```java
 public final class SimpleHelloWorld {
 
   public static void main(String[] args) {
@@ -132,7 +128,7 @@ public final class SimpleHelloWorld {
 
 Рассмотрим более сложный сценарий. Допустим, у нас есть некоторый абстрактный сервис `IGreeter`:
 
-```Java
+```java
 public interface IGreeter { 
     String sayHello(String name);
 }
@@ -140,7 +136,7 @@ public interface IGreeter {
 
 И две его реализации, одна для глобального контекста, вторая для scoped:
 
-```Java
+```java
 public final class GlobalGreeter implements IGreeter {
     @Override 
     public String sayHello(String name) {
@@ -174,7 +170,7 @@ module com.github.romanqed.di.examples {
 
 Соберём контейнер:
 
-```Java
+```java
 var provider = ProviderBuilders.createScoped(new ReflectStubFactory())
         .addSingleton(IGreeter.class, GlobalGreeter.class)
         .addScoped(String.class)
@@ -183,7 +179,7 @@ var provider = ProviderBuilders.createScoped(new ReflectStubFactory())
 ```
 
 И создадим два scope'а:
-```Java
+```java
 var scope1 = provider.createScoped();
 scope1.repository().put("Scope One"); 
 var scope2 = provider.createScoped(); 
@@ -192,7 +188,7 @@ scope2.repository().put("Scope Two");
 
 И, наконец, выведем результаты:
 
-```Java
+```java
 System.out.println(provider.get(IGreeter.class).sayHello("Roman"));
 System.out.println(scope1.get(IGreeter.class).sayHello("Roman")); 
 System.out.println(scope2.get(IGreeter.class).sayHello("Roman"));
@@ -207,14 +203,8 @@ Hello from scope 'Scope Two', Roman!
 
 Полный код выглядит следующим образом:
 
-```Java
-package com.github.romanqed.di.examples;
-
-import io.github.amayaframework.di.ProviderBuilders;
-import io.github.amayaframework.di.reflect.ReflectStubFactory;
-
+```java
 public final class ComplexHelloWorld {
-
     public static void main(String[] args) {
         var provider = ProviderBuilders.createScoped(new ReflectStubFactory())
                 .addSingleton(IGreeter.class, GlobalGreeter.class)
@@ -308,7 +298,6 @@ public interface TypeProvider {
 
 ```java
 public final class ManualHelloWorld {
-
     public static void main(String[] args) {
         var provider = ProviderBuilders.createScoped()
                 .add(IGreeter.class, (ObjectFactory) tp -> new GlobalGreeter())
@@ -627,7 +616,6 @@ public static ScopedProviderBuilder createCheckedScoped() {...}
 
 ```java
 public final class GenericTypes {
-
     public static void main(String[] args) {
         var provider = ProviderBuilders.create(new ReflectStubFactory(), BuilderChecks.VALIDATE_MISSING_TYPES)
                 .addInstance(new JType<>(){}, List.of("str1", "str2", "str3")) // auto-catch
