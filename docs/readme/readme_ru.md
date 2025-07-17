@@ -1,6 +1,6 @@
-<div style="text-align: center;">
-  <img src="../img/logo.png" alt="logo" style="width: 250px; height: 250px;">
-</div>
+<p align="center">
+  <img src="../img/logo.png" alt="logo" style="width: 250px; height: auto;">
+</p>
 
 # amaya-di – современный, легковесный и быстрый DI фреймворк.
 
