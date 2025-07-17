@@ -15,7 +15,9 @@
 - [Deutsch](docs/readme/readme_de.md)
 - [Français](docs/readme/readme_fr.md)
 
-Amaya DI is a modern view on what a DI framework should be. It is designed to provide developers with a high-performance, flexible, and minimalist IoC container without outdated XML configurations, excessive annotations, or hidden reflection-based magic.
+Amaya DI is a modern view on what a DI framework should be. It is designed to provide developers with a
+high-performance, flexible, and minimalist IoC container without outdated XML configurations, excessive annotations, or
+hidden reflection-based magic.
 
 The framework supports the following features "out of the box":
 
@@ -31,6 +33,7 @@ The framework supports the following features "out of the box":
 * easy integration with any existing library, framework, or standard.
 
 Performance of generated object factories is:
+
 * using the asm implementation matches manual implementation (13,604 ns vs 13,475 ns);
 * using the reflect implementation includes JNI overhead but is still reasonably fast (58,055 ns vs 13,402 ns).
 
@@ -45,22 +48,24 @@ Requirements:
 
 Any JVM version below 11 is not supported.
 
-Use of languages other than Java is possible since the framework has no compile-time plugins and does not analyze Java AST.
+Use of languages other than Java is possible since the framework has no compile-time plugins and does not analyze Java
+AST.
 
 ## Installation
 
-To use the framework, two modules must be installed: the core (`io.github.amayaframework:amaya-di`) and a stub factory implementation (`:amaya-di-asm` or `:amaya-di-reflect`).  
+To use the framework, two modules must be installed: the core (`io.github.amayaframework:amaya-di`) and a stub factory
+implementation (`:amaya-di-asm` or `:amaya-di-reflect`).  
 See [choosing an implementation](#choosing-an-implementation) for details.
 
 ### Gradle
 
 ```Groovy
 dependencies {
-implementation group: 'io.github.amayaframework', name: 'amaya-di', version: '3.0.4'
+    implementation group: 'io.github.amayaframework', name: 'amaya-di', version: '3.0.4'
 // ASM stub implementation
-implementation group: 'io.github.amayaframework', name: 'amaya-di-asm', version: '2.0.2'
+    implementation group: 'io.github.amayaframework', name: 'amaya-di-asm', version: '2.0.2'
 // Or reflect stub implementation
-implementation group: 'io.github.amayaframework', name: 'amaya-di-reflect', version: '2.0.0'
+    implementation group: 'io.github.amayaframework', name: 'amaya-di-reflect', version: '2.0.0'
 }
 ```
 
@@ -101,8 +106,8 @@ First, if using modules, declare dependencies in `module-info.java`:
 
 ```java
 module com.github.romanqed.di.examples {
-requires io.github.amayaframework.di; // Core module
-exports com.github.romanqed.di.examples;
+    requires io.github.amayaframework.di; // Core module
+    exports com.github.romanqed.di.examples;
 }
 ```
 
@@ -111,12 +116,12 @@ Now let's build a simplest container:
 ```java
 public final class SimpleHelloWorld {
 
-public static void main(String[] args) {
-var provider = ProviderBuilders.create()
-.addInstance("Hello, world!")
-.build();
-System.out.println(provider.get(String.class));
-}
+    public static void main(String[] args) {
+        var provider = ProviderBuilders.create()
+                .addInstance("Hello, world!")
+                .build();
+        System.out.println(provider.get(String.class));
+    }
 }
 ```
 
@@ -126,7 +131,7 @@ Consider a more complex scenario. Suppose we have an abstract service `IGreeter`
 
 ```java
 public interface IGreeter {
-String sayHello(String name);
+    String sayHello(String name);
 }
 ```
 
@@ -134,20 +139,20 @@ And two implementations, one for the global context, one for scoped:
 
 ```java
 public final class GlobalGreeter implements IGreeter {
-@Override
-public String sayHello(String name) {
-return "Hello, " + name + "!";
-}
+    @Override
+    public String sayHello(String name) {
+        return "Hello, " + name + "!";
+    }
 }
 
 public final class ScopedGreeter implements IGreeter {
-private final String scope;
+    private final String scope;
 
     public ScopedGreeter(String scope) {
         this.scope = scope;
     }
-    
-    @Override 
+
+    @Override
     public String sayHello(String name) {
         return "Hello from scope '" + scope + "', " + name + "!";
     }
@@ -158,9 +163,9 @@ Add the reflective factory generator to `module-info.java`:
 
 ```java
 module com.github.romanqed.di.examples {
-requires io.github.amayaframework.di; // Core module
-requires io.github.amayaframework.di.reflect; // Using reflect implementation
-exports com.github.romanqed.di.examples;
+    requires io.github.amayaframework.di; // Core module
+    requires io.github.amayaframework.di.reflect; // Using reflect implementation
+    exports com.github.romanqed.di.examples;
 }
 ```
 
@@ -168,10 +173,10 @@ Build the container:
 
 ```java
 var provider = ProviderBuilders.createScoped(new ReflectStubFactory())
-.addSingleton(IGreeter.class, GlobalGreeter.class)
-.addScoped(String.class)
-.addScopedSingleton(IGreeter.class, ScopedGreeter.class)
-.build();
+        .addSingleton(IGreeter.class, GlobalGreeter.class)
+        .addScoped(String.class)
+        .addScopedSingleton(IGreeter.class, ScopedGreeter.class)
+        .build();
 ```
 
 Create two scopes:
@@ -203,20 +208,20 @@ Full code looks like this:
 
 ```java
 public final class ComplexHelloWorld {
-public static void main(String[] args) {
-var provider = ProviderBuilders.createScoped(new ReflectStubFactory())
-.addSingleton(IGreeter.class, GlobalGreeter.class)
-.addScoped(String.class)
-.addScopedSingleton(IGreeter.class, ScopedGreeter.class)
-.build();
-var scope1 = provider.createScoped();
-scope1.repository().put("Scope One");
-var scope2 = provider.createScoped();
-scope2.repository().put("Scope Two");
-System.out.println(provider.get(IGreeter.class).sayHello("Roman"));
-System.out.println(scope1.get(IGreeter.class).sayHello("Roman"));
-System.out.println(scope2.get(IGreeter.class).sayHello("Roman"));
-}
+    public static void main(String[] args) {
+        var provider = ProviderBuilders.createScoped(new ReflectStubFactory())
+                .addSingleton(IGreeter.class, GlobalGreeter.class)
+                .addScoped(String.class)
+                .addScopedSingleton(IGreeter.class, ScopedGreeter.class)
+                .build();
+        var scope1 = provider.createScoped();
+        scope1.repository().put("Scope One");
+        var scope2 = provider.createScoped();
+        scope2.repository().put("Scope Two");
+        System.out.println(provider.get(IGreeter.class).sayHello("Roman"));
+        System.out.println(scope1.get(IGreeter.class).sayHello("Roman"));
+        System.out.println(scope2.get(IGreeter.class).sayHello("Roman"));
+    }
 
     public interface IGreeter {
         String sayHello(String name);
@@ -253,19 +258,20 @@ All runnable examples are available [here](../../examples).
 
 ### ObjectFactory and TypeProvider
 
-The main mechanism underlying the container are the interfaces `ObjectFactory` and `TypeProvider`. Their definitions are:
+The main mechanism underlying the container are the interfaces `ObjectFactory` and `TypeProvider`. Their definitions
+are:
 
 ```java
 @FunctionalInterface
 public interface ObjectFactory {
-Object create(TypeProvider provider) throws Throwable;
+    Object create(TypeProvider provider) throws Throwable;
 }
 ```
 
 ```java
 @FunctionalInterface
 public interface TypeProvider {
-ObjectFactory get(Type type);
+    ObjectFactory get(Type type);
 
     default boolean canProvide(Type type) {
         return get(type) != null;
@@ -273,41 +279,51 @@ ObjectFactory get(Type type);
 }
 ```
 
-`ObjectFactory` creates an instance of a type whose dependencies are supplied by `TypeProvider`. This design is convenient for two reasons:
+`ObjectFactory` creates an instance of a type whose dependencies are supplied by `TypeProvider`. This design is
+convenient for two reasons:
 
-1) the object factory has no hard dependency on the type provider and can wrap or modify it before passing it to lower-level factories, enabling any scenario;
+1) the object factory has no hard dependency on the type provider and can wrap or modify it before passing it to
+   lower-level factories, enabling any scenario;
 
-2) obtaining the factory directly instead of an instance allows avoiding extra lookups and caching the factory without losing other advantages.
+2) obtaining the factory directly instead of an instance allows avoiding extra lookups and caching the factory without
+   losing other advantages.
 
-The seemingly redundant method `TypeProvider#canProvide` is needed when we want to **definitively** ensure the provider can supply an object factory. Because comparing to `null` does not work in cases where the container implementation returns wrappers around factories for some reasons. For example, `get(Type.class)` might return an `ObjectFactory` implementation that always returns `null`.
+The seemingly redundant method `TypeProvider#canProvide` is needed when we want to **definitively** ensure the provider
+can supply an object factory. Because comparing to `null` does not work in cases where the container implementation
+returns wrappers around factories for some reasons. For example, `get(Type.class)` might return an `ObjectFactory`
+implementation that always returns `null`.
 
-To prevent such situations, `canProvide` exists as a definitive indicator. If it returns `true`, then `get` will return a **non-null** `ObjectFactory` instance, guaranteed (from the container's perspective!) to be a user-provided factory, not a stub or temporary wrapper.
+To prevent such situations, `canProvide` exists as a definitive indicator. If it returns `true`, then `get` will return
+a **non-null** `ObjectFactory` instance, guaranteed (from the container's perspective!) to be a user-provided factory,
+not a stub or temporary wrapper.
 
 Without automatic generation of `ObjectFactory`, the example `ComplexHelloWorld` looks like this (`ManualHelloWorld`):
 
 ```java
 public final class ManualHelloWorld {
-public static void main(String[] args) {
-var provider = ProviderBuilders.createScoped()
-.add(IGreeter.class, (ObjectFactory) tp -> new GlobalGreeter())
-.addScoped(IGreeter.class, (ObjectFactory) tp -> {
-var scope = (String) tp.get(String.class).create(tp);
-return new ScopedGreeter(scope);
-})
-.build();
-var scope1 = provider.createScoped();
-scope1.repository().put("Scope One");
-var scope2 = provider.createScoped();
-scope2.repository().put("Scope Two");
-System.out.println(provider.get(IGreeter.class).sayHello("Roman"));
-System.out.println(scope1.get(IGreeter.class).sayHello("Roman"));
-System.out.println(scope2.get(IGreeter.class).sayHello("Roman"));
-}
-// IGreeter and its impls
+    public static void main(String[] args) {
+        var provider = ProviderBuilders.createScoped()
+                .add(IGreeter.class, (ObjectFactory) tp -> new GlobalGreeter())
+                .addScoped(IGreeter.class, (ObjectFactory) tp -> {
+                    var scope = (String) tp.get(String.class).create(tp);
+                    return new ScopedGreeter(scope);
+                })
+                .build();
+        var scope1 = provider.createScoped();
+        scope1.repository().put("Scope One");
+        var scope2 = provider.createScoped();
+        scope2.repository().put("Scope Two");
+        System.out.println(provider.get(IGreeter.class).sayHello("Roman"));
+        System.out.println(scope1.get(IGreeter.class).sayHello("Roman"));
+        System.out.println(scope2.get(IGreeter.class).sayHello("Roman"));
+    }
+    // IGreeter and its impls
 }
 ```
 
-Note that `addScoped(String.class)`, which was in `ComplexHelloWorld`, can be omitted here because validation of user-provided factories is not performed. Such dependencies (including instance and `Function0` variants) are considered root since the set of dependent types cannot be determined in finite time (i.e., without running them).
+Note that `addScoped(String.class)`, which was in `ComplexHelloWorld`, can be omitted here because validation of
+user-provided factories is not performed. Such dependencies (including instance and `Function0` variants) are considered
+root since the set of dependent types cannot be determined in finite time (i.e., without running them).
 
 ### Extending TypeProvider: TypeRepository
 
@@ -315,29 +331,31 @@ Note that `addScoped(String.class)`, which was in `ComplexHelloWorld`, can be om
 
 ```java
 public interface TypeRepository extends TypeProvider, Iterable<Type> {
-void put(Type type, ObjectFactory factory);
+    void put(Type type, ObjectFactory factory);
 
     void put(Type type, Function0<?> provider);
-    
+
     void put(Type type, Object instance);
-    
+
     void put(Object instance);
-    
+
     ObjectFactory remove(Type type);
-    
+
     void putAll(TypeRepository repository);
-    
+
     void putAll(Map<Type, ObjectFactory> map);
-    
+
     void clear();
-    
+
     void forEach(BiConsumer<Type, ObjectFactory> action);
 }
 ```
 
 The method `put(type, factory)` adds an entry `type->factory`. If one exists for the type, it is overwritten.
 
-Methods `put(type, provider)`, `put(type, instance)`, `put(instance)` are equivalents (depending on repository implementation) of `put(type, p -> provider.invoke())`, `put(type, p -> instance)` and `put(instance.getClass(), p -> instance)` respectively.
+Methods `put(type, provider)`, `put(type, instance)`, `put(instance)` are equivalents (depending on repository
+implementation) of `put(type, p -> provider.invoke())`, `put(type, p -> instance)` and
+`put(instance.getClass(), p -> instance)` respectively.
 
 `remove(type)` removes the entry and returns the stored `ObjectFactory` or `null` if none existed.
 
@@ -347,22 +365,25 @@ Both `putAll(...)` variants copy entries from the given source into the reposito
 
 `forEach(BiConsumer)` applies the consumer to each entry, and the `Iterable<Type>` behaves as a mutable `Set<Type>`.
 
-All container variants are built on `TypeRepository`, which manages container contents. Note: **there is no guarantee** that the `TypeProvider` passed to `ObjectFactory#create()` is an instance of `TypeRepository`. Generally, accessing the repository inside a factory is considered bad design and will never be implemented.
+All container variants are built on `TypeRepository`, which manages container contents. Note: **there is no guarantee**
+that the `TypeProvider` passed to `ObjectFactory#create()` is an instance of `TypeRepository`. Generally, accessing the
+repository inside a factory is considered bad design and will never be implemented.
 
 ### Universal Container: ServiceProvider
 
-The `ServiceProvider` interface describes an abstract DI container, providing both access to implementations of requested types and management of contents:
+The `ServiceProvider` interface describes an abstract DI container, providing both access to implementations of
+requested types and management of contents:
 
 ```java
 public interface ServiceProvider {
-TypeRepository repository();
+    TypeRepository repository();
 
     ServiceProvider createScoped();
-    
+
     <T> T get(Type type);
-    
+
     <T> T get(Class<T> type);
-    
+
     <T> T get(JType<T> type);
 }
 ```
@@ -375,16 +396,19 @@ The `get(type)` methods search for an `ObjectFactory` for the requested type and
 
 `repository()` returns a mutable `TypeRepository` instance used by this container.
 
-`createScoped()` creates a new container that uses fallthrough lookup to the parent container if the type is not found in the current container. Scoping can be nested infinitely.
+`createScoped()` creates a new container that uses fallthrough lookup to the parent container if the type is not found
+in the current container. Scoping can be nested infinitely.
 
 ### Other core utilities
 
 Besides the above interfaces, the core includes:
 
-* an abstract `ServiceProvider` implementation (`AbstractServiceProvider`) containing the `repository` field and all methods except `createScoped()`;
+* an abstract `ServiceProvider` implementation (`AbstractServiceProvider`) containing the `repository` field and all
+  methods except `createScoped()`;
 * a `TypeRepository` implementation based on `Map<Type, ObjectFactory>` (`HashTypeRepository`);
 * a thread-safe lazy wrapper over `ObjectFactory` used for singleton policies (`LazyObjectFactory`);
-* a universal scoped `TypeRepository` implementation connecting any pair of scoped and parent repositories (`ScopedTypeRepository`).
+* a universal scoped `TypeRepository` implementation connecting any pair of scoped and parent repositories (
+  `ScopedTypeRepository`).
 
 See javadoc for details.
 
@@ -392,20 +416,22 @@ See javadoc for details.
 
 ### Injection schema concept
 
-To fully separate reflective information analysis from how it is obtained, the framework introduces the concept of an `injection schema`. It is a descriptor containing:
+To fully separate reflective information analysis from how it is obtained, the framework introduces the concept of an
+`injection schema`. It is a descriptor containing:
 
 * the target object or injection target – a class member or the class itself;
 * a set of types the injection target depends on;
 * a mapping of parameter indexes to types for a callable target (method or constructor);
 * a single type for a field.
 
-A class injection schema contains a constructor schema, sets of method schemas, and sets of field schemas. The set of types the class depends on is the union of all member schemas' types.
+A class injection schema contains a constructor schema, sets of method schemas, and sets of field schemas. The set of
+types the class depends on is the union of all member schemas' types.
 
 The base interface implemented by each `...Schema` is:
 
 ```java
 public interface Schema<T> {
-T getTarget();
+    T getTarget();
 
     Set<Type> getTypes();
 }
@@ -415,7 +441,7 @@ For callable targets it is extended by `ExecutableSchema`:
 
 ```java
 public interface ExecutableSchema<T extends Executable> extends Schema<T> {
-Type[] getMapping();
+    Type[] getMapping();
 }
 ```
 
@@ -432,11 +458,12 @@ To generate schemas for a given class, schema factories are used. Each factory i
 
 ```java
 public interface SchemaFactory {
-ClassSchema create(Class<?> clazz);
+    ClassSchema create(Class<?> clazz);
 }
 ```
 
-By default, an implementation that searches for injection targets among class members is provided (`ReflectSchemaFactory`). Logic:
+By default, an implementation that searches for injection targets among class members is provided (
+`ReflectSchemaFactory`). Logic:
 
 1) all public constructors (`Class#getConstructors()`) are inspected:
     1) if exactly one constructor, select it;
@@ -448,34 +475,39 @@ By default, an implementation that searches for injection targets among class me
     2) if static and first argument type is equal to or supertype of target class, select it;
     3) otherwise invalid.
 
-The marker annotation can be any (by default `@Inject` provided with `amaya-di`) and is passed as a constructor parameter.
+The marker annotation can be any (by default `@Inject` provided with `amaya-di`) and is passed as a constructor
+parameter.
 
 `ReflectSchemaFactory` also allows specifying a custom "type processor" implementing:
 
 ```java
 public interface TypeProcessor {
-Type process(Type type, AnnotatedElement element);
+    Type process(Type type, AnnotatedElement element);
 }
 ```
 
-The default processor (`ReflectTypeProcessor`) parses both "simple" types (`Class` instances) and generics. Wildcards are normalized to upper bounds:
+The default processor (`ReflectTypeProcessor`) parses both "simple" types (`Class` instances) and generics. Wildcards
+are normalized to upper bounds:
 
 * `List<? extends String>` => `List<String>`;
 * `List<? super String>` => `List<Object>`;
 * `List<?>` => `List<Object>`.
 
-Type variables are disallowed because their unambiguous normalization is impossible. For example, if mapped to the first upper bound type (`<T>` => `Object`, `<T extends Number>` => `Number`), cyclic bounds like `class A<T extends A<T>>` cannot be resolved.
+Type variables are disallowed because their unambiguous normalization is impossible. For example, if mapped to the first
+upper bound type (`<T>` => `Object`, `<T extends Number>` => `Number`), cyclic bounds like `class A<T extends A<T>>`
+cannot be resolved.
 
 ## ObjectFactory generation
 
 ### Stub factory
 
-In this framework, stubs are `ObjectFactory` implementations automatically generated according to the class injection schema. Stubs are created by `StubFactory`, whose interface is:
+In this framework, stubs are `ObjectFactory` implementations automatically generated according to the class injection
+schema. Stubs are created by `StubFactory`, whose interface is:
 
 ```java
 @FunctionalInterface
 public interface StubFactory {
-ObjectFactory create(ClassSchema schema, CacheMode mode);
+    ObjectFactory create(ClassSchema schema, CacheMode mode);
 
     default ObjectFactory create(ClassSchema schema) {
         return create(schema, CacheMode.NONE);
@@ -483,23 +515,30 @@ ObjectFactory create(ClassSchema schema, CacheMode mode);
 }
 ```
 
-All implementations **must** strictly follow the given injection schema and cache mode. If for any reason a **ready-to-use** `ObjectFactory` instance cannot be created, or part of dependencies cannot be injected (e.g., a target field is private), the factory must throw an exception. Returning `null` or a dummy implementation like `provider -> null` is forbidden.
+All implementations **must** strictly follow the given injection schema and cache mode. If for any reason a *
+*ready-to-use** `ObjectFactory` instance cannot be created, or part of dependencies cannot be injected (e.g., a target
+field is private), the factory must throw an exception. Returning `null` or a dummy implementation like
+`provider -> null` is forbidden.
 
 ### ObjectFactory caching
 
-In most scenarios, the built container is used in read-only mode. Therefore, for generated `ObjectFactory`s it makes sense to cache the factories of dependent types directly. This minimizes (or avoids) extra calls to `TypeProvider#get(type)`, greatly reducing overhead.
+In most scenarios, the built container is used in read-only mode. Therefore, for generated `ObjectFactory`s it makes
+sense to cache the factories of dependent types directly. This minimizes (or avoids) extra calls to
+`TypeProvider#get(type)`, greatly reducing overhead.
 
 Caching modes:
 
 * `CacheMode.FULL` – no calls to `TypeProvider`, factories taken directly from internal cache;
-* `CacheMode.PARTIAL` – calls to `TypeProvider` only if the needed factory is missing in the internal cache; results **are not cached** (for thread-safe container access);
+* `CacheMode.PARTIAL` – calls to `TypeProvider` only if the needed factory is missing in the internal cache; results *
+  *are not cached** (for thread-safe container access);
 * `CacheMode.NONE` – always calls `TypeProvider`; no internal cache.
 
-All internally cached `ObjectFactory`s must implement `CachedObjectFactory` interface, which allows initializing or updating cache content:
+All internally cached `ObjectFactory`s must implement `CachedObjectFactory` interface, which allows initializing or
+updating cache content:
 
 ```java
 public interface CachedObjectFactory extends ObjectFactory {
-void set(Type type, ObjectFactory factory);
+    void set(Type type, ObjectFactory factory);
 }
 ```
 
@@ -518,7 +557,8 @@ By default, the framework provides a build mechanism based on the "builder" patt
 
 ## Basic Usage Scenarios
 
-Builder variants are represented by the interfaces `ServiceProviderBuilder` and its extension `ScopedProviderBuilder`, which
+Builder variants are represented by the interfaces `ServiceProviderBuilder` and its extension `ScopedProviderBuilder`,
+which
 adds scoped features. Instances of these are provided via the utility class `ProviderBuilders`. It offers static methods
 to create all implementations included in the framework and effectively serves as the API entry point.
 
@@ -534,7 +574,7 @@ public static ServiceProviderBuilder create(SchemaFactory schemaFactory, StubFac
 public static ServiceProviderBuilder create(int checks) {...}
 
 // Creates a builder with specified factories, ProviderBuilders#CACHE_MODE, and no checks
-public static ServiceProviderBuilder create(SchemaFactory schemaFactory, StubFactory stubFactory) {}
+public static ServiceProviderBuilder create(SchemaFactory schemaFactory, StubFactory stubFactory) {...}
 
 // Creates a builder with ProviderBuilders#SCHEMA_FACTORY, #CACHE_MODE, and no checks.
 public static ServiceProviderBuilder create() {...}
@@ -560,7 +600,8 @@ public static ScopedProviderBuilder createScoped() {...}
 public static ScopedProviderBuilder createCheckedScoped() {...}
 ```
 
-An example demonstrating all builder capabilities is available [here](../../examples/src/main/java/com/github/romanqed/di/examples/AllMethods.java).
+An example demonstrating all builder capabilities is
+available [here](../../examples/src/main/java/com/github/romanqed/di/examples/AllMethods.java).
 
 ## Generic Types
 
@@ -570,27 +611,27 @@ showing both automatic capture of the type and manual creation:
 
 ```java
 public final class GenericTypes {
-public static void main(String[] args) {
-var provider = ProviderBuilders.create(new ReflectStubFactory(), BuilderChecks.VALIDATE_MISSING_TYPES)
-.addInstance(new JType<>(){}, List.of("str1", "str2", "str3")) // auto-catch
-.addInstance(Types.of(List.class, Integer.class), List.of(1, 2, 3)) // manual
-// for "new JType<>(){}" type will be Map<String, String>
-.addInstance(new JType<Map<String, Object>>(){}, Map.of("s1", "k1", "s2", "k2")) // and for map
-.addInstance(Types.of(Map.class, Integer.class, Object.class), Map.of(1, 1, 2, 2))
-.addTransient(A1.class)
-.addTransient(A2.class)
-// B<A1> and B<A2>
-.add(Types.of(B.class, A1.class), tp -> new B<>((A1) tp.get(A1.class).create(tp)))
-.add(new JType<B<A2>>(){}, tp -> new B<>((A2) tp.get(A2.class).create(tp)))
-// And, finally, C
-.addTransient(C.class)
-.build();
-var c = provider.get(C.class);
-System.out.println(c.b1.value.ints);
-System.out.println(c.b1.value.strings);
-System.out.println(c.b2.value.intMap);
-System.out.println(c.b2.value.strMap);
-}
+    public static void main(String[] args) {
+        var provider = ProviderBuilders.create(new ReflectStubFactory(), BuilderChecks.VALIDATE_MISSING_TYPES)
+                .addInstance(new JType<>(){}, List.of("str1", "str2", "str3")) // auto-catch
+                .addInstance(Types.of(List.class, Integer.class), List.of(1, 2, 3)) // manual
+                // for "new JType<>(){}" type will be Map<String, String>
+                .addInstance(new JType<Map<String, Object>>(){}, Map.of("s1", "k1", "s2", "k2")) // and for map
+                .addInstance(Types.of(Map.class, Integer.class, Object.class), Map.of(1, 1, 2, 2))
+                .addTransient(A1.class)
+                .addTransient(A2.class)
+                // B<A1> and B<A2>
+                .add(Types.of(B.class, A1.class), tp -> new B<>((A1) tp.get(A1.class).create(tp)))
+                .add(new JType<B<A2>>(){}, tp -> new B<>((A2) tp.get(A2.class).create(tp)))
+                // And, finally, C
+                .addTransient(C.class)
+                .build();
+        var c = provider.get(C.class);
+        System.out.println(c.b1.value.ints);
+        System.out.println(c.b1.value.strings);
+        System.out.println(c.b2.value.intMap);
+        System.out.println(c.b2.value.strMap);
+    }
 
     public static final class A1 {
         @Inject
@@ -648,8 +689,8 @@ The validation mechanism is implemented using the following conventions:
 
 For scoped containers, additionally:
 
-* registering a promised type **guarantees** that when creating a scoped container, BEFORE starting work with it, the type will
-  be provided in the repository;
+* registering a promised type **guarantees** that when creating a scoped container, BEFORE starting work with it, the
+  type will be provided in the repository;
 * scope types can refer to other scope types and to base types;
 * base types can ONLY refer to other base types.
 
@@ -658,6 +699,7 @@ Based on this and viewing the container as a dependency graph, five classes of p
 1. A type is missing in the base container, on which another base type depends.
 
 Example:
+
 ```
 class A -> class String
 class String -> missing
@@ -666,6 +708,7 @@ class String -> missing
 2. A type is missing in the scoped container, on which another scoped type depends.
 
 Example:
+
 ```
 class ScopedA -> class String
 class String -> missing in both scoped and base containers
@@ -674,6 +717,7 @@ class String -> missing in both scoped and base containers
 3. A cyclic dependency occurs between base types in the base container.
 
 Example:
+
 ```
 class A -> class B
 class B -> class C
@@ -685,6 +729,7 @@ class C -> class A
 5. A cyclic dependency occurs between containers due to overriding a type by the scoped container.
 
 Example:
+
 ```
 class A -> class B
 class B -> interface IC
@@ -697,7 +742,8 @@ See an example [here](../../examples/src/main/java/com/github/romanqed/di/exampl
 
 # Variants of ObjectFactory Generators
 
-The framework provides two implementations of `StubFactory`, supplied in the modules `amaya-di-asm` and `amaya-di-reflect`.
+The framework provides two implementations of `StubFactory`, supplied in the modules `amaya-di-asm` and
+`amaya-di-reflect`.
 
 ## ASM
 
@@ -713,23 +759,23 @@ when assembling a final (and importantly, unchanging) jar file that will be depl
 
 ```java
 public final class CachedAsmHelloWorld {
-public static void main(String[] args) {
-var baseLoader = new DefineClassLoader();
-var cachedLoader = new CachedClassLoader(baseLoader, new LocalClassCache());
-var stubFactory = new AsmStubFactory(cachedLoader);
-var provider = ProviderBuilders.createScoped(stubFactory)
-.addSingleton(IGreeter.class, GlobalGreeter.class)
-.addScoped(String.class)
-.addScopedSingleton(IGreeter.class, ScopedGreeter.class)
-.build();
-var scope1 = provider.createScoped();
-scope1.repository().put("Scope One");
-var scope2 = provider.createScoped();
-scope2.repository().put("Scope Two");
-System.out.println(provider.get(IGreeter.class).sayHello("Roman"));
-System.out.println(scope1.get(IGreeter.class).sayHello("Roman"));
-System.out.println(scope2.get(IGreeter.class).sayHello("Roman"));
-}
+    public static void main(String[] args) {
+        var baseLoader = new DefineClassLoader();
+        var cachedLoader = new CachedClassLoader(baseLoader, new LocalClassCache());
+        var stubFactory = new AsmStubFactory(cachedLoader);
+        var provider = ProviderBuilders.createScoped(stubFactory)
+                .addSingleton(IGreeter.class, GlobalGreeter.class)
+                .addScoped(String.class)
+                .addScopedSingleton(IGreeter.class, ScopedGreeter.class)
+                .build();
+        var scope1 = provider.createScoped();
+        scope1.repository().put("Scope One");
+        var scope2 = provider.createScoped();
+        scope2.repository().put("Scope Two");
+        System.out.println(provider.get(IGreeter.class).sayHello("Roman"));
+        System.out.println(scope1.get(IGreeter.class).sayHello("Roman"));
+        System.out.println(scope2.get(IGreeter.class).sayHello("Roman"));
+    }
 
     public static final class LocalClassCache implements ClassCache {
         private static final Path CACHE_ROOT = Path.of("cache").toAbsolutePath();
@@ -746,7 +792,7 @@ System.out.println(scope2.get(IGreeter.class).sayHello("Roman"));
             if (!Files.isRegularFile(path)) {
                 return null;
             }
-            try (var reader = Files.newInputStream(path)){
+            try (var reader = Files.newInputStream(path)) {
                 return reader.readAllBytes();
             } catch (IOException e) {
                 throw new RuntimeException(e);
@@ -809,7 +855,8 @@ including significant overhead from reflection mechanisms.
 
 ## Implementation Choice
 
-The choice between asm and reflect implementations should be made based on the container usage scenario. If your application container:
+The choice between asm and reflect implementations should be made based on the container usage scenario. If your
+application container:
 
 * is rebuilt frequently;
 * is used once at startup;
@@ -912,8 +959,10 @@ the same except for new methods. Users migrating from amaya-di 2.x to 3.x should
 * `StubFactory` API changed from `create(schema, typeProvider)` to `create(schema, cacheMode)`;
 * `StubFactory` no longer fills the factory cache on creation — this must be done manually;
 * the `jgraph` module is no longer used and removed from dependencies;
-* abstract class `AbstractProviderBuilder` replaced by `AbstractServiceProviderBuilder`, with completely changed protected API;
-* `ServiceWrapper` no longer extends `Function1`; its functional method signature is now `ObjectFactory wrap(ObjectFactory factory)`;
+* abstract class `AbstractProviderBuilder` replaced by `AbstractServiceProviderBuilder`, with completely changed
+  protected API;
+* `ServiceWrapper` no longer extends `Function1`; its functional method signature is now
+  `ObjectFactory wrap(ObjectFactory factory)`;
 * `LazyProvider` class was completely removed;
 * a new exception `CyclesFoundException` was introduced, thrown when multiple cycles are detected;
 * module separation changed completely:
@@ -940,7 +989,8 @@ contributing guide is available [here](CONTRIBUTING.md).
 
 * [RomanQed](https://github.com/RomanQed) - *Main work*
 
-Also check the list of [contributors](https://github.com/AmayaFramework/amaya-di/contributors) who contributed to this project.
+Also check the list of [contributors](https://github.com/AmayaFramework/amaya-di/contributors) who contributed to this
+project.
 
 # License
 
