@@ -573,27 +573,27 @@ public static ScopedProviderBuilder createCheckedScoped() {...}
 
 ```java
 public final class GenericTypes {
-public static void main(String[] args) {
-var provider = ProviderBuilders.create(new ReflectStubFactory(), BuilderChecks.VALIDATE_MISSING_TYPES)
-.addInstance(new JType<>(){}, List.of("str1", "str2", "str3")) // 自动捕获
-.addInstance(Types.of(List.class, Integer.class), List.of(1, 2, 3)) // 手动指定
-// 对于 "new JType<>(){}" 类型是 Map<String, String>
-.addInstance(new JType<Map<String, Object>>(){}, Map.of("s1", "k1", "s2", "k2")) // 对 map 也适用
-.addInstance(Types.of(Map.class, Integer.class, Object.class), Map.of(1, 1, 2, 2))
-.addTransient(A1.class)
-.addTransient(A2.class)
-// B<A1> 和 B<A2>
-.add(Types.of(B.class, A1.class), tp -> new B<>((A1) tp.get(A1.class).create(tp)))
-.add(new JType<B<A2>>(){}, tp -> new B<>((A2) tp.get(A2.class).create(tp)))
-// 最后是 C
-.addTransient(C.class)
-.build();
-var c = provider.get(C.class);
-System.out.println(c.b1.value.ints);
-System.out.println(c.b1.value.strings);
-System.out.println(c.b2.value.intMap);
-System.out.println(c.b2.value.strMap);
-}
+    public static void main(String[] args) {
+        var provider = ProviderBuilders.create(new ReflectStubFactory(), BuilderChecks.VALIDATE_MISSING_TYPES)
+                .addInstance(new JType<>(){}, List.of("str1", "str2", "str3")) // 自动捕获
+                .addInstance(Types.of(List.class, Integer.class), List.of(1, 2, 3)) // 手动指定
+                // 对于 "new JType<>(){}" 类型是 Map<String, String>
+                .addInstance(new JType<Map<String, Object>>(){}, Map.of("s1", "k1", "s2", "k2")) // and for map
+                .addInstance(Types.of(Map.class, Integer.class, Object.class), Map.of(1, 1, 2, 2))
+                .addTransient(A1.class)
+                .addTransient(A2.class)
+                // B<A1> 和 B<A2>
+                .add(Types.of(B.class, A1.class), tp -> new B<>((A1) tp.get(A1.class).create(tp)))
+                .add(new JType<B<A2>>(){}, tp -> new B<>((A2) tp.get(A2.class).create(tp)))
+                // 最后是 C
+                .addTransient(C.class)
+                .build();
+        var c = provider.get(C.class);
+        System.out.println(c.b1.value.ints);
+        System.out.println(c.b1.value.strings);
+        System.out.println(c.b2.value.intMap);
+        System.out.println(c.b2.value.strMap);
+    }
 
     public static final class A1 {
         @Inject
@@ -709,23 +709,23 @@ ASM 实现的特点是准备时间较长，但运行速度极快，接近普通�
 
 ```java
 public final class CachedAsmHelloWorld {
-public static void main(String[] args) {
-var baseLoader = new DefineClassLoader();
-var cachedLoader = new CachedClassLoader(baseLoader, new LocalClassCache());
-var stubFactory = new AsmStubFactory(cachedLoader);
-var provider = ProviderBuilders.createScoped(stubFactory)
-.addSingleton(IGreeter.class, GlobalGreeter.class)
-.addScoped(String.class)
-.addScopedSingleton(IGreeter.class, ScopedGreeter.class)
-.build();
-var scope1 = provider.createScoped();
-scope1.repository().put("Scope One");
-var scope2 = provider.createScoped();
-scope2.repository().put("Scope Two");
-System.out.println(provider.get(IGreeter.class).sayHello("Roman"));
-System.out.println(scope1.get(IGreeter.class).sayHello("Roman"));
-System.out.println(scope2.get(IGreeter.class).sayHello("Roman"));
-}
+    public static void main(String[] args) {
+        var baseLoader = new DefineClassLoader();
+        var cachedLoader = new CachedClassLoader(baseLoader, new LocalClassCache());
+        var stubFactory = new AsmStubFactory(cachedLoader);
+        var provider = ProviderBuilders.createScoped(stubFactory)
+                .addSingleton(IGreeter.class, GlobalGreeter.class)
+                .addScoped(String.class)
+                .addScopedSingleton(IGreeter.class, ScopedGreeter.class)
+                .build();
+        var scope1 = provider.createScoped();
+        scope1.repository().put("Scope One");
+        var scope2 = provider.createScoped();
+        scope2.repository().put("Scope Two");
+        System.out.println(provider.get(IGreeter.class).sayHello("Roman"));
+        System.out.println(scope1.get(IGreeter.class).sayHello("Roman"));
+        System.out.println(scope2.get(IGreeter.class).sayHello("Roman"));
+    }
 
     public static final class LocalClassCache implements ClassCache {
         private static final Path CACHE_ROOT = Path.of("cache").toAbsolutePath();
