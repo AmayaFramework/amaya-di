@@ -911,7 +911,7 @@ Beim Übergang von 2.x auf 3.x hat die grundlegende API des Frameworks die Kompa
 
 # Mitwirken
 
-Ich würde mich sehr freuen, wenn Sie Korrekturen, Verbesserungen und Funktionserweiterungen für amaya-di vorschlagen möchten. Eine detaillierte Anleitung zum Mitwirken finden Sie [hier](../contributing/contributing_ru.md).
+Ich würde mich sehr freuen, wenn Sie Korrekturen, Verbesserungen und Funktionserweiterungen für amaya-di vorschlagen möchten. Eine detaillierte Anleitung zum Mitwirken finden Sie [hier](../contributing/contributing_de.md).
 
 # Erstellt mit
 
