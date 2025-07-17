@@ -249,7 +249,7 @@ public final class ComplexHelloWorld {
 }
 ```
 
-Все запускаемые примеры можно найти [здесь](../examples).
+Все запускаемые примеры можно найти [здесь](../../examples).
 
 # Базовые концепции
 
@@ -609,7 +609,7 @@ public static ScopedProviderBuilder createScoped() {...}
 public static ScopedProviderBuilder createCheckedScoped() {...}
 ```
 
-Пример, показывающий все возможности билдеров, см. [тут](../examples/src/main/java/com/github/romanqed/di/examples/AllMethods.java).
+Пример, показывающий все возможности билдеров, см. [тут](../../examples/src/main/java/com/github/romanqed/di/examples/AllMethods.java).
 
 ## Generic-типы
 
@@ -743,7 +743,7 @@ interface IC: ScopedC -> A
 ```
 
 Встроенный механизм валидации поддерживает обработку всех этих 5 видов ошибок. 
-Пример смотри [тут](../examples/src/main/java/com/github/romanqed/di/examples/AllChecks.java).
+Пример смотри [тут](../../examples/src/main/java/com/github/romanqed/di/examples/AllChecks.java).
 
 # Варианты генераторов ObjectFactory
 
@@ -891,7 +891,8 @@ ReflectStubBenchmark.benchWrappedScopeCreationAndInjection  avgt   25  129,076 �
 
 # Внести вклад
 
-TODO
+Я буду очень рад, если вы захотите предложить свои исправления, улучшения и расширения функционала в amaya-di. Подробный
+contributing-гайд находится [здесь](../contributing/contributing_ru.md).
 
 # Создано с помощью
 
@@ -910,4 +911,4 @@ TODO
 
 # Лицензия
 
-Этот проект лицензирован под Apache License Version 2.0 - см. [LICENSE](../LICENSE) файл для подробностей.
+Этот проект лицензирован под Apache License Version 2.0 - см. [LICENSE](../../LICENSE) файл для подробностей.
