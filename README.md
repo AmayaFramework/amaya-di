@@ -62,9 +62,9 @@ See [choosing an implementation](#choosing-an-implementation) for details.
 ```Groovy
 dependencies {
     implementation group: 'io.github.amayaframework', name: 'amaya-di', version: '3.0.4'
-// ASM stub implementation
+    // ASM stub implementation
     implementation group: 'io.github.amayaframework', name: 'amaya-di-asm', version: '2.0.2'
-// Or reflect stub implementation
+    // Or reflect stub implementation
     implementation group: 'io.github.amayaframework', name: 'amaya-di-reflect', version: '2.0.0'
 }
 ```
