@@ -12,7 +12,7 @@ Merci de votre intérêt pour amaya-di ! Ce fichier décrit comment contribuer �
 création de modules tiers ou discussion des fonctionnalités. Vous pouvez créer votre propre implémentation d’une fabrique de schémas d’injection,  
 une fabrique de stubs, construire un équivalent du module `amaya-di` (voir [création de modules tiers](#création-de-modules-tiers))  
 ou faire une pull request sur ce [répertoire](https://github.com/AmayaFramework/amaya-di)  
-(voir [création de pull request](#création-de-pull-request)).
+(voir [сréation d’une pull request](#création-dune-pull-request)).
 
 Chaque option sera détaillée ci-dessous. Mais avant tout, voici les principes fondamentaux dont le respect est  
 fortement recommandé pour le développement de modules tiers et obligatoire pour l’intégration d’une pull request.
