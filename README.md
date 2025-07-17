@@ -55,7 +55,7 @@ AST.
 
 To use the framework, two modules must be installed: the core (`io.github.amayaframework:amaya-di`) and a stub factory
 implementation (`:amaya-di-asm` or `:amaya-di-reflect`).  
-See [choosing an implementation](#choosing-an-implementation) for details.
+See [implementation choice](#implementation-choice) for details.
 
 ### Gradle
 
@@ -252,7 +252,7 @@ public final class ComplexHelloWorld {
 }
 ```
 
-All runnable examples are available [here](../../examples).
+All runnable examples are available [here](examples).
 
 # Basic Concepts
 
@@ -603,7 +603,7 @@ public static ScopedProviderBuilder createCheckedScoped() {...}
 ```
 
 An example demonstrating all builder capabilities is
-available [here](../../examples/src/main/java/com/github/romanqed/di/examples/AllMethods.java).
+available [here](examples/src/main/java/com/github/romanqed/di/examples/AllMethods.java).
 
 ## Generic Types
 
@@ -740,7 +740,7 @@ interface IC: ScopedC -> A
 ```
 
 The built-in validation mechanism supports handling all these five types of errors.
-See an example [here](../../examples/src/main/java/com/github/romanqed/di/examples/AllChecks.java).
+See an example [here](examples/src/main/java/com/github/romanqed/di/examples/AllChecks.java).
 
 # Variants of ObjectFactory Generators
 
