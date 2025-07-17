@@ -72,23 +72,25 @@ dependencies {
 ### Maven
 
 ```
-<dependency>
-<groupId>io.github.amayaframework</groupId>
-<artifactId>amaya-di</artifactId>
-<version>3.0.4</version>
-</dependency>
-<!--ASM stub implementation-->
-<dependency>
-    <groupId>io.github.amayaframework</groupId>
-    <artifactId>amaya-di-asm</artifactId>
-    <version>2.0.2</version>
-</dependency>
-<!--Or reflect stub implementation-->
-<dependency>
-    <groupId>io.github.amayaframework</groupId>
-    <artifactId>amaya-di-reflect</artifactId>
-    <version>2.0.0</version>
-</dependency>
+<dependencies>
+    <dependency>
+        <groupId>io.github.amayaframework</groupId>
+        <artifactId>amaya-di</artifactId>
+        <version>3.0.4</version>
+    </dependency>
+    <!--ASM stub implementation-->
+    <dependency>
+        <groupId>io.github.amayaframework</groupId>
+        <artifactId>amaya-di-asm</artifactId>
+        <version>2.0.2</version>
+    </dependency>
+    <!--Or reflect stub implementation-->
+    <dependency>
+        <groupId>io.github.amayaframework</groupId>
+        <artifactId>amaya-di-reflect</artifactId>
+        <version>2.0.0</version>
+    </dependency>
+</dependencies>
 ```
 
 ## Hello, world!
