@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="../img/logo.png" alt="logo" style="width: 200px; height: auto;">
+</p>
+
 # amaya-di – 现代、轻量且高性能的依赖注入框架（DI）
 
 [![amaya-di](https://img.shields.io/maven-central/v/io.github.amayaframework/amaya-di?strategy=releaseProperty&style=for-the-badge&label=amaya-di&color=blue)](https://repo1.maven.org/maven2/io/github/amayaframework/amaya-di/)

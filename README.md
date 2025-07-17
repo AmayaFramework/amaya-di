@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="docs/img/logo.png" alt="logo" style="width: 200px; height: auto;">
+</p>
+
 # amaya-di – a modern, lightweight, and fast DI framework.
 
 [![amaya-di](https://img.shields.io/maven-central/v/io.github.amayaframework/amaya-di?strategy=releaseProperty&style=for-the-badge&label=amaya-di&color=blue)](https://repo1.maven.org/maven2/io/github/amayaframework/amaya-di/)
