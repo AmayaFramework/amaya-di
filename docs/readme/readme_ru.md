@@ -7,6 +7,14 @@
 [![amaya-di-asm](https://img.shields.io/maven-central/v/io.github.amayaframework/amaya-di-asm?strategy=releaseProperty&style=for-the-badge&label=amaya-di-asm&color=blue)](https://repo1.maven.org/maven2/io/github/amayaframework/amaya-di-asm/)
 [![amaya-di-reflect](https://img.shields.io/maven-central/v/io.github.amayaframework/amaya-di-reflect?strategy=releaseProperty&style=for-the-badge&label=amaya-di-reflect&color=blue)](https://repo1.maven.org/maven2/io/github/amayaframework/amaya-di-reflect/)
 
+- [English](../../README.md)
+- Русский
+- [简体中文](readme_zh_cn.md)
+- [正體中文](readme_zh_tw.md)
+- [日本語](readme_jp.md)
+- [Deutsch](readme_de.md)
+- [Français](readme_fr.md)
+
 Amaya DI — современный взгляд на то, каким должен быть DI фреймворк. Он создан с целью 
 предоставить разработчикам высокопроизводительный, гибкий и минималистичный IoC-контейнер без
 устаревших XML-конфигураций, множества аннотаций и скрытой магии, основанной на рефлексии.
