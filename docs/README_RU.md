@@ -687,23 +687,211 @@ public final class GenericTypes {
 
 ## Валидация графа зависимостей
 
+Для реализации механизма валидации используются следующие соглашения:
 
+* все реализации `ObjectFactory`, предоставленные пользователем, безусловно считаются корректными и рассматриваются,
+как "root"-типы, не имеющие собственных зависимостей;
+* все пользовательские `ServiceWrapper` возвращают корректные `ObjectFactory` и не создают ошибок;
+* все типы, для которых можно построить схему внедрения, считаются "слабыми" и будут проверены на:
+  * запрос отсутствующих зависимостей;
+  * создание циклов в графе зависимостей.
+
+Для scoped-контейнеров дополнительно вводится:
+
+* регистрация promised-типа **гарантирует**, что при создании scoped-контейнера, ДО начала работы с ним, тип будет
+предоставлен в репозиторий;
+* scope-типы могут ссылаться на другие scope-типы и на базовые типы;
+* базовые типы могут ссылаться ТОЛЬКО на другие базовые типы.
+
+Опираясь на это и рассматривая контейнер, как граф зависимостей, можно выделить пять классов возможных ошибок.
+
+1. В базовом контейнере отсутствует тип, от которого зависит другой базовый тип. 
+
+Пример: 
+```
+class A -> class String
+class String -> отсутствует
+```
+
+2. В scoped контейнере отсутствует тип, от которого зависит другой scoped тип.
+
+Пример:
+```
+class ScopedA -> class String
+class String -> отсутствует в scoped- и в базовом контейнере
+```
+
+3) В базовом контейнере возникла циклическая зависимость между базовыми типами.
+
+Пример:
+```
+class A -> class B
+class B -> class C
+class C -> class A
+```
+
+4) В scoped контейнере возникла циклическая зависимость между scoped типами.
+
+5) Возникла циклическая зависимость между контейнерами из-за перезаписи типа scoped-контейнером.
+
+Пример:
+```
+class A -> class B
+class B -> inteface IC
+interface IC: C
+interface IC: ScopedC -> A
+```
+
+Встроенный механизм валидации поддерживает обработку всех этих 5 видов ошибок. 
+Пример смотри [тут](../examples/src/main/java/com/github/romanqed/di/examples/AllChecks.java).
 
 # Варианты генераторов ObjectFactory
 
+Фреймворк предоставляет две реализации `StubFactory`, поставляемые в модулях `amaya-di-asm` и `amaya-di-reflect`.
+
 ## ASM
 
-\+ кэширование
+ASM-реализация использует для создания `ObjectFactory` генерацию байт-кода на лету. Сгенерированный класс получает имя,
+состоящее из имени класса, являющегося целью внедрения, и псевдонима используемого режима кэширования. Соответственно,
+при повторном запросе генерации не происходит, а используется уже загруженный класс, получаемый по имени.
+
+Особенностью ASM-реализации является относительно долгая скорость подготовки и максимально возможная скорость работы,
+фактически равная скорости обычного кода.
 
 ## Reflect
 
+Reflect-реализация использует для создания `ObjectFactory` рефлективные вызовы методов и доступ к полям. Запрошенные 
+члены класса помечаются как доступные без проверки модификаторов `setAccessible(true)` и оборачиваются в подготовленную
+реализацию фабрики.
+
+Особенностью Reflect-реализации является относительно быстрая скорость подготовки и медленная скорость работы,
+включающая значительные накладные расходы на механизмы рефлективного доступа.
+
 ## Выбор реализации
+
+Выбор между asm- и reflect- реализациями стоит осуществлять, основываясь на особенностях сценария использования
+контейнера. Если в вашем приложении контейнер:
+
+* часто пересобирается;
+* используется один раз во время запуска;
+* не используется в "горячем" коде (или высокие накладные расходы допустимы);
+
+то стоит использовать reflect-реализацию.
+
+Если же контейнер:
+
+* собирается один раз;
+* постоянно используется в горячем коде;
+* должен поставлять зависимости за минимальное время;
+
+то стоит использовать asm-реализацию.
 
 ## Бенчмарки
 
-# Отличия от предыдущего релиза
+Бенчмарки проводились на Amazon Corretto 11 (`openjdk version "11.0.27" 2025-04-15 LTS`), на ПК (не сервере) с 
+Intel i5-9400F, 40 ГБ ОЗУ и Windows 10 22H2. Использовался фреймворк jmh версии 1.37.
+
+Набор зависимостей состоит из:
+
+* Service1;
+* Service2;
+* Service3, зависимый от Service1 (конструктор);
+* App, зависимый от всех трёх (Service1 – конструктор, Service2 – поле, Service3 – метод).
+
+Контейнер полностью подготавливается до бенчмарка, никаких взаимодействий с ним не совершается.
+
+Для получения опорного времени, с которым можно сравнить остальные результаты, был написан простой код, реализующий
+"ручное" создание App и внедрение зависимостей:
+
+```java
+var app = new App(new Service1());
+app.s2 = new Service2();
+app.setS3(new Service3(new Service1()));
+```
+
+При этом бенчмарки для получения данных об оверхеде самого репозитория (на поиск типа) проводились в двух версиях: 
+
+* замерялось "чистое" время выполнения создания App вручную;
+* создание App оборачивалось в `ObjectFactory` и помещалось в контейнер, замерялось время вызова поиска в контейнере и
+вызова `create()`.
+
+Также замерялось время для каждого CacheMode отдельно, и повторно для CacheMode.FULL (режим по умолчанию).
+
+Получены следующие результаты:
+
+```
+Benchmark                                    Mode  Cnt   Score   Error  Units
+AsmStubBenchmark.benchFullCacheInjection     avgt   25  13,604 ± 0,020  ns/op
+AsmStubBenchmark.benchManualInjection        avgt   25  13,475 ± 0,119  ns/op
+AsmStubBenchmark.benchNoCacheInjection       avgt   25  23,962 ± 0,309  ns/op
+AsmStubBenchmark.benchPartialCacheInjection  avgt   25  16,424 ± 0,036  ns/op
+```
+
+```
+Benchmark                                        Mode  Cnt   Score   Error  Units
+ReflectStubBenchmark.benchFullCacheInjection     avgt   25  58,055 ± 0,513  ns/op
+ReflectStubBenchmark.benchManualInjection        avgt   25  13,402 ± 0,096  ns/op
+ReflectStubBenchmark.benchNoCacheInjection       avgt   25  81,497 ± 1,746  ns/op
+ReflectStubBenchmark.benchPartialCacheInjection  avgt   25  66,429 ± 1,045  ns/op
+```
+
+```
+Benchmark                                                   Mode  Cnt    Score   Error  Units
+AsmStubBenchmark.benchFullCacheInjection                    avgt   25   15,597 ± 0,768  ns/op
+AsmStubBenchmark.benchManualInjection                       avgt   25   11,265 ± 0,098  ns/op
+AsmStubBenchmark.benchNoCacheInjection                      avgt   25   26,064 ± 0,760  ns/op
+AsmStubBenchmark.benchPartialCacheInjection                 avgt   25   15,225 ± 0,416  ns/op
+AsmStubBenchmark.benchScopeCreation                         avgt   25   39,367 ± 0,853  ns/op
+AsmStubBenchmark.benchScopeCreationAndInjection             avgt   25   59,320 ± 0,859  ns/op
+AsmStubBenchmark.benchWrappedScopeCreation                  avgt   25   39,993 ± 0,963  ns/op
+AsmStubBenchmark.benchWrappedScopeCreationAndInjection      avgt   25   75,249 ± 1,509  ns/op
+ReflectStubBenchmark.benchFullCacheInjection                avgt   25   61,459 ± 0,963  ns/op
+ReflectStubBenchmark.benchManualInjection                   avgt   25   11,561 ± 0,461  ns/op
+ReflectStubBenchmark.benchNoCacheInjection                  avgt   25   83,394 ± 1,433  ns/op
+ReflectStubBenchmark.benchPartialCacheInjection             avgt   25   61,693 ± 0,204  ns/op
+ReflectStubBenchmark.benchScopeCreation                     avgt   25   41,413 ± 0,844  ns/op
+ReflectStubBenchmark.benchScopeCreationAndInjection         avgt   25  129,332 ± 1,293  ns/op
+ReflectStubBenchmark.benchWrappedScopeCreation              avgt   25   40,684 ± 0,741  ns/op
+ReflectStubBenchmark.benchWrappedScopeCreationAndInjection  avgt   25  129,076 ± 1,930  ns/op
+```
+
+Запуск бенчмарков осуществляется следующим образом:
+
+```
+>./gradlew asm:jmh
+>./gradlew reflect:jmh
+>./gradlew :jmh
+```
+
+# Отличия от 2.x
+
+При переходе с 2.x на 3.x базовое API фреймворка полностью утратило совместимость. API builder'ов за исключением новых
+методов осталось прежним. Тем, кто до этого использовал amaya-di 2.x и хочет перейти на 3.x, 
+следует иметь в виду следующие ключевые изменения:
+
+* в качестве фабрики объектов теперь используется `ObjectFactory`, а не `Function0`;
+* интерфейс `ServiceRepository` переименован в `TypeRepository`;
+* интерфейс `TypeProvider`, бывший локальным механизмом для нужд stub-модуля, полностью удалён;
+* интерфейс `ManualProviderBuilder` полностью удалён;
+* изменено API `StubFactory`: `create(schema, typeProvider)` => `create(schema, cacheMode)`;
+* теперь `StubFactory` не заполняет кэш фабрики при создании, это необходимо делать самому;
+* модуль `jgraph` больше не используется и был исключен из зависимостей;
+* абстрактный класс `AbstractProviderBuilder` заменен `AbstractServiceProviderBuilder`, protected-API полностью
+изменилось;
+* интерфейс `ServiceWrapper` больше не наследует интерфейс `Function1`, сигнатура его функционального метода теперь
+такова `ObjectFactory wrap(ObjectFactory factory)`;
+* класс `LazyProvider` полностью удалён;
+* появилось исключение `CyclesFoundException`, которое может быть выброшено, если обнаружено несколько циклов;
+* полностью изменилось разделение по модулям:
+  * `ServiceProvider` и связанные типы перемещены в отдельный модуль `amaya-di-core`;
+  * `ClassSchema` и связанные типы перемещены в отдельный модуль `amaya-di-schema`;
+  * `StubFactory` и связанные типы перемещены в отдельный модуль `amaya-di-stub`;
+  * модуль `amaya-di` теперь включает эти три модуля, модуль `amaya-di-core` прописан, как транзитивная зависимость;
+* появился новый механизм scope'ов.
 
 # Внести вклад
+
+TODO
 
 # Создано с помощью
 
