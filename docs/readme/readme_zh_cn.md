@@ -32,6 +32,7 @@ Amaya DI 是对依赖注入框架应有形态的现代诠释。它旨在为开�
 * 简单集成现有的任意库、框架或标准。
 
 生成工厂的性能表现为：
+
 * 使用 asm 实现时，性能接近手写实现（13,604 ns 对比 13,475 ns）；
 * 使用反射实现时，包含 JNI 开销但依然较快（58,055 ns 对比 13,402 ns）。
 
@@ -50,18 +51,19 @@ Amaya DI 是对依赖注入框架应有形态的现代诠释。它旨在为开�
 
 ## 安装
 
-使用时需安装两个模块：基础模块 (`io.github.amayaframework:amaya-di`) 和 stub 工厂实现模块（`:amaya-di-asm` 或 `:amaya-di-reflect`）。  
+使用时需安装两个模块：基础模块 (`io.github.amayaframework:amaya-di`) 和 stub 工厂实现模块（`:amaya-di-asm` 或
+`:amaya-di-reflect`）。  
 关于如何选择实现，请参阅 [选择实现](#выбор-реализации)。
 
 ### Gradle
 
 ```Groovy
 dependencies {
-implementation group: 'io.github.amayaframework', name: 'amaya-di', version: '3.0.4'
-// ASM stub 实现
-implementation group: 'io.github.amayaframework', name: 'amaya-di-asm', version: '2.0.2'
-// 或者反射 stub 实现
-implementation group: 'io.github.amayaframework', name: 'amaya-di-reflect', version: '2.0.0'
+    implementation group: 'io.github.amayaframework', name: 'amaya-di', version: '3.0.4'
+    // ASM stub 实现
+    implementation group: 'io.github.amayaframework', name: 'amaya-di-asm', version: '2.0.2'
+    // 或者反射 stub 实现
+    implementation group: 'io.github.amayaframework', name: 'amaya-di-reflect', version: '2.0.0'
 }
 ```
 
@@ -69,23 +71,23 @@ implementation group: 'io.github.amayaframework', name: 'amaya-di-reflect', vers
 
 ```
 <dependencies>
-<dependency>
-<groupId>io.github.amayaframework</groupId>
-<artifactId>amaya-di</artifactId>
-<version>3.0.4</version>
-</dependency>
-<!-- ASM stub 实现 -->
-<dependency>
-<groupId>io.github.amayaframework</groupId>
-<artifactId>amaya-di-asm</artifactId>
-<version>2.0.2</version>
-</dependency>
-<!-- 或者反射 stub 实现 -->
-<dependency>
-<groupId>io.github.amayaframework</groupId>
-<artifactId>amaya-di-reflect</artifactId>
-<version>2.0.0</version>
-</dependency>
+    <dependency>
+        <groupId>io.github.amayaframework</groupId>
+        <artifactId>amaya-di</artifactId>
+        <version>3.0.4</version>
+    </dependency>
+    <!-- ASM stub 实现 -->
+    <dependency>
+        <groupId>io.github.amayaframework</groupId>
+        <artifactId>amaya-di-asm</artifactId>
+        <version>2.0.2</version>
+    </dependency>
+    <!-- 或者反射 stub 实现 -->
+    <dependency>
+        <groupId>io.github.amayaframework</groupId>
+        <artifactId>amaya-di-reflect</artifactId>
+        <version>2.0.0</version>
+    </dependency>
 </dependencies>
 ```
 
@@ -104,8 +106,8 @@ implementation group: 'io.github.amayaframework', name: 'amaya-di-reflect', vers
 
 ```java
 module com.github.romanqed.di.examples {
-requires io.github.amayaframework.di; // 主模块
-exports com.github.romanqed.di.examples;
+    requires io.github.amayaframework.di; // 主模块
+    exports com.github.romanqed.di.examples;
 }
 ```
 
@@ -113,13 +115,12 @@ exports com.github.romanqed.di.examples;
 
 ```java
 public final class SimpleHelloWorld {
-
-public static void main(String[] args) {
-var provider = ProviderBuilders.create()
-.addInstance("Hello, world!")
-.build();
-System.out.println(provider.get(String.class));
-}
+    public static void main(String[] args) {
+        var provider = ProviderBuilders.create()
+                .addInstance("Hello, world!")
+                .build();
+        System.out.println(provider.get(String.class));
+    }
 }
 ```
 
@@ -129,7 +130,7 @@ System.out.println(provider.get(String.class));
 
 ```java
 public interface IGreeter {
-String sayHello(String name);
+    String sayHello(String name);
 }
 ```
 
@@ -137,20 +138,20 @@ String sayHello(String name);
 
 ```java
 public final class GlobalGreeter implements IGreeter {
-@Override
-public String sayHello(String name) {
-return "Hello, " + name + "!";
-}
+    @Override
+    public String sayHello(String name) {
+        return "Hello, " + name + "!";
+    }
 }
 
 public final class ScopedGreeter implements IGreeter {
-private final String scope;
+    private final String scope;
 
     public ScopedGreeter(String scope) {
         this.scope = scope;
     }
-    
-    @Override 
+
+    @Override
     public String sayHello(String name) {
         return "Hello from scope '" + scope + "', " + name + "!";
     }
@@ -161,9 +162,9 @@ private final String scope;
 
 ```java
 module com.github.romanqed.di.examples {
-requires io.github.amayaframework.di; // 主模块
-requires io.github.amayaframework.di.reflect; // 使用反射实现
-exports com.github.romanqed.di.examples;
+    requires io.github.amayaframework.di; // 主模块
+    requires io.github.amayaframework.di.reflect; // 使用反射实现
+    exports com.github.romanqed.di.examples;
 }
 ```
 
@@ -171,10 +172,10 @@ exports com.github.romanqed.di.examples;
 
 ```java
 var provider = ProviderBuilders.createScoped(new ReflectStubFactory())
-.addSingleton(IGreeter.class, GlobalGreeter.class)
-.addScoped(String.class)
-.addScopedSingleton(IGreeter.class, ScopedGreeter.class)
-.build();
+        .addSingleton(IGreeter.class, GlobalGreeter.class)
+        .addScoped(String.class)
+        .addScopedSingleton(IGreeter.class, ScopedGreeter.class)
+        .build();
 ```
 
 创建两个作用域：
@@ -206,20 +207,20 @@ Hello from scope 'Scope Two', Roman!
 
 ```java
 public final class ComplexHelloWorld {
-public static void main(String[] args) {
-var provider = ProviderBuilders.createScoped(new ReflectStubFactory())
-.addSingleton(IGreeter.class, GlobalGreeter.class)
-.addScoped(String.class)
-.addScopedSingleton(IGreeter.class, ScopedGreeter.class)
-.build();
-var scope1 = provider.createScoped();
-scope1.repository().put("Scope One");
-var scope2 = provider.createScoped();
-scope2.repository().put("Scope Two");
-System.out.println(provider.get(IGreeter.class).sayHello("Roman"));
-System.out.println(scope1.get(IGreeter.class).sayHello("Roman"));
-System.out.println(scope2.get(IGreeter.class).sayHello("Roman"));
-}
+    public static void main(String[] args) {
+        var provider = ProviderBuilders.createScoped(new ReflectStubFactory())
+                .addSingleton(IGreeter.class, GlobalGreeter.class)
+                .addScoped(String.class)
+                .addScopedSingleton(IGreeter.class, ScopedGreeter.class)
+                .build();
+        var scope1 = provider.createScoped();
+        scope1.repository().put("Scope One");
+        var scope2 = provider.createScoped();
+        scope2.repository().put("Scope Two");
+        System.out.println(provider.get(IGreeter.class).sayHello("Roman"));
+        System.out.println(scope1.get(IGreeter.class).sayHello("Roman"));
+        System.out.println(scope2.get(IGreeter.class).sayHello("Roman"));
+    }
 
     public interface IGreeter {
         String sayHello(String name);
@@ -259,16 +260,18 @@ System.out.println(scope2.get(IGreeter.class).sayHello("Roman"));
 容器底层机制是接口 `ObjectFactory` 和 `TypeProvider`，定义如下：
 
 ```java
+
 @FunctionalInterface
 public interface ObjectFactory {
-Object create(TypeProvider provider) throws Throwable;
+    Object create(TypeProvider provider) throws Throwable;
 }
 ```
 
 ```java
+
 @FunctionalInterface
 public interface TypeProvider {
-ObjectFactory get(Type type);
+    ObjectFactory get(Type type);
 
     default boolean canProvide(Type type) {
         return get(type) != null;
@@ -289,23 +292,23 @@ ObjectFactory get(Type type);
 
 ```java
 public final class ManualHelloWorld {
-public static void main(String[] args) {
-var provider = ProviderBuilders.createScoped()
-.add(IGreeter.class, (ObjectFactory) tp -> new GlobalGreeter())
-.addScoped(IGreeter.class, (ObjectFactory) tp -> {
-var scope = (String) tp.get(String.class).create(tp);
-return new ScopedGreeter(scope);
-})
-.build();
-var scope1 = provider.createScoped();
-scope1.repository().put("Scope One");
-var scope2 = provider.createScoped();
-scope2.repository().put("Scope Two");
-System.out.println(provider.get(IGreeter.class).sayHello("Roman"));
-System.out.println(scope1.get(IGreeter.class).sayHello("Roman"));
-System.out.println(scope2.get(IGreeter.class).sayHello("Roman"));
-}
-// IGreeter 及其实现
+    public static void main(String[] args) {
+        var provider = ProviderBuilders.createScoped()
+                .add(IGreeter.class, (ObjectFactory) tp -> new GlobalGreeter())
+                .addScoped(IGreeter.class, (ObjectFactory) tp -> {
+                    var scope = (String) tp.get(String.class).create(tp);
+                    return new ScopedGreeter(scope);
+                })
+                .build();
+        var scope1 = provider.createScoped();
+        scope1.repository().put("Scope One");
+        var scope2 = provider.createScoped();
+        scope2.repository().put("Scope Two");
+        System.out.println(provider.get(IGreeter.class).sayHello("Roman"));
+        System.out.println(scope1.get(IGreeter.class).sayHello("Roman"));
+        System.out.println(scope2.get(IGreeter.class).sayHello("Roman"));
+    }
+    // IGreeter 及其实现
 }
 ```
 
@@ -318,28 +321,29 @@ System.out.println(scope2.get(IGreeter.class).sayHello("Roman"));
 
 ```java
 public interface TypeRepository extends TypeProvider, Iterable<Type> {
-void put(Type type, ObjectFactory factory);
+    void put(Type type, ObjectFactory factory);
 
     void put(Type type, Function0<?> provider);
-    
+
     void put(Type type, Object instance);
-    
+
     void put(Object instance);
-    
+
     ObjectFactory remove(Type type);
-    
+
     void putAll(TypeRepository repository);
-    
+
     void putAll(Map<Type, ObjectFactory> map);
-    
+
     void clear();
-    
+
     void forEach(BiConsumer<Type, ObjectFactory> action);
 }
 ```
 
 `put(type, factory)` 将 `type->factory` 记录写入仓库，已有时覆盖。  
-`put(type, provider)`、`put(type, instance)` 和 `put(instance)` 等同于将 `provider.invoke()`、`instance` 等封装为工厂再放入。  
+`put(type, provider)`、`put(type, instance)` 和 `put(instance)` 等同于将 `provider.invoke()`、`instance`
+等封装为工厂再放入。  
 `remove(type)` 删除类型记录，返回对应工厂或 null。  
 `putAll(...)` 将其它仓库或映射中的记录复制进来。  
 `clear()` 清空仓库。  
@@ -355,14 +359,14 @@ void put(Type type, ObjectFactory factory);
 
 ```java
 public interface ServiceProvider {
-TypeRepository repository();
+    TypeRepository repository();
 
     ServiceProvider createScoped();
-    
+
     <T> T get(Type type);
-    
+
     <T> T get(Class<T> type);
-    
+
     <T> T get(JType<T> type);
 }
 ```
@@ -404,7 +408,7 @@ TypeRepository repository();
 
 ```java
 public interface Schema<T> {
-T getTarget();
+    T getTarget();
 
     Set<Type> getTypes();
 }
@@ -414,7 +418,7 @@ T getTarget();
 
 ```java
 public interface ExecutableSchema<T extends Executable> extends Schema<T> {
-Type[] getMapping();
+    Type[] getMapping();
 }
 ```
 
@@ -431,7 +435,7 @@ Type[] getMapping();
 
 ```java
 public interface SchemaFactory {
-ClassSchema create(Class<?> clazz);
+    ClassSchema create(Class<?> clazz);
 }
 ```
 
@@ -453,7 +457,7 @@ ClassSchema create(Class<?> clazz);
 
 ```java
 public interface TypeProcessor {
-Type process(Type type, AnnotatedElement element);
+    Type process(Type type, AnnotatedElement element);
 }
 ```
 
@@ -477,7 +481,7 @@ Stub 是框架中根据类注入方案自动生成的 `ObjectFactory` 实现。
 ```java
 @FunctionalInterface
 public interface StubFactory {
-ObjectFactory create(ClassSchema schema, CacheMode mode);
+    ObjectFactory create(ClassSchema schema, CacheMode mode);
 
     default ObjectFactory create(ClassSchema schema) {
         return create(schema, CacheMode.NONE);
@@ -503,6 +507,7 @@ ObjectFactory create(ClassSchema schema, CacheMode mode);
 
 ```java
 public interface CachedObjectFactory extends ObjectFactory {
-void set(Type type, ObjectFactory factory);
+    void set(Type type, ObjectFactory factory);
 }
 ```
+
