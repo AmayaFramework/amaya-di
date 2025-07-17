@@ -1,0 +1,230 @@
+package io.github.amayaframework.di.schema;
+
+import com.github.romanqed.jtype.IllegalTypeException;
+
+import java.lang.annotation.Annotation;
+import java.lang.reflect.*;
+import java.util.*;
+import java.util.stream.Collectors;
+
+/**
+ * A reflection-based implementation of {@link SchemaFactory}, which scans
+ * class constructors, fields, and methods to build a dependency schema.
+ * <p>
+ * It respects a given marker annotation to identify injectable elements.
+ * <p>
+ * Rules:
+ * <ul>
+ *     <li>No generic types</li>
+ *     <li>One public constructor must be annotated (or there must be exactly one public constructor).</li>
+ *     <li>Only public, non-static, non-final fields annotated with the marker are included.</li>
+ *     <li>Only public methods with at least one parameter and annotated with the marker are included.</li>
+ *     <li>Static methods must have the first parameter assignable from the declaring class.</li>
+ * </ul>
+ */
+public final class ReflectSchemaFactory implements SchemaFactory {
+    private static final TypeProcessor TYPE_PROCESSOR = new ReflectTypeProcessor();
+    private final TypeProcessor processor;
+    private final Class<? extends Annotation> annotation;
+
+    /**
+     * Constructs a factory that will use the specified type processor and
+     * annotation as a marker to identify the dependent members of the class.
+     *
+     * @param processor  the specified type processor, must be non-null
+     * @param annotation the specified annotation type, must be non-null
+     */
+    public ReflectSchemaFactory(TypeProcessor processor, Class<? extends Annotation> annotation) {
+        this.processor = Objects.requireNonNull(processor);
+        this.annotation = annotation;
+    }
+
+    /**
+     * Constructs a factory that will use the specified annotation
+     * as a marker to identify the dependent members of the class.
+     *
+     * @param annotation the specified annotation type, must be non-null
+     */
+    public ReflectSchemaFactory(Class<? extends Annotation> annotation) {
+        this(TYPE_PROCESSOR, annotation);
+    }
+
+    private void process(Executable executable, int start, Set<Type> types, Type[] mapping) {
+        var parameters = executable.getParameters();
+        try {
+            for (var i = start; i < parameters.length; ++i) {
+                var parameter = parameters[i];
+                var type = parameter.getParameterizedType();
+                var processed = processor.process(type, parameter);
+                types.add(processed);
+                mapping[i - start] = processed;
+            }
+        } catch (IllegalTypeException e) {
+            throw new IllegalMemberException("Cannot use executable with illegal type " + e.getType(), e, executable);
+        }
+    }
+
+    private void process(Executable executable, Set<Type> types, Type[] mapping) {
+        process(executable, 0, types, mapping);
+    }
+
+    private ConstructorSchema create(Constructor<?> constructor) {
+        if (constructor.getTypeParameters().length != 0) {
+            throw new IllegalMemberException("Cannot use parameterized constructor", constructor);
+        }
+        var types = new HashSet<Type>();
+        var mapping = new Type[constructor.getParameterCount()];
+        process(constructor, types, mapping);
+        return new ConstructorSchema(constructor, types, mapping);
+    }
+
+    private MethodSchema create(Method method) {
+        if (method.getTypeParameters().length != 0) {
+            throw new IllegalMemberException("Cannot use parameterized method", method);
+        }
+        var types = new HashSet<Type>();
+        if (!Modifier.isStatic(method.getModifiers())) {
+            var mapping = new Type[method.getParameterCount()];
+            process(method, types, mapping);
+            return new MethodSchema(method, types, mapping);
+        }
+        var first = method.getParameterTypes()[0];
+        var owner = method.getDeclaringClass();
+        if (!first.isAssignableFrom(owner)) {
+            throw new IllegalClassException(
+                    "The first parameter of the static method must be the superclass of the current class",
+                    owner
+            );
+        }
+        var mapping = new Type[method.getParameterCount() - 1];
+        process(method, 1, types, mapping);
+        return new MethodSchema(method, types, mapping);
+    }
+
+    private FieldSchema create(Field field) {
+        var type = field.getGenericType();
+        if (type instanceof TypeVariable<?>) {
+            throw new IllegalMemberException("Cannot use generic field", field);
+        }
+        try {
+            return new FieldSchema(field, processor.process(type, field));
+        } catch (IllegalTypeException e) {
+            throw new IllegalMemberException("Cannot use field with illegal type " + type, e, field);
+        }
+    }
+
+    private ConstructorSchema findConstructor(Class<?> clazz) {
+        // Get all public constructors
+        var constructors = clazz.getConstructors();
+        // If there is no public constructors, then we cannot build class schema
+        if (constructors.length == 0) {
+            throw new IllegalClassException("No public constructor was found", clazz);
+        }
+        // If there is 1 public constructor, just use it
+        if (constructors.length == 1) {
+            return create(constructors[0]);
+        }
+        // Else try to find annotated constructor
+        var found = Arrays
+                .stream(constructors)
+                .filter(e -> e.isAnnotationPresent(annotation))
+                .collect(Collectors.toList());
+        if (found.isEmpty()) {
+            throw new IllegalClassException("There are no annotated constructors", clazz);
+        }
+        if (found.size() != 1) {
+            throw new IllegalClassException("It is impossible to select a constructor", clazz);
+        }
+        return create(found.get(0));
+    }
+
+    private Set<FieldSchema> findFields(Class<?> clazz) {
+        // Collect all public virtual non-final fields, annotated with specified annotation
+        var fields = Arrays
+                .stream(clazz.getFields())
+                .filter(field -> {
+                    var modifiers = field.getModifiers();
+                    return !Modifier.isStatic(modifiers)
+                            && !Modifier.isFinal(modifiers)
+                            && field.isAnnotationPresent(annotation);
+                })
+                .collect(Collectors.toList());
+        if (fields.isEmpty()) {
+            return Collections.emptySet();
+        }
+        var ret = new HashSet<FieldSchema>();
+        fields.forEach(field -> ret.add(create(field)));
+        return ret;
+    }
+
+    private boolean checkMethod(Method method) {
+        if (!method.isAnnotationPresent(annotation)) {
+            return false;
+        }
+        var parameters = method.getParameterCount();
+        if (Modifier.isStatic(method.getModifiers())) {
+            return parameters > 1;
+        }
+        return parameters > 0;
+    }
+
+    private Set<MethodSchema> findMethods(Class<?> clazz) {
+        // Collect all public methods, annotated with specified annotation
+        // (static or virtual - it does not matter)
+        var methods = Arrays
+                .stream(clazz.getMethods())
+                .filter(this::checkMethod)
+                .collect(Collectors.toList());
+        if (methods.isEmpty()) {
+            return Collections.emptySet();
+        }
+        var ret = new HashSet<MethodSchema>();
+        methods.forEach(method -> ret.add(create(method)));
+        return ret;
+    }
+
+    /**
+     * Creates a {@link ClassSchema} representing all injectable members
+     * of the given class based on the configured annotation and rules.
+     *
+     * @param clazz non-null class to analyze
+     * @return non-null class schema for injection
+     * @throws IllegalClassException  if class is unsupported (e.g., abstract, enum, inner non-static,
+     *                                no suitable constructor)
+     * @throws IllegalMemberException if a constructor, field, or method is found but invalid for injection
+     */
+    @Override
+    public ClassSchema create(Class<?> clazz) {
+        Objects.requireNonNull(clazz);
+        // Check class
+        var modifiers = clazz.getModifiers();
+        if (!Modifier.isPublic(modifiers)) {
+            throw new IllegalClassException("Cannot create schema of non-public class", clazz);
+        }
+        if (Modifier.isAbstract(modifiers)) {
+            throw new IllegalClassException("Cannot create schema of abstract class", clazz);
+        }
+        if (clazz.isEnum()) {
+            throw new IllegalClassException("Cannot create schema of enum class", clazz);
+        }
+        if (clazz.isPrimitive()) {
+            throw new IllegalClassException("Cannot create schema of primitive class", clazz);
+        }
+        if (clazz.isArray()) {
+            throw new IllegalClassException("Cannot create schema of array class", clazz);
+        }
+        if (clazz.isAnnotation()) {
+            throw new IllegalClassException("Cannot create schema of annotation class", clazz);
+        }
+        if (clazz.isAnonymousClass()) {
+            throw new IllegalClassException("Cannot create schema of anonymous class", clazz);
+        }
+        if (clazz.getDeclaringClass() != null && !Modifier.isStatic(modifiers)) {
+            throw new IllegalClassException("Cannot create schema of non-static member class", clazz);
+        }
+        var constructor = findConstructor(clazz);
+        var fields = findFields(clazz);
+        var methods = findMethods(clazz);
+        return new ClassSchema(clazz, constructor, fields, methods);
+    }
+}

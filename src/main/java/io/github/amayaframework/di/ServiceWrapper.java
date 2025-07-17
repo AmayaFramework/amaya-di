@@ -1,23 +1,22 @@
 package io.github.amayaframework.di;
 
-import com.github.romanqed.jfunc.Function0;
-import com.github.romanqed.jfunc.Function1;
+import io.github.amayaframework.di.core.ObjectFactory;
 
 /**
- * An interface that describes an abstract mechanism
- * that allows you to proxy or modify providers of service implementations.
- *
- * @param <S> the type of wrapped service
+ * An interface that describes a mechanism for wrapping or proxying
+ * {@link ObjectFactory} instances.
+ * <p>
+ * This is typically used to implement scopes, lazy instantiation,
+ * monitoring, or other behavioral decorations of service providers.
  */
-public interface ServiceWrapper<S> extends Function1<Function0<S>, Function0<S>> {
+@FunctionalInterface
+public interface ServiceWrapper {
 
     /**
-     * Applies changes to the specified service provider.
+     * Applies wrapping logic to the given service factory.
      *
-     * @param func the specified service provider
-     * @return modified service provider
-     * @throws Throwable if any errors occur
+     * @param factory the factory to wrap, must be non-null
+     * @return the wrapped factory
      */
-    @Override
-    Function0<S> invoke(Function0<S> func) throws Throwable;
+    ObjectFactory wrap(ObjectFactory factory);
 }

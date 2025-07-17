@@ -5,6 +5,7 @@ plugins {
     id 'maven-publish'
     id 'signing'
     id 'io.github.gradle-nexus.publish-plugin' version '2.0.0'
+    id 'me.champeau.jmh' version '0.7.3'
 }
 
 java {
@@ -27,10 +28,21 @@ dependencies {
     // Tests
     testImplementation group: 'org.junit.jupiter', name: 'junit-jupiter-api', version: '5.10.0'
     testRuntimeOnly group: 'org.junit.jupiter', name: 'junit-jupiter-engine', version: '5.10.0'
+    testImplementation project(':asm')
+    testImplementation project(':reflect')
+    // Benchmarks
+    jmhImplementation group: 'org.openjdk.jmh', name: 'jmh-core', version: '1.37'
+    jmhImplementation group: 'org.openjdk.jmh', name: 'jmh-generator-annprocess', version: '1.37'
+    jmhImplementation project(':asm')
+    jmhImplementation project(':reflect')
     // Dependencies
-    api group: 'com.github.romanqed', name: 'jtype', version: '1.0.2'
+    // Base
+    api group: 'com.github.romanqed', name: 'jtype', version: '1.1.0'
     api group: 'com.github.romanqed', name: 'jfunc', version: '1.1.4'
-    implementation group: 'com.github.romanqed', name: 'jgraph', version: '1.0.0'
+    // Modules
+    api group: 'io.github.amayaframework', name: 'amaya-di-core', version: '1.0.1'
+    api group: 'io.github.amayaframework', name: 'amaya-di-schema', version: '1.0.2'
+    api group: 'io.github.amayaframework', name: 'amaya-di-stub', version: '1.0.1'
 }
 
 test {
@@ -78,9 +90,7 @@ publishing {
             // Configure pom
             pom {
                 name.set(archivesBaseName)
-                description.set(
-                        'A framework responsible for monitoring and automating the dependency injection process.'
-                )
+                description.set('A modern, lightweight and fast DI framework.')
                 url.set('https://github.com/AmayaFramework/amaya-di')
 
                 organization {

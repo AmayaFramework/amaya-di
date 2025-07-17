@@ -4,7 +4,8 @@ import java.lang.annotation.*;
 
 /**
  * An annotation that is used as a default marker when building a
- * {@link io.github.amayaframework.di.scheme.ClassScheme}.
+ * {@link io.github.amayaframework.di.schema.ClassSchema}.
+ * <br>
  * It can only be applied to constructors, fields, and methods.
  * It is inherited.
  * <br>
@@ -21,7 +22,7 @@ import java.lang.annotation.*;
  *         public Service2 service2;
  *
  *         &#64;Inject
- *         public void setService3(Service3 dep) {...}
+ *         public void setService3(Service3 service3) {...}
  *     }
  * </pre>
  */

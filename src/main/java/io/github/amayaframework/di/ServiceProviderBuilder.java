@@ -2,251 +2,270 @@ package io.github.amayaframework.di;
 
 import com.github.romanqed.jfunc.Function0;
 import com.github.romanqed.jtype.JType;
+import io.github.amayaframework.di.core.ObjectFactory;
+import io.github.amayaframework.di.core.ServiceProvider;
+import io.github.amayaframework.di.core.TypeRepository;
+import io.github.amayaframework.di.schema.SchemaFactory;
+import io.github.amayaframework.di.stub.CacheMode;
+import io.github.amayaframework.di.stub.StubFactory;
 
 import java.lang.reflect.Type;
+import java.util.function.Supplier;
 
 /**
- * An interface describing an abstract {@link ServiceProvider} builder.
+ * A builder interface for constructing a {@link ServiceProvider}.
+ * <p>
+ * Allows configuring repositories, schema/stub factories, and registering
+ * services (factories, instances, implementations) with optional scoping.
+ * <p>
+ * Each call to {@link #build()} resets the internal builder state.
  */
 public interface ServiceProviderBuilder {
 
     /**
-     * Sets the repository that will be used by built {@link ServiceProvider} instance.
-     * If no repository has been set, or null has been set, an empty default repository will be created.
-     * The repository used will not be changed in any way
-     * until the {@link ServiceProviderBuilder#build} method is called.
-     * If any error occurs during the build process, no changes will be made either.
+     * Specifies the {@link SchemaFactory} to use for generating injection metadata.
      *
-     * @param repository the specified {@link ServiceRepository} instance, may be null
-     * @return this {@link ServiceProviderBuilder} instance
+     * @param factory the schema factory to use
+     * @return this builder instance for chaining
      */
-    ServiceProviderBuilder setRepository(ServiceRepository repository);
+    ServiceProviderBuilder withSchemaFactory(SchemaFactory factory);
 
     /**
-     * Adds a service by its class, which is an implementation of the specified type.
+     * Specifies the {@link StubFactory} to use for generating {@link ObjectFactory} stubs.
      *
-     * @param type           the specified type, must be non-null
-     * @param implementation the specified implementation class, must extend the service type and be non-null
-     * @param wrapper        the wrapper function that will be applied to the created instantiator, must be non-null
-     * @param <T>            the service type
-     * @return this {@link ServiceProviderBuilder} instance
+     * @param factory the stub factory to use
+     * @return this builder instance for chaining
      */
-    <T> ServiceProviderBuilder addService(Type type, Class<? extends T> implementation, ServiceWrapper<T> wrapper);
+    ServiceProviderBuilder withStubFactory(StubFactory factory);
 
     /**
-     * Adds a singleton service by its class, which is an implementation of the specified type.
-     * Singleton implies a dependency resolution policy in which each service request will return the same instance.
-     * It is guaranteed that the implementation of the policy is thread-safe.
+     * Specifies the {@link CacheMode} used during stub generation.
      *
-     * @param type           the specified type, must be non-null
-     * @param implementation the specified implementation class, must extend the service type and be non-null
-     * @return this {@link ServiceProviderBuilder} instance
+     * @param mode the caching mode to apply
+     * @return this builder instance for chaining
      */
-    ServiceProviderBuilder addSingleton(Type type, Class<?> implementation);
+    ServiceProviderBuilder withCacheMode(CacheMode mode);
 
     /**
-     * Adds a transient service by its class, which is an implementation of the specified type.
-     * Transient implies a dependency resolution policy in which each service request will return a new instance.
-     * It is guaranteed that the implementation of the policy is thread-safe.
+     * Sets the {@link TypeRepository} to store built object factories.
      *
-     * @param type           the specified type, must be non-null
-     * @param implementation the specified implementation class, must extend the service type and be non-null
-     * @return this {@link ServiceProviderBuilder} instance
+     * @param repository the repository instance
+     * @return this builder instance for chaining
      */
-    ServiceProviderBuilder addTransient(Type type, Class<?> implementation);
+    ServiceProviderBuilder withRepository(TypeRepository repository);
 
     /**
-     * Adds a service by its class, which is an implementation of the specified type.
+     * Sets a lazy provider of the {@link TypeRepository}.
      *
-     * @param type           the specified type, must be non-null
-     * @param implementation the specified implementation class, must extend the service type and be non-null
-     * @param wrapper        the wrapper function that will be applied to the created instantiator, must be non-null
-     * @param <T>            the service type
-     * @return this {@link ServiceProviderBuilder} instance
+     * @param supplier the supplier that provides the repository
+     * @return this builder instance for chaining
      */
-    default <T> ServiceProviderBuilder addService(JType<T> type,
-                                                  Class<? extends T> implementation,
-                                                  ServiceWrapper<T> wrapper) {
-        return addService(type.getType(), implementation, wrapper);
-    }
+    ServiceProviderBuilder withRepository(Supplier<TypeRepository> supplier);
 
     /**
-     * Adds a singleton service by its class, which is an implementation of the specified type.
-     * Singleton implies a dependency resolution policy in which each service request will return the same instance.
-     * It is guaranteed that the implementation of the policy is thread-safe.
+     * Registers a raw object factory directly for the specified type.
      *
-     * @param type           the specified type, must be non-null
-     * @param implementation the specified implementation class, must extend the service type and be non-null
-     * @param <T>            the type of service
-     * @return this {@link ServiceProviderBuilder} instance
+     * @param type    the target type
+     * @param factory the object factory to use
+     * @return this builder instance for chaining
      */
-    default <T> ServiceProviderBuilder addSingleton(JType<T> type, Class<? extends T> implementation) {
-        return addSingleton(type.getType(), implementation);
-    }
+    ServiceProviderBuilder add(Type type, ObjectFactory factory);
 
     /**
-     * Adds a transient service by its class, which is an implementation of the specified type.
-     * Transient implies a dependency resolution policy in which each service request will return a new instance.
-     * It is guaranteed that the implementation of the policy is thread-safe.
+     * Registers a raw object factory using {@link JType}.
      *
-     * @param type           the specified type, must be non-null
-     * @param implementation the specified implementation class, must extend the service type and be non-null
-     * @param <T>            the type of service
-     * @return this {@link ServiceProviderBuilder} instance
+     * @param type    the target type
+     * @param factory the object factory to use
+     * @return this builder instance for chaining
      */
-    default <T> ServiceProviderBuilder addTransient(JType<T> type, Class<? extends T> implementation) {
-        return addTransient(type.getType(), implementation);
-    }
+    ServiceProviderBuilder add(JType<?> type, ObjectFactory factory);
 
     /**
-     * Adds a service by its class, which is an implementation of the specified class.
+     * Removes any previously registered factory or service binding for the specified type.
      *
-     * @param type           the specified class, must be non-null
-     * @param implementation the specified implementation class, must extend the service type and be non-null
-     * @param wrapper        the wrapper function that will be applied to the created instantiator, must be non-null
-     * @param <T>            the service type
-     * @return this {@link ServiceProviderBuilder} instance
+     * @param type the type to remove
+     * @return this builder instance for chaining
      */
-    <T> ServiceProviderBuilder addService(Class<T> type, Class<? extends T> implementation, ServiceWrapper<T> wrapper);
+    ServiceProviderBuilder remove(Type type);
 
     /**
-     * Adds a singleton service by its class, which is an implementation of the specified class.
-     * Singleton implies a dependency resolution policy in which each service request will return the same instance.
-     * It is guaranteed that the implementation of the policy is thread-safe.
+     * Removes any binding for the given {@link JType}.
      *
-     * @param type           the specified class, must be non-null
-     * @param implementation the specified implementation class, must extend the service type and be non-null
-     * @param <T>            the type of service
-     * @return this {@link ServiceProviderBuilder} instance
+     * @param type the type to remove
+     * @return this builder instance for chaining
      */
-    <T> ServiceProviderBuilder addSingleton(Class<T> type, Class<? extends T> implementation);
+    ServiceProviderBuilder remove(JType<?> type);
 
     /**
-     * Adds a transient service by its class, which is an implementation of the specified class.
-     * Transient implies a dependency resolution policy in which each service request will return a new instance.
-     * It is guaranteed that the implementation of the policy is thread-safe.
+     * Registers a functional provider for the specified type.
      *
-     * @param type           the specified class, must be non-null
-     * @param implementation the specified implementation class, must extend the service type and be non-null
-     * @param <T>            the type of service
-     * @return this {@link ServiceProviderBuilder} instance
+     * @param type     the target type
+     * @param provider the function that produces an instance
+     * @return this builder instance for chaining
      */
-    <T> ServiceProviderBuilder addTransient(Class<T> type, Class<? extends T> implementation);
+    ServiceProviderBuilder add(Type type, Function0<?> provider);
 
     /**
-     * Adds a service by its class, that will be used as service type and service implementation at the same time.
+     * Registers a typed functional provider using {@link JType}.
      *
-     * @param type    the specified class, must be non-null
-     * @param wrapper the wrapper function that will be applied to the created instantiator, must be non-null
+     * @param type     the target type
+     * @param provider the function that produces an instance
+     * @param <T>      the service type
+     * @return this builder instance for chaining
+     */
+    <T> ServiceProviderBuilder add(JType<T> type, Function0<T> provider);
+
+    /**
+     * Registers a prebuilt service instance.
+     *
+     * @param type     the service type
+     * @param instance the service instance
+     * @return this builder instance for chaining
+     */
+    ServiceProviderBuilder addInstance(Type type, Object instance);
+
+
+    /**
+     * Registers a typed service instance using {@link JType}.
+     *
+     * @param type     the target type
+     * @param instance the instance to register
+     * @param <T>      the service type
+     * @return this builder instance for chaining
+     */
+    <T> ServiceProviderBuilder addInstance(JType<T> type, T instance);
+
+    /**
+     * Registers an untyped service instance using its runtime class.
+     *
+     * @param instance the instance to register
+     * @return this builder instance for chaining
+     */
+    ServiceProviderBuilder addInstance(Object instance);
+
+    /**
+     * Registers a concrete implementation with a {@link ServiceWrapper} for the given type.
+     *
+     * @param type    the service interface or base type
+     * @param impl    the implementation class
+     * @param wrapper the wrapper to apply to the factory
+     * @return this builder instance for chaining
+     */
+    ServiceProviderBuilder add(Type type, Class<?> impl, ServiceWrapper wrapper);
+
+    /**
+     * Registers a typed implementation with a wrapper.
+     *
+     * @param type    the base type
+     * @param impl    the implementation class
+     * @param wrapper the factory wrapper
      * @param <T>     the service type
-     * @return this {@link ServiceProviderBuilder} instance
+     * @return this builder instance for chaining
      */
-    <T> ServiceProviderBuilder addService(Class<T> type, ServiceWrapper<T> wrapper);
+    <T> ServiceProviderBuilder add(Class<T> type, Class<? extends T> impl, ServiceWrapper wrapper);
 
     /**
-     * Adds a singleton service by its class,
-     * that will be used as service type and service implementation at the same time.
-     * Singleton implies a dependency resolution policy in which each service request will return the same instance.
-     * It is guaranteed that the implementation of the policy is thread-safe.
+     * Registers a typed implementation via {@link JType} with a wrapper.
      *
-     * @param type the specified class, must be non-null
-     * @return this {@link ServiceProviderBuilder} instance
+     * @param type    the typed service
+     * @param impl    the implementation class
+     * @param wrapper the wrapper to apply
+     * @param <T>     the service type
+     * @return this builder instance for chaining
      */
-    ServiceProviderBuilder addSingleton(Class<?> type);
+    <T> ServiceProviderBuilder add(JType<T> type, Class<? extends T> impl, ServiceWrapper wrapper);
 
     /**
-     * Adds a transient service by its class,
-     * that will be used as service type and service implementation at the same time.
-     * Transient implies a dependency resolution policy in which each service request will return a new instance.
-     * It is guaranteed that the implementation of the policy is thread-safe.
+     * Registers a self-bound implementation with a wrapper.
      *
-     * @param type the specified class, must be non-null
-     * @return this {@link ServiceProviderBuilder} instance
+     * @param impl    the implementation class
+     * @param wrapper the factory wrapper
+     * @return this builder instance for chaining
      */
-    ServiceProviderBuilder addTransient(Class<?> type);
+    ServiceProviderBuilder add(Class<?> impl, ServiceWrapper wrapper);
 
     /**
-     * Adds a service by its instantiator, which creates instances of the specified type.
+     * Registers a transient binding (new instance created per request).
      *
-     * @param type     the specified type, must be non-null
-     * @param supplier the specified instantiator, must be non-null
-     * @return this {@link ServiceProviderBuilder} instance
+     * @param type the service type
+     * @param impl the implementation class
+     * @return this builder instance for chaining
      */
-    ServiceProviderBuilder addService(Type type, Function0<?> supplier);
+    ServiceProviderBuilder addTransient(Type type, Class<?> impl);
 
     /**
-     * Adds a service by its instantiator, which creates instances of the specified type.
+     * Registers a typed transient binding.
      *
-     * @param type     the specified type, must be non-null
-     * @param supplier the specified instantiator, must be non-null
-     * @param <T>      the service type
-     * @return this {@link ServiceProviderBuilder} instance
+     * @param type the service type
+     * @param impl the implementation class
+     * @param <T>  the service type
+     * @return this builder instance for chaining
      */
-    default <T> ServiceProviderBuilder addService(JType<T> type, Function0<T> supplier) {
-        return addService(type.getType(), supplier);
-    }
+    <T> ServiceProviderBuilder addTransient(Class<T> type, Class<? extends T> impl);
 
     /**
-     * Adds a service by its instance, which will continue to be used unchanged.
+     * Registers a typed transient binding using {@link JType}.
      *
-     * @param type     the specified type, must be non-null
-     * @param instance the specified instance, may be null
-     * @return this {@link ServiceProviderBuilder} instance
+     * @param type the service type
+     * @param impl the implementation class
+     * @param <T>  the service type
+     * @return this builder instance for chaining
      */
-    default ServiceProviderBuilder addInstance(Type type, Object instance) {
-        return addService(type, () -> instance);
-    }
+    <T> ServiceProviderBuilder addTransient(JType<T> type, Class<? extends T> impl);
 
     /**
-     * Adds a service by its instance, which will continue to be used unchanged.
+     * Registers a self-bound transient binding.
      *
-     * @param type     the specified type, must be non-null
-     * @param instance the specified instance, may be null
-     * @param <T>      the service type
-     * @return this {@link ServiceProviderBuilder} instance
+     * @param impl the implementation class
+     * @return this builder instance for chaining
      */
-    default <T> ServiceProviderBuilder addInstance(JType<T> type, T instance) {
-        return addService(type, () -> instance);
-    }
+    ServiceProviderBuilder addTransient(Class<?> impl);
 
     /**
-     * Adds a service by its instance, which will continue to be used unchanged.
+     * Registers a singleton binding (single instance reused).
      *
-     * @param instance the specified instance, must be non-null (to determine service type)
-     * @return this {@link ServiceProviderBuilder} instance
+     * @param type the service type
+     * @param impl the implementation class
+     * @return this builder instance for chaining
      */
-    default ServiceProviderBuilder addInstance(Object instance) {
-        return addService(instance.getClass(), () -> instance);
-    }
+    ServiceProviderBuilder addSingleton(Type type, Class<?> impl);
 
     /**
-     * Removes the service that implements the specified type.
+     * Registers a typed singleton binding.
      *
-     * @param type the specified type, must be non-null
-     * @return this {@link ServiceProviderBuilder} instance
+     * @param type the service type
+     * @param impl the implementation class
+     * @param <T>  the service type
+     * @return this builder instance for chaining
      */
-    ServiceProviderBuilder removeService(Type type);
+    <T> ServiceProviderBuilder addSingleton(Class<T> type, Class<? extends T> impl);
 
     /**
-     * Removes the service that implements the specified type.
+     * Registers a typed singleton binding using {@link JType}.
      *
-     * @param type the specified type, must be non-null
-     * @return this {@link ServiceProviderBuilder} instance
+     * @param type the service type
+     * @param impl the implementation class
+     * @param <T>  the service type
+     * @return this builder instance for chaining
      */
-    default ServiceProviderBuilder removeService(JType<?> type) {
-        return removeService(type.getType());
-    }
+    <T> ServiceProviderBuilder addSingleton(JType<T> type, Class<? extends T> impl);
 
     /**
-     * Builds a ready-to-use {@link ServiceProvider} implementation and resets
-     * this {@link ServiceProviderBuilder} instance to its original state,
-     * making it ready for reuse.
-     * If the build was not completed due to an error, no third-party effects will be applied.
-     * Important: if an error occurred while filling in the repository, the changes made will not be undone.
+     * Registers a self-bound singleton binding.
      *
-     * @return {@link ServiceProvider} instance
-     * @throws TypeNotFoundException if the dependency of the service used has not been resolved (optional)
-     * @throws CycleFoundException   if a cyclic dependence is detected (optional)
+     * @param impl the implementation class
+     * @return this builder instance for chaining
+     */
+    ServiceProviderBuilder addSingleton(Class<?> impl);
+
+    /**
+     * Builds a new {@link ServiceProvider} and resets the builder.
+     * <p>
+     * If an error occurs during the build process, the builder is still reset.
+     *
+     * @return a newly constructed {@link ServiceProvider}
+     * @throws RuntimeException if the build process fails
+     * @throws Error            if the build process fails
      */
     ServiceProvider build();
 }

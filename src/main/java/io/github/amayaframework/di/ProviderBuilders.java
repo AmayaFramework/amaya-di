@@ -1,175 +1,228 @@
 package io.github.amayaframework.di;
 
-import io.github.amayaframework.di.scheme.ReflectionSchemeFactory;
-import io.github.amayaframework.di.scheme.SchemeFactory;
+import io.github.amayaframework.di.schema.ReflectSchemaFactory;
+import io.github.amayaframework.di.schema.SchemaFactory;
+import io.github.amayaframework.di.stub.CacheMode;
 import io.github.amayaframework.di.stub.StubFactory;
 
-import java.lang.annotation.Annotation;
-
 /**
- * A utility class that provides methods for creating all {@link ServiceProviderBuilder}
- * and {@link ManualProviderBuilder} implementations included in the current version of the framework.
+ * Utility class providing factory methods to create instances of {@link ServiceProviderBuilder}
+ * and {@link ScopedProviderBuilder} with various configurations.
+ *
+ * <p>It offers preconfigured defaults for schema factory, cache mode, and validation checks,
+ * as well as overloaded methods allowing customization of schema factories, stub factories,
+ * and validation levels. The class covers both plain and checked builders, including scoped variants.</p>
+ *
+ * <p>This class serves as the main entry point for getting builder instances used to configure
+ * and construct service providers within the DI framework.</p>
  */
 public final class ProviderBuilders {
-    public static final SchemeFactory REFLECTION_FACTORY = new ReflectionSchemeFactory(Inject.class);
+    /**
+     * The default schema factory used for introspecting injection points.
+     */
+    public static final SchemaFactory SCHEMA_FACTORY = new ReflectSchemaFactory(Inject.class);
+
+    /**
+     * The default cache mode applied to built providers.
+     */
+    public static final CacheMode CACHE_MODE = CacheMode.FULL;
 
     private ProviderBuilders() {
     }
 
+    // Base methods
+
     /**
-     * Creates {@link CheckedProviderBuilder} with the specified scheme, stub factories and check set.
+     * Creates a {@link ServiceProviderBuilder} with the given schema factory, stub factory, and validation checks.
      *
-     * @param schemeFactory the specified scheme factory, must be non-null
-     * @param stubFactory   the specified stub factory, must be non-null
-     * @param checks        the specified set of applied checks
-     * @return the {@link ServiceProviderBuilder} instance
+     * @param schemaFactory the schema factory to use for dependency schemas
+     * @param stubFactory   the stub factory to use for generating stubs (maybe null)
+     * @param checks        bitmask of validation checks to apply during build (see {@link BuilderChecks})
+     * @return a new instance of {@link ServiceProviderBuilder} with checking enabled
      */
-    public static ServiceProviderBuilder createChecked(
-            SchemeFactory schemeFactory,
-            StubFactory stubFactory,
-            int checks) {
-        return new CheckedProviderBuilder(schemeFactory, stubFactory, checks);
+    public static ServiceProviderBuilder create(SchemaFactory schemaFactory, StubFactory stubFactory, int checks) {
+        if (checks == BuilderChecks.NO_CHECKS) {
+            return new PlainProviderBuilder(schemaFactory, stubFactory, CACHE_MODE);
+        }
+        return new CheckedProviderBuilder(schemaFactory, stubFactory, CACHE_MODE, checks);
     }
 
     /**
-     * Creates {@link CheckedProviderBuilder} with the specified scheme and stub factories.
-     * Enables all available checks {@link CheckedProviderBuilder#VALIDATE_ALL}.
+     * Creates a {@link ServiceProviderBuilder} with the default schema factory,
+     * no stub factory, and specified validation checks.
      *
-     * @param schemeFactory the specified scheme factory, must be non-null
-     * @param stubFactory   the specified stub factory, must be non-null
-     * @return the {@link ServiceProviderBuilder} instance
+     * @param checks bitmask of validation checks to apply during build
+     * @return a new instance of {@link ServiceProviderBuilder} with checking enabled
      */
-    public static ServiceProviderBuilder createChecked(SchemeFactory schemeFactory, StubFactory stubFactory) {
-        return new CheckedProviderBuilder(schemeFactory, stubFactory);
+    public static ServiceProviderBuilder create(int checks) {
+        if (checks == BuilderChecks.NO_CHECKS) {
+            return new PlainProviderBuilder(SCHEMA_FACTORY, null, CACHE_MODE);
+        }
+        return new CheckedProviderBuilder(SCHEMA_FACTORY, null, CACHE_MODE, checks);
     }
 
     /**
-     * Creates {@link CheckedProviderBuilder} instance with the specified stub factory,
-     * {@link ReflectionSchemeFactory}, using the specified annotation as marker and check set.
+     * Creates a plain {@link ServiceProviderBuilder} without validation checks,
+     * using the provided schema factory and stub factory.
      *
-     * @param annotation the specified annotation, must be non-null
-     * @param factory    the specified stub factory, must be non-null
-     * @param checks     the specified set of applied checks
-     * @return the {@link ServiceProviderBuilder} instance
+     * @param schemaFactory the schema factory to use
+     * @param stubFactory   the stub factory to use (maybe null)
+     * @return a new instance of {@link ServiceProviderBuilder} without validation
      */
-    public static ServiceProviderBuilder createChecked(
-            Class<? extends Annotation> annotation,
-            StubFactory factory,
-            int checks) {
-        return createChecked(new ReflectionSchemeFactory(annotation), factory, checks);
+    public static ServiceProviderBuilder create(SchemaFactory schemaFactory, StubFactory stubFactory) {
+        return new PlainProviderBuilder(schemaFactory, stubFactory, CACHE_MODE);
     }
 
     /**
-     * Creates {@link CheckedProviderBuilder} instance with the specified stub factory and
-     * {@link ReflectionSchemeFactory}, using the specified annotation as marker.
-     * Enables all available checks {@link CheckedProviderBuilder#VALIDATE_ALL}.
+     * Creates a plain {@link ServiceProviderBuilder} with default schema factory,
+     * no stub factory, and no validation.
      *
-     * @param annotation the specified annotation, must be non-null
-     * @param factory    the specified stub factory, must be non-null
-     * @return the {@link ServiceProviderBuilder} instance
+     * @return a new instance of {@link ServiceProviderBuilder} without validation
      */
-    public static ServiceProviderBuilder createChecked(Class<? extends Annotation> annotation, StubFactory factory) {
-        return createChecked(new ReflectionSchemeFactory(annotation), factory);
+    public static ServiceProviderBuilder create() {
+        return new PlainProviderBuilder(SCHEMA_FACTORY, null, CACHE_MODE);
     }
 
     /**
-     * Creates {@link CheckedProviderBuilder} instance with the specified stub factory,
-     * {@link ReflectionSchemeFactory}, using {@link Inject} annotation as marker and check set.
+     * Creates a checked {@link ServiceProviderBuilder} with all validation checks enabled,
+     * default schema factory, and no stub factory.
      *
-     * @param factory the specified stub factory, must be non-null
-     * @param checks  the specified set of applied checks
-     * @return the {@link ServiceProviderBuilder} instance
+     * @return a new instance of {@link ServiceProviderBuilder} with full validation
      */
-    public static ServiceProviderBuilder createChecked(StubFactory factory, int checks) {
-        return createChecked(REFLECTION_FACTORY, factory, checks);
+    public static ServiceProviderBuilder createChecked() {
+        return new CheckedProviderBuilder(SCHEMA_FACTORY, null, CACHE_MODE, BuilderChecks.VALIDATE_ALL);
     }
 
     /**
-     * Creates {@link CheckedProviderBuilder} instance with the specified stub factory and
-     * {@link ReflectionSchemeFactory}, using {@link Inject} annotation as marker.
-     * Enables all available checks {@link CheckedProviderBuilder#VALIDATE_ALL}.
+     * Creates a scoped {@link ScopedProviderBuilder} with specified schema factory,
+     * stub factory, and validation checks.
      *
-     * @param factory the specified stub factory, must be non-null
-     * @return the {@link ServiceProviderBuilder} instance
+     * @param schemaFactory the schema factory to use
+     * @param stubFactory   the stub factory to use (maybe null)
+     * @param checks        bitmask of validation checks to apply
+     * @return a new instance of {@link ScopedProviderBuilder} with checking enabled
      */
-    public static ServiceProviderBuilder createChecked(StubFactory factory) {
-        return createChecked(REFLECTION_FACTORY, factory);
+    public static ScopedProviderBuilder createScoped(SchemaFactory schemaFactory, StubFactory stubFactory, int checks) {
+        if (checks == BuilderChecks.NO_CHECKS) {
+            return new PlainScopedProviderBuilder(schemaFactory, stubFactory, CACHE_MODE);
+        }
+        return new CheckedScopedProviderBuilder(schemaFactory, stubFactory, CACHE_MODE, checks);
     }
 
     /**
-     * Creates {@link ManualCheckedProviderBuilder} with the specified scheme, stub factories and check set.
+     * Creates a scoped {@link ScopedProviderBuilder} with default schema factory,
+     * no stub factory, and specified validation checks.
      *
-     * @param schemeFactory the specified scheme factory, must be non-null
-     * @param stubFactory   the specified stub factory, must be non-null
-     * @param checks        the specified set of applied checks
-     * @return the {@link ManualProviderBuilder} instance
+     * @param checks bitmask of validation checks to apply
+     * @return a new instance of {@link ScopedProviderBuilder} with checking enabled
      */
-    public static ManualProviderBuilder createManual(SchemeFactory schemeFactory, StubFactory stubFactory, int checks) {
-        return new ManualCheckedProviderBuilder(schemeFactory, stubFactory, checks);
+    public static ScopedProviderBuilder createScoped(int checks) {
+        if (checks == BuilderChecks.NO_CHECKS) {
+            return new PlainScopedProviderBuilder(SCHEMA_FACTORY, null, CACHE_MODE);
+        }
+        return new CheckedScopedProviderBuilder(SCHEMA_FACTORY, null, CACHE_MODE, checks);
     }
 
     /**
-     * Creates {@link ManualCheckedProviderBuilder} with the specified scheme and stub factories.
-     * Enables all available checks {@link CheckedProviderBuilder#VALIDATE_ALL}.
+     * Creates a plain scoped {@link ScopedProviderBuilder} without validation,
+     * using the specified schema factory and stub factory.
      *
-     * @param schemeFactory the specified scheme factory, must be non-null
-     * @param stubFactory   the specified stub factory, must be non-null
-     * @return the {@link ManualProviderBuilder} instance
+     * @param schemaFactory the schema factory to use
+     * @param stubFactory   the stub factory to use (maybe null)
+     * @return a new instance of {@link ScopedProviderBuilder} without validation
      */
-    public static ManualProviderBuilder createManual(SchemeFactory schemeFactory, StubFactory stubFactory) {
-        return new ManualCheckedProviderBuilder(schemeFactory, stubFactory);
+    public static ScopedProviderBuilder createScoped(SchemaFactory schemaFactory, StubFactory stubFactory) {
+        return new PlainScopedProviderBuilder(schemaFactory, stubFactory, CACHE_MODE);
     }
 
     /**
-     * Creates {@link ManualCheckedProviderBuilder} instance with the specified stub factory,
-     * {@link ReflectionSchemeFactory}, using the specified annotation as marker and check set.
+     * Creates a plain scoped {@link ScopedProviderBuilder} with default schema factory,
+     * no stub factory, and no validation.
      *
-     * @param annotation the specified annotation, must be non-null
-     * @param factory    the specified stub factory, must be non-null
-     * @param checks     the specified set of applied checks
-     * @return the {@link ServiceProviderBuilder} instance
+     * @return a new instance of {@link ScopedProviderBuilder} without validation
      */
-    public static ManualProviderBuilder createManual(
-            Class<? extends Annotation> annotation,
-            StubFactory factory,
-            int checks) {
-        return createManual(new ReflectionSchemeFactory(annotation), factory, checks);
+    public static ScopedProviderBuilder createScoped() {
+        return new PlainScopedProviderBuilder(SCHEMA_FACTORY, null, CACHE_MODE);
+    }
+
+
+    /**
+     * Creates a checked scoped {@link ScopedProviderBuilder} with all validation checks enabled,
+     * default schema factory, and no stub factory.
+     *
+     * @return a new instance of {@link ScopedProviderBuilder} with full validation
+     */
+    public static ScopedProviderBuilder createCheckedScoped() {
+        return new CheckedScopedProviderBuilder(SCHEMA_FACTORY, null, CACHE_MODE, BuilderChecks.VALIDATE_ALL);
+    }
+
+    // Proxy methods for convenience when only stub factory or checks are specified
+
+    /**
+     * Creates a {@link ServiceProviderBuilder} with the given stub factory and validation checks,
+     * using the default schema factory.
+     *
+     * @param stubFactory the stub factory to use (maybe null)
+     * @param checks      bitmask of validation checks to apply
+     * @return a new instance of {@link ServiceProviderBuilder} with checking enabled
+     */
+    public static ServiceProviderBuilder create(StubFactory stubFactory, int checks) {
+        return create(SCHEMA_FACTORY, stubFactory, checks);
     }
 
     /**
-     * Creates {@link ManualCheckedProviderBuilder} instance with the specified stub factory and
-     * {@link ReflectionSchemeFactory}, using the specified annotation as marker.
-     * Enables all available checks {@link CheckedProviderBuilder#VALIDATE_ALL}.
+     * Creates a plain {@link ServiceProviderBuilder} with the given stub factory,
+     * default schema factory, and no validation.
      *
-     * @param annotation the specified annotation, must be non-null
-     * @param factory    the specified stub factory, must be non-null
-     * @return the {@link ServiceProviderBuilder} instance
+     * @param stubFactory the stub factory to use (maybe null)
+     * @return a new instance of {@link ServiceProviderBuilder} without validation
      */
-    public static ManualProviderBuilder createManual(Class<? extends Annotation> annotation, StubFactory factory) {
-        return createManual(new ReflectionSchemeFactory(annotation), factory);
+    public static ServiceProviderBuilder create(StubFactory stubFactory) {
+        return create(SCHEMA_FACTORY, stubFactory);
     }
 
     /**
-     * Creates {@link ManualCheckedProviderBuilder} instance with the specified stub factory,
-     * {@link ReflectionSchemeFactory}, using {@link Inject} annotation as marker and check set.
+     * Creates a checked {@link ServiceProviderBuilder} with all validation checks enabled,
+     * default schema factory and the given stub factory.
      *
-     * @param factory the specified stub factory, must be non-null
-     * @param checks  the specified set of applied checks
-     * @return the {@link ServiceProviderBuilder} instance
+     * @param stubFactory the stub factory to use (maybe null)
+     * @return a new instance of {@link ServiceProviderBuilder} with full validation
      */
-    public static ManualProviderBuilder createManual(StubFactory factory, int checks) {
-        return createManual(REFLECTION_FACTORY, factory, checks);
+    public static ServiceProviderBuilder createChecked(StubFactory stubFactory) {
+        return create(SCHEMA_FACTORY, stubFactory, BuilderChecks.VALIDATE_ALL);
     }
 
     /**
-     * Creates {@link ManualCheckedProviderBuilder} instance with the specified stub factory and
-     * {@link ReflectionSchemeFactory}, using {@link Inject} annotation as marker.
-     * Enables all available checks {@link CheckedProviderBuilder#VALIDATE_ALL}.
+     * Creates a scoped {@link ScopedProviderBuilder} with the given stub factory and validation checks,
+     * using the default schema factory.
      *
-     * @param factory the specified stub factory, must be non-null
-     * @return the {@link ServiceProviderBuilder} instance
+     * @param stubFactory the stub factory to use (maybe null)
+     * @param checks      bitmask of validation checks to apply
+     * @return a new instance of {@link ScopedProviderBuilder} with checking enabled
      */
-    public static ManualProviderBuilder createManual(StubFactory factory) {
-        return createManual(REFLECTION_FACTORY, factory);
+    public static ScopedProviderBuilder createScoped(StubFactory stubFactory, int checks) {
+        return createScoped(SCHEMA_FACTORY, stubFactory, checks);
+    }
+
+    /**
+     * Creates a plain scoped {@link ScopedProviderBuilder} with the given stub factory,
+     * default schema factory, and no validation.
+     *
+     * @param stubFactory the stub factory to use (maybe null)
+     * @return a new instance of {@link ScopedProviderBuilder} without validation
+     */
+    public static ScopedProviderBuilder createScoped(StubFactory stubFactory) {
+        return createScoped(SCHEMA_FACTORY, stubFactory);
+    }
+
+    /**
+     * Creates a checked scoped {@link ScopedProviderBuilder} with all validation checks enabled,
+     * default schema factory and the given stub factory.
+     *
+     * @param stubFactory the stub factory to use (maybe null)
+     * @return a new instance of {@link ScopedProviderBuilder} with full validation
+     */
+    public static ScopedProviderBuilder createCheckedScoped(StubFactory stubFactory) {
+        return createScoped(SCHEMA_FACTORY, stubFactory, BuilderChecks.VALIDATE_ALL);
     }
 }
