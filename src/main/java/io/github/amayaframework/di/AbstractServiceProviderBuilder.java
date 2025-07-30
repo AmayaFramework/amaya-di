@@ -1,5 +1,6 @@
 package io.github.amayaframework.di;
 
+import com.github.romanqed.jfunc.Exceptions;
 import com.github.romanqed.jfunc.Function0;
 import com.github.romanqed.jtype.IllegalTypeException;
 import com.github.romanqed.jtype.JType;
@@ -475,10 +476,10 @@ public abstract class AbstractServiceProviderBuilder<B extends ServiceProviderBu
     public ServiceProvider build() {
         try {
             return doBuild();
-        } catch (Error | RuntimeException e) {
-            throw e;
         } catch (Throwable e) {
-            throw new RuntimeException(e);
+            Exceptions.throwAny(e);
+            // Unreachable code to suppress javac error
+            return null;
         } finally {
             this.reset();
         }
