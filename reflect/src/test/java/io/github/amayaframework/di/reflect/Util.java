@@ -1,5 +1,6 @@
 package io.github.amayaframework.di.reflect;
 
+import com.github.romanqed.jfunc.Exceptions;
 import com.github.romanqed.jtype.JType;
 import io.github.amayaframework.di.core.HashTypeRepository;
 import io.github.amayaframework.di.core.ObjectFactory;
@@ -25,10 +26,10 @@ final class Util {
         var factory = provider.get(type);
         try {
             return (T) factory.create(provider);
-        } catch (Error | RuntimeException e) {
-            throw e;
         } catch (Throwable e) {
-            throw new RuntimeException(e);
+            Exceptions.throwAny(e);
+            // Unreachable code to suppress javac error
+            return null;
         }
     }
 
@@ -36,10 +37,10 @@ final class Util {
     static <T> T get(ObjectFactory factory, Class<T> type) {
         try {
             return (T) factory.create(null);
-        } catch (Error | RuntimeException e) {
-            throw e;
         } catch (Throwable e) {
-            throw new RuntimeException(e);
+            Exceptions.throwAny(e);
+            // Unreachable code to suppress javac error
+            return null;
         }
     }
 
