@@ -1,5 +1,6 @@
 package io.github.amayaframework.di.core;
 
+import com.github.romanqed.jfunc.Exceptions;
 import com.github.romanqed.jtype.JType;
 
 import java.lang.reflect.Type;
@@ -40,10 +41,10 @@ public abstract class AbstractServiceProvider implements ServiceProvider {
         }
         try {
             return (T) factory.create(repository);
-        } catch (Error | RuntimeException e) {
-            throw e;
         } catch (Throwable e) {
-            throw new RuntimeException(e);
+            Exceptions.throwAny(e);
+            // Unreachable code to suppress javac error
+            return null;
         }
     }
 
@@ -64,10 +65,10 @@ public abstract class AbstractServiceProvider implements ServiceProvider {
         }
         try {
             return (T) factory.create(repository);
-        } catch (Error | RuntimeException e) {
-            throw e;
         } catch (Throwable e) {
-            throw new RuntimeException(e);
+            Exceptions.throwAny(e);
+            // Unreachable code to suppress javac error
+            return null;
         }
     }
 }
