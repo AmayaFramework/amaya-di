@@ -60,9 +60,9 @@ JVM 11より前のバージョンはサポートされていません。
 
 ```groovy
 dependencies {
-    implementation group: 'io.github.amayaframework', name: 'amaya-di', version: '3.0.4'
+    implementation group: 'io.github.amayaframework', name: 'amaya-di', version: '3.0.5'
     // ASM stub implementation
-    implementation group: 'io.github.amayaframework', name: 'amaya-di-asm', version: '2.0.2'
+    implementation group: 'io.github.amayaframework', name: 'amaya-di-asm', version: '2.0.3'
     // Or reflect stub implementation
     implementation group: 'io.github.amayaframework', name: 'amaya-di-reflect', version: '2.0.0'
 }
@@ -75,12 +75,12 @@ dependencies {
     <dependency>
         <groupId>io.github.amayaframework</groupId>
         <artifactId>amaya-di</artifactId>
-        <version>3.0.4</version>
+        <version>3.0.5</version>
     </dependency>
     <dependency>
         <groupId>io.github.amayaframework</groupId>
         <artifactId>amaya-di-asm</artifactId>
-        <version>2.0.2</version>
+        <version>2.0.3</version>
     </dependency>
     <dependency>
         <groupId>io.github.amayaframework</groupId>

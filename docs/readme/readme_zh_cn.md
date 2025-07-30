@@ -63,9 +63,9 @@ Amaya DI 是对依赖注入框架应有形态的现代诠释。它旨在为开�
 
 ```Groovy
 dependencies {
-    implementation group: 'io.github.amayaframework', name: 'amaya-di', version: '3.0.4'
+    implementation group: 'io.github.amayaframework', name: 'amaya-di', version: '3.0.5'
     // ASM stub 实现
-    implementation group: 'io.github.amayaframework', name: 'amaya-di-asm', version: '2.0.2'
+    implementation group: 'io.github.amayaframework', name: 'amaya-di-asm', version: '2.0.3'
     // 或者反射 stub 实现
     implementation group: 'io.github.amayaframework', name: 'amaya-di-reflect', version: '2.0.0'
 }
@@ -78,13 +78,13 @@ dependencies {
     <dependency>
         <groupId>io.github.amayaframework</groupId>
         <artifactId>amaya-di</artifactId>
-        <version>3.0.4</version>
+        <version>3.0.5</version>
     </dependency>
     <!-- ASM stub 实现 -->
     <dependency>
         <groupId>io.github.amayaframework</groupId>
         <artifactId>amaya-di-asm</artifactId>
-        <version>2.0.2</version>
+        <version>2.0.3</version>
     </dependency>
     <!-- 或者反射 stub 实现 -->
     <dependency>
