@@ -42,7 +42,7 @@ dependencies {
     compileOnly project(':schema')
     compileOnly project(':stub')
     implementation group: 'org.ow2.asm', name: 'asm', version: '9.8'
-    api group: 'com.github.romanqed', name: 'jeflect-loader', version: '1.1.1'
+    api group: 'com.github.romanqed', name: 'jeflect-loader', version: '1.1.2'
 }
 
 test {
