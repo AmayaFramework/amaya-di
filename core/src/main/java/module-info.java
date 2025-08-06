@@ -16,7 +16,7 @@
  *     <li>{@code io.github.amayaframework.di.core}</li>
  * </ul>
  */
-module io.github.amayaframework.di.core {
+module amayaframework.di.core {
     // Imports
     requires com.github.romanqed.jfunc;
     requires com.github.romanqed.jtype;
