@@ -112,7 +112,7 @@ First, if using modules, declare dependencies in `module-info.java`:
 
 ```java
 module com.github.romanqed.di.examples {
-    requires io.github.amayaframework.di; // Core module
+    requires amayaframework.di; // Core module
     exports com.github.romanqed.di.examples;
 }
 ```
@@ -169,8 +169,8 @@ Add the reflective factory generator to `module-info.java`:
 
 ```java
 module com.github.romanqed.di.examples {
-    requires io.github.amayaframework.di; // Core module
-    requires io.github.amayaframework.di.reflect; // Using reflect implementation
+    requires amayaframework.di; // Core module
+    requires amayaframework.di.reflect; // Using reflect implementation
     exports com.github.romanqed.di.examples;
 }
 ```

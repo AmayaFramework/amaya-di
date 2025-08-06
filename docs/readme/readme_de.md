@@ -104,7 +104,7 @@ Zuerst, bei Verwendung von Modulen, geben wir die Abhängigkeiten für `module-i
 
 ```java
 module com.github.romanqed.di.examples {
-    requires io.github.amayaframework.di; // Hauptmodul
+    requires amayaframework.di; // Hauptmodul
     exports com.github.romanqed.di.examples;
 }
 ```
@@ -161,8 +161,8 @@ Fügen wir dem `module-info.java` den reflektiven Objektfabriksgenerator hinzu:
 
 ```java
 module com.github.romanqed.di.examples {
-    requires io.github.amayaframework.di; // Hauptmodul
-    requires io.github.amayaframework.di.reflect; // Verwenden der reflektiven Implementierung
+    requires amayaframework.di; // Hauptmodul
+    requires amayaframework.di.reflect; // Verwenden der reflektiven Implementierung
     exports com.github.romanqed.di.examples;
 }
 ```
