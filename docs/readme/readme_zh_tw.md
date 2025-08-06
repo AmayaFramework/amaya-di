@@ -60,11 +60,11 @@ Amaya DI 是對 DI 框架應有面貌的現代化詮釋。它旨在為開發者�
 
 ```groovy
 dependencies {
-    implementation group: 'io.github.amayaframework', name: 'amaya-di', version: '3.0.5' // 核心模組
+    implementation group: 'io.github.amayaframework', name: 'amaya-di', version: '3.1.0' // 核心模組
     // ASM stub 實作
-    implementation group: 'io.github.amayaframework', name: 'amaya-di-asm', version: '2.0.3' // ASM Stub 實作
+    implementation group: 'io.github.amayaframework', name: 'amaya-di-asm', version: '2.1.0' // ASM Stub 實作
     // 或 reflect stub 實作
-    implementation group: 'io.github.amayaframework', name: 'amaya-di-reflect', version: '2.0.0' // Reflect Stub 實作
+    implementation group: 'io.github.amayaframework', name: 'amaya-di-reflect', version: '2.1.0' // Reflect Stub 實作
 }
 ```
 
@@ -75,17 +75,17 @@ dependencies {
     <dependency>
         <groupId>io.github.amayaframework</groupId>
         <artifactId>amaya-di</artifactId>
-        <version>3.0.5</version>
+        <version>3.1.0</version>
     </dependency>
     <dependency>
         <groupId>io.github.amayaframework</groupId>
         <artifactId>amaya-di-asm</artifactId>
-        <version>2.0.3</version>
+        <version>2.1.0</version>
     </dependency>
     <dependency>
         <groupId>io.github.amayaframework</groupId>
         <artifactId>amaya-di-reflect</artifactId>
-        <version>2.0.0</version>
+        <version>2.1.0</version>
     </dependency>
 </dependencies>
 ```
