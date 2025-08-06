@@ -60,11 +60,11 @@ Um das Framework zu verwenden, müssen zwei Module installiert werden: das Basis
 
 ```groovy
 dependencies {
-    implementation group: 'io.github.amayaframework', name: 'amaya-di', version: '3.0.5'
+    implementation group: 'io.github.amayaframework', name: 'amaya-di', version: '3.1.0'
     // ASM stub implementation
-    implementation group: 'io.github.amayaframework', name: 'amaya-di-asm', version: '2.0.3'
+    implementation group: 'io.github.amayaframework', name: 'amaya-di-asm', version: '2.1.0'
     // Oder reflect stub implementation
-    implementation group: 'io.github.amayaframework', name: 'amaya-di-reflect', version: '2.0.0'
+    implementation group: 'io.github.amayaframework', name: 'amaya-di-reflect', version: '2.1.0'
 }
 ```
 
@@ -75,17 +75,17 @@ dependencies {
     <dependency>
         <groupId>io.github.amayaframework</groupId>
         <artifactId>amaya-di</artifactId>
-        <version>3.0.5</version>
+        <version>3.1.0</version>
     </dependency>
     <dependency>
         <groupId>io.github.amayaframework</groupId>
         <artifactId>amaya-di-asm</artifactId>
-        <version>2.0.3</version>
+        <version>2.1.0</version>
     </dependency>
     <dependency>
         <groupId>io.github.amayaframework</groupId>
         <artifactId>amaya-di-reflect</artifactId>
-        <version>2.0.0</version>
+        <version>2.1.0</version>
     </dependency>
 </dependencies>
 ```
@@ -104,7 +104,7 @@ Zuerst, bei Verwendung von Modulen, geben wir die Abhängigkeiten für `module-i
 
 ```java
 module com.github.romanqed.di.examples {
-    requires io.github.amayaframework.di; // Hauptmodul
+    requires amayaframework.di; // Hauptmodul
     exports com.github.romanqed.di.examples;
 }
 ```
@@ -161,8 +161,8 @@ Fügen wir dem `module-info.java` den reflektiven Objektfabriksgenerator hinzu:
 
 ```java
 module com.github.romanqed.di.examples {
-    requires io.github.amayaframework.di; // Hauptmodul
-    requires io.github.amayaframework.di.reflect; // Verwenden der reflektiven Implementierung
+    requires amayaframework.di; // Hauptmodul
+    requires amayaframework.di.reflect; // Verwenden der reflektiven Implementierung
     exports com.github.romanqed.di.examples;
 }
 ```

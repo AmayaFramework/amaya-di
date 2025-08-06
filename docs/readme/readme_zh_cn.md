@@ -63,11 +63,11 @@ Amaya DI 是对依赖注入框架应有形态的现代诠释。它旨在为开�
 
 ```Groovy
 dependencies {
-    implementation group: 'io.github.amayaframework', name: 'amaya-di', version: '3.0.5'
+    implementation group: 'io.github.amayaframework', name: 'amaya-di', version: '3.1.0'
     // ASM stub 实现
-    implementation group: 'io.github.amayaframework', name: 'amaya-di-asm', version: '2.0.3'
+    implementation group: 'io.github.amayaframework', name: 'amaya-di-asm', version: '2.1.0'
     // 或者反射 stub 实现
-    implementation group: 'io.github.amayaframework', name: 'amaya-di-reflect', version: '2.0.0'
+    implementation group: 'io.github.amayaframework', name: 'amaya-di-reflect', version: '2.1.0'
 }
 ```
 
@@ -78,19 +78,19 @@ dependencies {
     <dependency>
         <groupId>io.github.amayaframework</groupId>
         <artifactId>amaya-di</artifactId>
-        <version>3.0.5</version>
+        <version>3.1.0</version>
     </dependency>
     <!-- ASM stub 实现 -->
     <dependency>
         <groupId>io.github.amayaframework</groupId>
         <artifactId>amaya-di-asm</artifactId>
-        <version>2.0.3</version>
+        <version>2.1.0</version>
     </dependency>
     <!-- 或者反射 stub 实现 -->
     <dependency>
         <groupId>io.github.amayaframework</groupId>
         <artifactId>amaya-di-reflect</artifactId>
-        <version>2.0.0</version>
+        <version>2.1.0</version>
     </dependency>
 </dependencies>
 ```
@@ -110,7 +110,7 @@ dependencies {
 
 ```java
 module com.github.romanqed.di.examples {
-    requires io.github.amayaframework.di; // 主模块
+    requires amayaframework.di; // 主模块
     exports com.github.romanqed.di.examples;
 }
 ```
@@ -166,8 +166,8 @@ public final class ScopedGreeter implements IGreeter {
 
 ```java
 module com.github.romanqed.di.examples {
-    requires io.github.amayaframework.di; // 主模块
-    requires io.github.amayaframework.di.reflect; // 使用反射实现
+    requires amayaframework.di; // 主模块
+    requires amayaframework.di.reflect; // 使用反射实现
     exports com.github.romanqed.di.examples;
 }
 ```

@@ -15,10 +15,10 @@
  *         such as {@code ObjectFactory} and {@code TypeRepository}, used for runtime injection.</li>
  * </ul>
  */
-module io.github.amayaframework.di.stub {
+module amayaframework.di.stub {
     // Imports
-    requires io.github.amayaframework.di.schema;
-    requires io.github.amayaframework.di.core;
+    requires amayaframework.di.schema;
+    requires amayaframework.di.core;
     // Exports
     exports io.github.amayaframework.di.stub;
 }

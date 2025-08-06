@@ -65,11 +65,11 @@ See [implementation choice](#implementation-choice) for details.
 
 ```Groovy
 dependencies {
-    implementation group: 'io.github.amayaframework', name: 'amaya-di', version: '3.0.5'
+    implementation group: 'io.github.amayaframework', name: 'amaya-di', version: '3.1.0'
     // ASM stub implementation
-    implementation group: 'io.github.amayaframework', name: 'amaya-di-asm', version: '2.0.3'
+    implementation group: 'io.github.amayaframework', name: 'amaya-di-asm', version: '2.1.0'
     // Or reflect stub implementation
-    implementation group: 'io.github.amayaframework', name: 'amaya-di-reflect', version: '2.0.0'
+    implementation group: 'io.github.amayaframework', name: 'amaya-di-reflect', version: '2.1.0'
 }
 ```
 
@@ -80,19 +80,19 @@ dependencies {
     <dependency>
         <groupId>io.github.amayaframework</groupId>
         <artifactId>amaya-di</artifactId>
-        <version>3.0.5</version>
+        <version>3.1.0</version>
     </dependency>
     <!--ASM stub implementation-->
     <dependency>
         <groupId>io.github.amayaframework</groupId>
         <artifactId>amaya-di-asm</artifactId>
-        <version>2.0.3</version>
+        <version>2.1.0</version>
     </dependency>
     <!--Or reflect stub implementation-->
     <dependency>
         <groupId>io.github.amayaframework</groupId>
         <artifactId>amaya-di-reflect</artifactId>
-        <version>2.0.0</version>
+        <version>2.1.0</version>
     </dependency>
 </dependencies>
 ```
@@ -112,7 +112,7 @@ First, if using modules, declare dependencies in `module-info.java`:
 
 ```java
 module com.github.romanqed.di.examples {
-    requires io.github.amayaframework.di; // Core module
+    requires amayaframework.di; // Core module
     exports com.github.romanqed.di.examples;
 }
 ```
@@ -169,8 +169,8 @@ Add the reflective factory generator to `module-info.java`:
 
 ```java
 module com.github.romanqed.di.examples {
-    requires io.github.amayaframework.di; // Core module
-    requires io.github.amayaframework.di.reflect; // Using reflect implementation
+    requires amayaframework.di; // Core module
+    requires amayaframework.di.reflect; // Using reflect implementation
     exports com.github.romanqed.di.examples;
 }
 ```
