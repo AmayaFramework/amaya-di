@@ -13,7 +13,7 @@
  *     <li>{@code com.github.romanqed.jtype} — for generic type analysis and modeling</li>
  * </ul>
  */
-module io.github.amayaframework.di.schema {
+module amayaframework.di.schema {
     // Imports
     requires com.github.romanqed.jtype;
     // Exports

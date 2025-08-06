@@ -1,9 +1,9 @@
-module io.github.amayaframework.di {
+module amayaframework.di {
     // Imports
     // DI Modules
-    requires transitive io.github.amayaframework.di.core;
-    requires io.github.amayaframework.di.schema;
-    requires io.github.amayaframework.di.stub;
+    requires transitive amayaframework.di.core;
+    requires amayaframework.di.schema;
+    requires amayaframework.di.stub;
     // External imports
     requires com.github.romanqed.jtype;
     requires com.github.romanqed.jfunc;

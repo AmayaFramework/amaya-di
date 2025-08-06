@@ -104,7 +104,7 @@ Tout d'abord, si vous utilisez des modules, spécifiez les dépendances pour `mo
 
 ```java
 module com.github.romanqed.di.examples {
-    requires io.github.amayaframework.di; // Module principal
+    requires amayaframework.di; // Module principal
     exports com.github.romanqed.di.examples;
 }
 ```
@@ -161,8 +161,8 @@ Ajoutons le générateur de fabriques d'objets réflexifs à `module-info.java`:
 
 ```java
 module com.github.romanqed.di.examples {
-    requires io.github.amayaframework.di; // Module principal
-    requires io.github.amayaframework.di.reflect; // Utilisation de l'implémentation réflexive
+    requires amayaframework.di; // Module principal
+    requires amayaframework.di.reflect; // Utilisation de l'implémentation réflexive
     exports com.github.romanqed.di.examples;
 }
 ```

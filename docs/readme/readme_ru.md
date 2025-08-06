@@ -111,7 +111,7 @@ dependencies {
 
 ```java
 module com.github.romanqed.di.examples {
-    requires io.github.amayaframework.di; // Основной модуль
+    requires amayaframework.di; // Основной модуль
     exports com.github.romanqed.di.examples;
 }
 ```
@@ -168,8 +168,8 @@ public final class ScopedGreeter implements IGreeter {
 
 ```java
 module com.github.romanqed.di.examples {
-    requires io.github.amayaframework.di; // Основной модуль
-    requires io.github.amayaframework.di.reflect; // Используем рефлективную реализацию
+    requires amayaframework.di; // Основной модуль
+    requires amayaframework.di.reflect; // Используем рефлективную реализацию
     exports com.github.romanqed.di.examples;
 }
 ```
