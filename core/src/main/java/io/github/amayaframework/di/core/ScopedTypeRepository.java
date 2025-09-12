@@ -3,10 +3,7 @@ package io.github.amayaframework.di.core;
 import com.github.romanqed.jfunc.Function0;
 
 import java.lang.reflect.Type;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
@@ -16,7 +13,7 @@ import java.util.function.Consumer;
  * <br>
  * All modifications affect only the current (scoped) repository.
  */
-public final class ScopedTypeRepository implements TypeRepository {
+public final class ScopedTypeRepository implements ScopedRepository {
     private final TypeRepository current;
     private final TypeRepository parent;
 
@@ -184,6 +181,35 @@ public final class ScopedTypeRepository implements TypeRepository {
     }
 
     /**
+     * Returns an iterator over all factories available in this repository,
+     * traversing both local and parent scopes.
+     * <br>
+     * Local factories override parent factories for the same type.
+     *
+     * @return an {@link Iterator} of factories
+     */
+    @Override
+    public Iterator<ObjectFactory> factoryIterator() {
+        return new ScopedFactoryIterator(iterator(), current, parent);
+    }
+
+    /**
+     * Returns a spliterator over all factories available in this repository,
+     * traversing both local and parent scopes.
+     * <br>
+     * Local factories override parent factories for the same type.
+     *
+     * @return a {@link Spliterator} of factories
+     */
+    @Override
+    public Spliterator<ObjectFactory> factorySpliterator() {
+        return Spliterators.spliteratorUnknownSize(
+                factoryIterator(),
+                Spliterator.NONNULL | Spliterator.DISTINCT
+        );
+    }
+
+    /**
      * Returns an iterator over all unique types available in this repository.
      * <br>
      * Types from the current repository override those from the parent repository.
@@ -192,7 +218,20 @@ public final class ScopedTypeRepository implements TypeRepository {
      */
     @Override
     public Iterator<Type> iterator() {
-        return new ScopedIterator(current.iterator(), parent.iterator());
+        return new ScopedTypeIterator(current.iterator(), parent.iterator());
+    }
+
+    /**
+     * TODO
+     *
+     * @return
+     */
+    @Override
+    public Spliterator<Type> spliterator() {
+        return Spliterators.spliteratorUnknownSize(
+                iterator(),
+                Spliterator.NONNULL | Spliterator.DISTINCT
+        );
     }
 
     /**
@@ -216,13 +255,85 @@ public final class ScopedTypeRepository implements TypeRepository {
         });
     }
 
-    private static final class ScopedIterator implements Iterator<Type> {
+    @Override
+    public ObjectFactory getLocal(Type type) {
+        return current.get(type);
+    }
+
+    @Override
+    public boolean canProvideLocal(Type type) {
+        return current.canProvide(type);
+    }
+
+    @Override
+    public void forEachLocal(BiConsumer<Type, ObjectFactory> action) {
+        current.forEach(action);
+    }
+
+    @Override
+    public void forEachLocal(Consumer<Type> action) {
+        current.forEach(action);
+    }
+
+    @Override
+    public Iterator<Type> localIterator() {
+        return current.iterator();
+    }
+
+    @Override
+    public Spliterator<Type> localSpliterator() {
+        return current.spliterator();
+    }
+
+    @Override
+    public Iterator<ObjectFactory> localFactoryIterator() {
+        return current.factoryIterator();
+    }
+
+    @Override
+    public Spliterator<ObjectFactory> localFactorySpliterator() {
+        return current.factorySpliterator();
+    }
+
+    private static final class ScopedFactoryIterator implements Iterator<ObjectFactory> {
+        private final Iterator<Type> iterator;
+        private final TypeRepository current;
+        private final TypeRepository parent;
+
+        ScopedFactoryIterator(Iterator<Type> iterator, TypeRepository current, TypeRepository parent) {
+            this.iterator = iterator;
+            this.current = current;
+            this.parent = parent;
+        }
+
+        @Override
+        public boolean hasNext() {
+            return iterator.hasNext();
+        }
+
+        @Override
+        public ObjectFactory next() {
+            var type = iterator.next();
+            var found = current.get(type);
+            if (found != null) {
+                return found;
+            }
+            return parent.get(type);
+        }
+
+        @Override
+        public void remove() {
+            iterator.remove();
+        }
+    }
+
+    private static final class ScopedTypeIterator implements Iterator<Type> {
         final Set<Type> visited;
         Iterator<Type> current;
         Iterator<Type> parent;
         Type last;
 
-        private ScopedIterator(Iterator<Type> current, Iterator<Type> parent) {
+        ScopedTypeIterator(Iterator<Type> current, Iterator<Type> parent) {
             this.current = current;
             this.parent = parent;
             this.last = null;

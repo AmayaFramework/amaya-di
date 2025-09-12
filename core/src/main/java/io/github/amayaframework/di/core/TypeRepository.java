@@ -3,7 +3,9 @@ package io.github.amayaframework.di.core;
 import com.github.romanqed.jfunc.Function0;
 
 import java.lang.reflect.Type;
+import java.util.Iterator;
 import java.util.Map;
+import java.util.Spliterator;
 import java.util.function.BiConsumer;
 
 /**
@@ -44,6 +46,33 @@ public interface TypeRepository extends TypeProvider, Iterable<Type> {
     void put(Type type, Object instance);
 
     /**
+     * Adds a constant {@link Closeable} instance associated with the specified type,
+     * overwriting any existing factory.
+     * <br>
+     * The instance is wrapped into a {@link CloseableObjectFactory} that always returns it
+     * and invokes {@link Closeable#close()} when the owning provider/scope is closed.
+     * <br>
+     * Useful for registering resources that should participate in DI-managed teardown
+     * without relying on {@link AutoCloseable}.
+     *
+     * @param type     the type to associate with the instance, must be non-null
+     * @param instance the closeable instance to associate, must be non-null
+     */
+    default void put(Type type, Closeable instance) {
+        put(type, (ObjectFactory) new CloseableObjectFactory() {
+            @Override
+            public Object create(TypeProvider provider) {
+                return instance;
+            }
+
+            @Override
+            public void close() {
+                instance.close();
+            }
+        });
+    }
+
+    /**
      * Adds a constant instance associated with its runtime class.
      * <br>
      * The instance is wrapped into an {@link ObjectFactory} that always returns it.
@@ -53,6 +82,31 @@ public interface TypeRepository extends TypeProvider, Iterable<Type> {
      * @param instance the instance to associate, must be non-null
      */
     void put(Object instance);
+
+    /**
+     * Adds a constant {@link Closeable} instance associated with its runtime class,
+     * overwriting any existing factory.
+     * <br>
+     * The instance is wrapped into a {@link CloseableObjectFactory} that always returns it
+     * and invokes {@link Closeable#close()} when the owning provider/scope is closed.
+     * <br>
+     * Useful for quickly registering singleton-like closeable resources without explicitly specifying the type.
+     *
+     * @param instance the closeable instance to associate, must be non-null
+     */
+    default void put(Closeable instance) {
+        put((ObjectFactory) new CloseableObjectFactory() {
+            @Override
+            public Object create(TypeProvider provider) {
+                return instance;
+            }
+
+            @Override
+            public void close() {
+                instance.close();
+            }
+        });
+    }
 
     /**
      * Removes the instantiator associated with the specified type.
@@ -91,4 +145,22 @@ public interface TypeRepository extends TypeProvider, Iterable<Type> {
      * @param action the action to be performed for each element
      */
     void forEach(BiConsumer<Type, ObjectFactory> action);
+
+    /**
+     * Returns an {@link Iterator} over all object factories contained in this repository.
+     * <br>
+     * The iteration order is implementation-dependent.
+     *
+     * @return an iterator over the factories
+     */
+    Iterator<ObjectFactory> factoryIterator();
+
+    /**
+     * Returns a {@link Spliterator} over all object factories contained in this repository.
+     * <br>
+     * The spliterator characteristics are implementation-dependent.
+     *
+     * @return a spliterator over the factories
+     */
+    Spliterator<ObjectFactory> factorySpliterator();
 }
