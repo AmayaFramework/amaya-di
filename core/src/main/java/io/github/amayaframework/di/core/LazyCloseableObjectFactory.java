@@ -7,8 +7,8 @@ package io.github.amayaframework.di.core;
  * The first call to {@link #create(TypeProvider)} instantiates the object by invoking
  * the wrapped factory and stores it for subsequent calls.
  * <br>
- * On {@link #close()}, the cached instance is closed if it implements {@link Closeable},
- * and the wrapped factory is closed if it also implements {@link Closeable}.
+ * On {@link #close()}, the cached instance is closed,
+ * and the wrapped factory is closed if it implements {@link Closeable}.
  * <p>
  * This class is suitable for implementing singleton-like lifecycles where both the
  * instance and the factory may require cleanup.
@@ -60,8 +60,8 @@ public final class LazyCloseableObjectFactory implements CloseableObjectFactory 
     /**
      * Closes the cached instance and the underlying factory if they implement {@link Closeable}.
      * <br>
-     * If the cached instance has been created and implements {@link Closeable}, its
-     * {@link Closeable#close()} method is invoked and the reference is cleared.
+     * If the cached instance has been created, its {@link Closeable#close()} method is invoked
+     * and the reference is cleared.
      * If the instance has not been created yet, the method synchronizes to safely check
      * and close it if necessary.
      * <br>
@@ -74,16 +74,14 @@ public final class LazyCloseableObjectFactory implements CloseableObjectFactory 
     @Override
     public void close() {
         if (value != null) {
-            if (value instanceof Closeable) {
-                ((Closeable) value).close();
-            }
+            ((Closeable) value).close();
             value = null;
         } else {
             synchronized (lock) {
-                if (value instanceof Closeable) {
+                if (value != null) {
                     ((Closeable) value).close();
+                    value = null;
                 }
-                value = null;
             }
         }
         if (body instanceof Closeable) {
