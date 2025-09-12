@@ -23,9 +23,6 @@ public final class WrappedMapServiceProvider extends AbstractCloseableProvider {
         for (var entry : wrapped) {
             map.put(entry.type, entry.wrap());
         }
-        return new PlainScopedServiceProvider(new ScopedTypeRepository(
-                new HashTypeRepository(map),
-                repository
-        ));
+        return new PlainScopedServiceProvider(new ScopedTypeRepository(new HashTypeRepository(map), repository));
     }
 }
