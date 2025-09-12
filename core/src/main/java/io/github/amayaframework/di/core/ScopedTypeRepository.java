@@ -222,9 +222,12 @@ public final class ScopedTypeRepository implements ScopedRepository {
     }
 
     /**
-     * TODO
+     * Returns a spliterator over all unique types available in this repository,
+     * traversing both local and parent scopes.
+     * <br>
+     * Local types override parent types.
      *
-     * @return
+     * @return a {@link Spliterator} of types
      */
     @Override
     public Spliterator<Type> spliterator() {
