@@ -136,13 +136,13 @@ public class ScopedProviderBuilderTest extends ServiceProviderBuilderTest {
         assertTrue(isS);
     }
 
+    public interface IService {
+        String val();
+    }
+
     public static final class Dependent {
         @Inject
         public IService is;
-    }
-
-    public interface IService {
-        String val();
     }
 
     public static final class IntS1 {

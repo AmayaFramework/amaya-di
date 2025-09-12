@@ -1,6 +1,8 @@
 package io.github.amayaframework.di;
 
 import io.github.amayaframework.di.core.ServiceProvider;
+import io.github.amayaframework.di.internal.PlainServiceProvider;
+import io.github.amayaframework.di.internal.SuppliedPlainServiceProvider;
 import io.github.amayaframework.di.schema.SchemaFactory;
 import io.github.amayaframework.di.stub.CacheMode;
 import io.github.amayaframework.di.stub.StubFactory;
@@ -38,9 +40,9 @@ public class PlainScopedProviderBuilder extends AbstractScopedProviderBuilder<Sc
         var provider = (SchemaProvider) (t, impl) -> schemaFactory.create(impl);
         buildRepository(repository, provider, stubFactory, mode);
         if (noScoped()) {
-            return repositorySupplier == null
+            return scopedRepositorySupplier == null
                     ? new PlainServiceProvider(repository)
-                    : new SuppliedPlainServiceProvider(repository, repositorySupplier);
+                    : new SuppliedPlainServiceProvider(repository, scopedRepositorySupplier);
         }
         return BuildUtil.buildScopedProvider(this, provider, stubFactory, repository, mode);
     }

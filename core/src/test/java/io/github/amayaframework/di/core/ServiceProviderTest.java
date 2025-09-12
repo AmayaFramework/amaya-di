@@ -112,21 +112,31 @@ public final class ServiceProviderTest {
         assertEquals("scopedStr", sa.s);
     }
 
-    static final class SPImpl extends AbstractServiceProvider {
-
-        private SPImpl(TypeRepository repository) {
-            super(repository);
-        }
+    static final class SPImpl extends AbstractCloseableProvider {
 
         public SPImpl() {
             super(new HashTypeRepository());
         }
 
         @Override
-        public ServiceProvider createScoped() {
+        public ScopedServiceProvider createScoped() {
             var cur = new HashTypeRepository();
             var scoped = new ScopedTypeRepository(cur, repository);
-            return new SPImpl(scoped);
+            return new SSPImpl(scoped);
+        }
+    }
+
+    static final class SSPImpl extends AbstractCloseableScopedProvider {
+
+        SSPImpl(ScopedRepository repository) {
+            super(repository);
+        }
+
+        @Override
+        public ScopedServiceProvider createScoped() {
+            var cur = new HashTypeRepository();
+            var scoped = new ScopedTypeRepository(cur, repository);
+            return new SSPImpl(scoped);
         }
     }
 

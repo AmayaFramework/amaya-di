@@ -1,4 +1,4 @@
-package io.github.amayaframework.di;
+package io.github.amayaframework.di.internal;
 
 import io.github.amayaframework.di.core.*;
 
@@ -6,17 +6,18 @@ import java.lang.reflect.Type;
 import java.util.HashMap;
 import java.util.Map;
 
-final class ScopedServiceProvider extends AbstractServiceProvider {
+public final class MapScopedServiceProvider extends AbstractCloseableProvider {
     private final Map<Type, ObjectFactory> scoped;
 
-    ScopedServiceProvider(TypeRepository repository, Map<Type, ObjectFactory> scoped) {
+    public MapScopedServiceProvider(TypeRepository repository, Map<Type, ObjectFactory> scoped) {
         super(repository);
         this.scoped = scoped;
     }
 
+
     @Override
-    public ServiceProvider createScoped() {
-        return new PlainServiceProvider(new ScopedTypeRepository(
+    public ScopedServiceProvider createScoped() {
+        return new PlainScopedServiceProvider(new ScopedTypeRepository(
                 new HashTypeRepository(new HashMap<>(scoped)),
                 repository
         ));

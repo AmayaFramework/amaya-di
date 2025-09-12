@@ -1,6 +1,8 @@
 package io.github.amayaframework.di;
 
 import io.github.amayaframework.di.core.ServiceProvider;
+import io.github.amayaframework.di.internal.PlainServiceProvider;
+import io.github.amayaframework.di.internal.SuppliedPlainServiceProvider;
 import io.github.amayaframework.di.schema.ClassSchema;
 import io.github.amayaframework.di.schema.SchemaFactory;
 import io.github.amayaframework.di.stub.CacheMode;
@@ -76,7 +78,7 @@ public class CheckedScopedProviderBuilder extends AbstractScopedProviderBuilder<
         if (repository != null && repository.canProvide(type)) {
             return true;
         }
-        return roots.containsKey(type) || types.containsKey(type);
+        return hasRoot(type) || hasType(type);
     }
 
     /**
@@ -86,11 +88,7 @@ public class CheckedScopedProviderBuilder extends AbstractScopedProviderBuilder<
      * @return {@code true} if the type can be resolved; {@code false} otherwise
      */
     protected boolean canResolveScoped(Type type) {
-        return promised.contains(type)
-                || scopedRoots.containsKey(type)
-                || scopedTypes.containsKey(type)
-                || wrapped.containsKey(type)
-                || canResolve(type);
+        return hasPromised(type) || hasScopedRoot(type) || hasScopedType(type) || hasWrapped(type) || canResolve(type);
     }
 
     /**
@@ -101,8 +99,13 @@ public class CheckedScopedProviderBuilder extends AbstractScopedProviderBuilder<
      */
     protected Map<Type, ClassSchema> buildScopedSchemas(SchemaFactory factory) {
         var ret = new HashMap<Type, ClassSchema>();
-        for (var entry : scopedTypes.entrySet()) {
-            ret.put(entry.getKey(), factory.create(entry.getValue()));
+        if (scopedTypes != null && !scopedTypes.isEmpty()) {
+            for (var entry : scopedTypes.entrySet()) {
+                ret.put(entry.getKey(), factory.create(entry.getValue()));
+            }
+        }
+        if (wrapped == null || wrapped.isEmpty()) {
+            return ret;
         }
         for (var entry : wrapped.entrySet()) {
             var wrappedEntry = entry.getValue();
@@ -134,9 +137,9 @@ public class CheckedScopedProviderBuilder extends AbstractScopedProviderBuilder<
         var provider = (SchemaProvider) (t, impl) -> schemaFactory.create(impl);
         buildRepository(repository, provider, stubFactory, mode);
         if (noScoped()) {
-            return repositorySupplier == null
+            return scopedRepositorySupplier == null
                     ? new PlainServiceProvider(repository)
-                    : new SuppliedPlainServiceProvider(repository, repositorySupplier);
+                    : new SuppliedPlainServiceProvider(repository, scopedRepositorySupplier);
         }
         return BuildUtil.buildScopedProvider(this, provider, stubFactory, repository, mode);
     }

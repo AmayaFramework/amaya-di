@@ -40,7 +40,7 @@ dependencies {
     api group: 'com.github.romanqed', name: 'jtype', version: '1.1.0'
     api group: 'com.github.romanqed', name: 'jfunc', version: '1.2.0'
     // Modules
-    api group: 'io.github.amayaframework', name: 'amaya-di-core', version: '1.1.0'
+    api group: 'io.github.amayaframework', name: 'amaya-di-core', version: '1.2.1'
     api group: 'io.github.amayaframework', name: 'amaya-di-schema', version: '1.1.0'
     api group: 'io.github.amayaframework', name: 'amaya-di-stub', version: '1.1.0'
 }

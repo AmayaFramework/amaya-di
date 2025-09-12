@@ -2,19 +2,27 @@ package io.github.amayaframework.di;
 
 import io.github.amayaframework.di.core.ObjectFactory;
 
+import java.lang.reflect.Type;
+
 /**
- * Represents a pair of an object factory and a service wrapper to be applied within a scoped container.
+ * Internal DTO that couples a target {@link Type}, its {@link ObjectFactory},
+ * and a {@link ServiceWrapper} to be applied at scope creation time.
  * <p>
- * {@code WrappedEntry} is used to register services that must be wrapped during scope creation.
- * The {@link ServiceWrapper} is applied to the {@link ObjectFactory} when entering a new scope,
- * producing a scope-local provider instance.
+ * Used by scoped builders to defer wrapping until a new scope is entered:
+ * the raw factory is stored here and {@link #wrap()} produces the
+ * scope-local factory by applying the wrapper.
  * <p>
- * This class is internal to the builder implementation and is not intended for public use.
+ * Not intended for public use.
  *
  * @see ServiceWrapper
  * @see AbstractScopedProviderBuilder#buildWrapped(SchemaProvider, io.github.amayaframework.di.stub.StubFactory, java.util.List, io.github.amayaframework.di.stub.CacheMode)
  */
 public final class WrappedEntry {
+
+    /**
+     * The service {@link Type} this entry belongs to (used as the registration key).
+     */
+    public final Type type;
 
     /**
      * The object factory producing service instances.
@@ -27,13 +35,25 @@ public final class WrappedEntry {
     public final ServiceWrapper wrapper;
 
     /**
-     * Constructs a new {@code WrappedEntry} with the given factory and wrapper.
+     * Creates a new wrapped entry.
      *
-     * @param factory the original object factory
-     * @param wrapper the wrapper to apply in each scope
+     * @param type    the service {@link Type}, must be non-null
+     * @param factory the underlying {@link ObjectFactory}, must be non-null
+     * @param wrapper the {@link ServiceWrapper} to apply per-scope, must be non-null
      */
-    public WrappedEntry(ObjectFactory factory, ServiceWrapper wrapper) {
+    public WrappedEntry(Type type, ObjectFactory factory, ServiceWrapper wrapper) {
+        this.type = type;
         this.factory = factory;
         this.wrapper = wrapper;
+    }
+
+    /**
+     * Applies the {@link #wrapper} to the underlying {@link #factory} and
+     * returns the resulting scope-local {@link ObjectFactory}.
+     *
+     * @return a wrapped factory to be used inside a scope
+     */
+    public ObjectFactory wrap() {
+        return wrapper.wrap(factory);
     }
 }

@@ -1,6 +1,8 @@
 package io.github.amayaframework.di;
 
 import io.github.amayaframework.di.core.ServiceProvider;
+import io.github.amayaframework.di.internal.PlainServiceProvider;
+import io.github.amayaframework.di.internal.SuppliedPlainServiceProvider;
 import io.github.amayaframework.di.schema.SchemaFactory;
 import io.github.amayaframework.di.stub.CacheMode;
 import io.github.amayaframework.di.stub.StubFactory;
@@ -58,12 +60,12 @@ public class CheckedProviderBuilder extends AbstractServiceProviderBuilder<Servi
         if (repository != null && repository.canProvide(type)) {
             return true;
         }
-        return roots.containsKey(type) || types.containsKey(type);
+        return hasRoot(type) || hasType(type);
     }
 
     @Override
     protected ServiceProvider doBuild() {
-        var required = !types.isEmpty();
+        var required = types != null && !types.isEmpty();
         var schemaFactory = getSchemaFactory(required);
         var schemas = BuildUtil.buildSchemas(schemaFactory, types);
         BuildUtil.doChecks(checks, schemas, this::canResolve);
@@ -72,8 +74,8 @@ public class CheckedProviderBuilder extends AbstractServiceProviderBuilder<Servi
         var repository = getRepository();
         var provider = required ? (SchemaProvider) (type, v) -> schemas.get(type) : null;
         buildRepository(repository, provider, stubFactory, mode);
-        if (repositorySupplier != null) {
-            return new SuppliedPlainServiceProvider(repository, repositorySupplier);
+        if (scopedRepositorySupplier != null) {
+            return new SuppliedPlainServiceProvider(repository, scopedRepositorySupplier);
         }
         return new PlainServiceProvider(repository);
     }
