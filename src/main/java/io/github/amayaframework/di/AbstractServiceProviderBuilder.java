@@ -64,6 +64,11 @@ public abstract class AbstractServiceProviderBuilder<B extends ServiceProviderBu
     protected Supplier<TypeRepository> repositorySupplier;
 
     /**
+     * TODO
+     */
+    protected Supplier<ScopedRepository> scopedRepositorySupplier;
+
+    /**
      * A pre-instantiated type repository.
      */
     protected TypeRepository repository;
@@ -122,7 +127,7 @@ public abstract class AbstractServiceProviderBuilder<B extends ServiceProviderBu
     /**
      * Resets the builder to its initial state, removing all bindings and overrides.
      */
-    protected void reset() {
+    public void reset() {
         // Reset factories
         this.schemaFactory = null;
         this.stubFactory = null;
@@ -132,8 +137,64 @@ public abstract class AbstractServiceProviderBuilder<B extends ServiceProviderBu
         this.repository = null;
         this.repositorySupplier = null;
         // Reset type maps
-        this.roots = new HashMap<>();
-        this.types = new HashMap<>();
+        this.roots = null;
+        this.types = null;
+    }
+
+    // Lazy accessors
+
+    /**
+     * TODO
+     *
+     * @return
+     */
+    protected void putRoot(Type type, ObjectFactory factory) {
+        if (roots == null) {
+            roots = new HashMap<>();
+        }
+        roots.put(type, factory);
+    }
+
+    /**
+     * TODO
+     *
+     * @return
+     */
+    protected void putType(Type type, TypeEntry entry) {
+        if (types == null) {
+            types = new HashMap<>();
+        }
+        types.put(type, entry);
+    }
+
+    /**
+     * TODO
+     *
+     * @param type
+     */
+    protected void removeRoot(Type type) {
+        if (roots != null) {
+            roots.remove(type);
+        }
+    }
+
+    /**
+     * TODO
+     *
+     * @param type
+     */
+    protected void removeType(Type type) {
+        if (types != null) {
+            types.remove(type);
+        }
+    }
+
+    protected boolean hasRoot(Type type) {
+        return roots != null && roots.containsKey(type);
+    }
+
+    protected boolean hasType(Type type) {
+        return types != null && types.containsKey(type);
     }
 
     // Inner factory getters
@@ -240,6 +301,13 @@ public abstract class AbstractServiceProviderBuilder<B extends ServiceProviderBu
         return (B) this;
     }
 
+    @Override
+    @SuppressWarnings("unchecked")
+    public B withScopedRepository(Supplier<ScopedRepository> supplier) {
+        this.scopedRepositorySupplier = supplier;
+        return (B) this;
+    }
+
     // Base methods
 
     @Override
@@ -247,16 +315,16 @@ public abstract class AbstractServiceProviderBuilder<B extends ServiceProviderBu
     public B add(Type type, ObjectFactory factory) {
         Objects.requireNonNull(type);
         Objects.requireNonNull(factory);
-        types.remove(type);
-        roots.put(type, factory);
+        removeType(type);
+        putRoot(type, factory);
         return (B) this;
     }
 
     @Override
     @SuppressWarnings("unchecked")
     public B remove(Type type) {
-        types.remove(type);
-        roots.remove(type);
+        removeType(type);
+        removeRoot(type);
         return (B) this;
     }
 
@@ -265,8 +333,8 @@ public abstract class AbstractServiceProviderBuilder<B extends ServiceProviderBu
     public B add(Type type, Function0<?> provider) {
         Objects.requireNonNull(type);
         Objects.requireNonNull(provider);
-        types.remove(type);
-        roots.put(type, v -> provider.invoke());
+        removeType(type);
+        putRoot(type, v -> provider.invoke());
         return (B) this;
     }
 
@@ -274,8 +342,8 @@ public abstract class AbstractServiceProviderBuilder<B extends ServiceProviderBu
     @SuppressWarnings("unchecked")
     public B addInstance(Type type, Object instance) {
         Objects.requireNonNull(type);
-        types.remove(type);
-        roots.put(type, v -> instance);
+        removeType(type);
+        putRoot(type, WrapUtil.wrapInstance(instance));
         return (B) this;
     }
 
@@ -285,8 +353,8 @@ public abstract class AbstractServiceProviderBuilder<B extends ServiceProviderBu
         Objects.requireNonNull(type);
         Objects.requireNonNull(impl);
         checkInheritance(type, impl);
-        roots.remove(type);
-        types.put(type, new TypeEntry(impl, wrapper));
+        removeRoot(type);
+        putType(type, new TypeEntry(impl, wrapper));
         return (B) this;
     }
 
@@ -296,8 +364,8 @@ public abstract class AbstractServiceProviderBuilder<B extends ServiceProviderBu
         Objects.requireNonNull(type);
         Objects.requireNonNull(impl);
         checkInheritance(type, impl);
-        roots.remove(type);
-        types.put(type, new TypeEntry(impl, wrapper));
+        removeRoot(type);
+        putType(type, new TypeEntry(impl, wrapper));
         return (B) this;
     }
 
@@ -309,8 +377,8 @@ public abstract class AbstractServiceProviderBuilder<B extends ServiceProviderBu
         Objects.requireNonNull(impl);
         checkInheritance(type.getRawType(), impl);
         var complex = type.getType();
-        roots.remove(complex);
-        types.put(complex, new TypeEntry(impl, wrapper));
+        removeRoot(complex);
+        putType(complex, new TypeEntry(impl, wrapper));
         return (B) this;
     }
 
@@ -318,8 +386,8 @@ public abstract class AbstractServiceProviderBuilder<B extends ServiceProviderBu
     @SuppressWarnings("unchecked")
     public B add(Class<?> impl, ServiceWrapper wrapper) {
         Objects.requireNonNull(impl);
-        roots.remove(impl);
-        types.put(impl, new TypeEntry(impl, wrapper));
+        removeRoot(impl);
+        putType(impl, new TypeEntry(impl, wrapper));
         return (B) this;
     }
 
@@ -372,22 +440,22 @@ public abstract class AbstractServiceProviderBuilder<B extends ServiceProviderBu
 
     @Override
     public B addSingleton(Type type, Class<?> impl) {
-        return add(type, impl, LazyObjectFactory::new);
+        return add(type, impl, WrapUtil.wrapLazy(impl));
     }
 
     @Override
     public <T> B addSingleton(Class<T> type, Class<? extends T> impl) {
-        return add(type, impl, LazyObjectFactory::new);
+        return add(type, impl, WrapUtil.wrapLazy(impl));
     }
 
     @Override
     public <T> B addSingleton(JType<T> type, Class<? extends T> impl) {
-        return add(type, impl, LazyObjectFactory::new);
+        return add(type, impl, WrapUtil.wrapLazy(impl));
     }
 
     @Override
     public B addSingleton(Class<?> impl) {
-        return add(impl, LazyObjectFactory::new);
+        return add(impl, WrapUtil.wrapLazy(impl));
     }
 
     // Utility methods
@@ -435,8 +503,10 @@ public abstract class AbstractServiceProviderBuilder<B extends ServiceProviderBu
                                    StubFactory stubFactory,
                                    CacheMode mode) {
         // Add root types
-        roots.forEach(repository::put);
-        if (schemaProvider == null || stubFactory == null) {
+        if (roots != null) {
+            roots.forEach(repository::put);
+        }
+        if (schemaProvider == null || stubFactory == null || types == null) {
             return;
         }
         // Add weak types

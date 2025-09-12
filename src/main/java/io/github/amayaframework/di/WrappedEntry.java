@@ -2,6 +2,8 @@ package io.github.amayaframework.di;
 
 import io.github.amayaframework.di.core.ObjectFactory;
 
+import java.lang.reflect.Type;
+
 /**
  * Represents a pair of an object factory and a service wrapper to be applied within a scoped container.
  * <p>
@@ -15,6 +17,11 @@ import io.github.amayaframework.di.core.ObjectFactory;
  * @see AbstractScopedProviderBuilder#buildWrapped(SchemaProvider, io.github.amayaframework.di.stub.StubFactory, java.util.List, io.github.amayaframework.di.stub.CacheMode)
  */
 public final class WrappedEntry {
+
+    /**
+     * TODO
+     */
+    public final Type type;
 
     /**
      * The object factory producing service instances.
@@ -32,8 +39,18 @@ public final class WrappedEntry {
      * @param factory the original object factory
      * @param wrapper the wrapper to apply in each scope
      */
-    public WrappedEntry(ObjectFactory factory, ServiceWrapper wrapper) {
+    public WrappedEntry(Type type, ObjectFactory factory, ServiceWrapper wrapper) {
+        this.type = type;
         this.factory = factory;
         this.wrapper = wrapper;
+    }
+
+    /**
+     * TODO
+     *
+     * @return
+     */
+    public ObjectFactory wrap() {
+        return wrapper.wrap(factory);
     }
 }

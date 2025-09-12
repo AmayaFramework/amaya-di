@@ -21,6 +21,9 @@ final class BuildUtil {
     static Map<Type, ClassSchema> buildSchemas(SchemaFactory factory,
                                                Map<Type, AbstractServiceProviderBuilder.TypeEntry> types) {
         var ret = new HashMap<Type, ClassSchema>();
+        if (types == null || types.isEmpty()) {
+            return ret;
+        }
         for (var entry : types.entrySet()) {
             ret.put(entry.getKey(), factory.create(entry.getValue().impl));
         }
@@ -96,36 +99,40 @@ final class BuildUtil {
         var delayed = new LinkedList<StubEntry>();
         // Build scoped provider
         var scoped = builder.buildScoped(schemaProvider, stubFactory, delayed, mode);
-        if (builder.wrapped.isEmpty()) {
+        var wrapped = builder.wrapped;
+        if (wrapped == null || wrapped.isEmpty()) {
             builder.handleDelayed(delayed, scoped, repository);
-            return builder.repositorySupplier == null
-                    ? new ScopedServiceProvider(repository, scoped)
-                    : new SuppliedScopedServiceProvider(repository, scoped, builder.repositorySupplier);
+            return builder.scopedRepositorySupplier == null
+                    ? new MapScopedServiceProvider(repository, scoped)
+                    : new SuppliedMapScopedServiceProvider(repository, scoped, builder.scopedRepositorySupplier);
         }
         // Add wrapped types
-        var wrapped = builder.buildWrapped(schemaProvider, stubFactory, delayed, mode);
+        var entries = builder.buildWrapped(schemaProvider, stubFactory, delayed, mode);
         builder.handleDelayed(delayed, scoped, repository);
         if (scoped.isEmpty()) {
-            return builder.repositorySupplier == null
-                    ? new WrappedServiceProvider(repository, wrapped)
-                    : new SuppliedWrappedServiceProvider(repository, wrapped, builder.repositorySupplier);
+            return builder.scopedRepositorySupplier == null
+                    ? new WrappedServiceProvider(repository, entries)
+                    : new SuppliedWrappedServiceProvider(repository, entries, builder.scopedRepositorySupplier);
         }
-        return builder.repositorySupplier == null
-                ? new WrappedScopedServiceProvider(repository, scoped, wrapped)
-                : new SuppliedWrappedScopedServiceProvider(repository, scoped, wrapped, builder.repositorySupplier);
+        return builder.scopedRepositorySupplier == null
+                ? new WrappedMapServiceProvider(repository, scoped, entries)
+                : new SuppliedWrappedMapServiceProvider(repository, scoped, entries, builder.scopedRepositorySupplier);
     }
 
     static <T extends ScopedProviderBuilder> boolean needFactories(AbstractScopedProviderBuilder<T> builder) {
-        if (!builder.types.isEmpty()) {
+        var types = builder.types;
+        if (types != null && !types.isEmpty()) {
             return true;
         }
-        if (!builder.scopedTypes.isEmpty()) {
+        var scopedTypes = builder.scopedTypes;
+        if (scopedTypes != null && !scopedTypes.isEmpty()) {
             return true;
         }
-        if (builder.wrapped.isEmpty()) {
+        var wrapped = builder.wrapped;
+        if (wrapped == null || wrapped.isEmpty()) {
             return false;
         }
-        for (var entry : builder.wrapped.entrySet()) {
+        for (var entry : wrapped.entrySet()) {
             if (entry.getValue().impl != null) {
                 return true;
             }

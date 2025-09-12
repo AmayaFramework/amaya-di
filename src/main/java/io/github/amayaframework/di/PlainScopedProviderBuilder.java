@@ -38,9 +38,9 @@ public class PlainScopedProviderBuilder extends AbstractScopedProviderBuilder<Sc
         var provider = (SchemaProvider) (t, impl) -> schemaFactory.create(impl);
         buildRepository(repository, provider, stubFactory, mode);
         if (noScoped()) {
-            return repositorySupplier == null
+            return scopedRepositorySupplier == null
                     ? new PlainServiceProvider(repository)
-                    : new SuppliedPlainServiceProvider(repository, repositorySupplier);
+                    : new SuppliedPlainServiceProvider(repository, scopedRepositorySupplier);
         }
         return BuildUtil.buildScopedProvider(this, provider, stubFactory, repository, mode);
     }

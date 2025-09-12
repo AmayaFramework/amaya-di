@@ -2,8 +2,8 @@ package io.github.amayaframework.di;
 
 import com.github.romanqed.jfunc.Function0;
 import com.github.romanqed.jtype.JType;
-import io.github.amayaframework.di.core.LazyObjectFactory;
 import io.github.amayaframework.di.core.ObjectFactory;
+import io.github.amayaframework.di.core.ScopedRepository;
 import io.github.amayaframework.di.core.TypeRepository;
 import io.github.amayaframework.di.schema.ClassSchema;
 import io.github.amayaframework.di.schema.SchemaFactory;
@@ -13,6 +13,7 @@ import io.github.amayaframework.di.stub.StubFactory;
 
 import java.lang.reflect.Type;
 import java.util.*;
+import java.util.function.Supplier;
 
 /**
  * Abstract base implementation of {@link ScopedProviderBuilder} that
@@ -72,13 +73,110 @@ public abstract class AbstractScopedProviderBuilder<B extends ScopedProviderBuil
      * promised types, and wrappers.
      */
     @Override
-    protected void reset() {
+    public void reset() {
         super.reset();
         // Reset type maps
-        this.promised = new HashSet<>();
-        this.scopedRoots = new HashMap<>();
-        this.scopedTypes = new HashMap<>();
-        this.wrapped = new HashMap<>();
+        this.promised = null;
+        this.scopedRoots = null;
+        this.scopedTypes = null;
+        this.wrapped = null;
+    }
+
+    // Lazy accessors
+
+    /**
+     * TODO
+     *
+     * @param type
+     */
+    protected void putPromised(Type type) {
+        if (promised == null) {
+            promised = new HashSet<>();
+        }
+        promised.add(type);
+    }
+
+    /**
+     * TODO
+     *
+     * @param type
+     * @param factory
+     */
+    protected void putScopedRoot(Type type, ObjectFactory factory) {
+        if (scopedRoots == null) {
+            scopedRoots = new HashMap<>();
+        }
+        scopedRoots.put(type, factory);
+    }
+
+    /**
+     * TODO
+     *
+     * @param type
+     * @param clazz
+     */
+    protected void putScopedType(Type type, Class<?> clazz) {
+        if (scopedTypes == null) {
+            scopedTypes = new HashMap<>();
+        }
+        scopedTypes.put(type, clazz);
+    }
+
+    /**
+     * TODO
+     *
+     * @param type
+     * @param entry
+     */
+    protected void putWrapped(Type type, ScopedTypeEntry entry) {
+        if (wrapped == null) {
+            wrapped = new HashMap<>();
+        }
+        wrapped.put(type, entry);
+    }
+
+    /**
+     * TODO
+     *
+     * @param type
+     */
+    protected void removePromised(Type type) {
+        if (promised != null) {
+            promised.remove(type);
+        }
+    }
+
+    /**
+     * TODO
+     *
+     * @param type
+     */
+    protected void removeScopedRoot(Type type) {
+        if (scopedRoots != null) {
+            scopedRoots.remove(type);
+        }
+    }
+
+    /**
+     * TODO
+     *
+     * @param type
+     */
+    protected void removeScopedType(Type type) {
+        if (scopedTypes != null) {
+            scopedTypes.remove(type);
+        }
+    }
+
+    /**
+     * TODO
+     *
+     * @param type
+     */
+    protected void removeWrapped(Type type) {
+        if (wrapped != null) {
+            wrapped.remove(type);
+        }
     }
 
     // Base scoped methods
@@ -87,10 +185,10 @@ public abstract class AbstractScopedProviderBuilder<B extends ScopedProviderBuil
     @SuppressWarnings("unchecked")
     public B addScoped(Type type) {
         Objects.requireNonNull(type);
-        scopedRoots.remove(type);
-        scopedTypes.remove(type);
-        wrapped.remove(type);
-        promised.add(type);
+        removeScopedRoot(type);
+        removeScopedType(type);
+        removeWrapped(type);
+        putPromised(type);
         return (B) this;
     }
 
@@ -98,14 +196,14 @@ public abstract class AbstractScopedProviderBuilder<B extends ScopedProviderBuil
     @SuppressWarnings("unchecked")
     public B addScoped(Type type, ObjectFactory factory) {
         Objects.requireNonNull(type);
-        scopedTypes.remove(type);
-        wrapped.remove(type);
+        removeScopedType(type);
+        removeWrapped(type);
         if (factory == null) {
-            scopedRoots.remove(type);
-            promised.add(type);
+            removeScopedRoot(type);
+            putPromised(type);
         } else {
-            promised.remove(type);
-            scopedRoots.put(type, factory);
+            removePromised(type);
+            putScopedRoot(type, factory);
         }
         return (B) this;
     }
@@ -115,15 +213,15 @@ public abstract class AbstractScopedProviderBuilder<B extends ScopedProviderBuil
     public B addScoped(Type type, ObjectFactory factory, ServiceWrapper wrapper) {
         Objects.requireNonNull(type);
         Objects.requireNonNull(factory);
-        promised.remove(type);
+        removePromised(type);
         // noinspection DuplicatedCode
-        scopedTypes.remove(type);
+        removeScopedType(type);
         if (wrapper == null) {
-            wrapped.remove(type);
-            scopedRoots.put(type, factory);
+            removeWrapped(type);
+            putScopedRoot(type, factory);
         } else {
-            scopedRoots.remove(type);
-            wrapped.put(type, new ScopedTypeEntry(factory, wrapper));
+            removeScopedRoot(type);
+            putWrapped(type, new ScopedTypeEntry(factory, wrapper));
         }
         return (B) this;
     }
@@ -134,10 +232,10 @@ public abstract class AbstractScopedProviderBuilder<B extends ScopedProviderBuil
         // noinspection DuplicatedCode
         Objects.requireNonNull(type);
         Objects.requireNonNull(provider);
-        promised.remove(type);
-        scopedTypes.remove(type);
-        wrapped.remove(type);
-        scopedRoots.put(type, v -> provider.invoke());
+        removePromised(type);
+        removeScopedType(type);
+        removeWrapped(type);
+        putScopedRoot(type, v -> provider.invoke());
         return (B) this;
     }
 
@@ -146,14 +244,14 @@ public abstract class AbstractScopedProviderBuilder<B extends ScopedProviderBuil
     public B addScoped(Type type, Function0<?> provider, ServiceWrapper wrapper) {
         Objects.requireNonNull(type);
         Objects.requireNonNull(provider);
-        promised.remove(type);
-        scopedTypes.remove(type);
+        removePromised(type);
+        removeScopedType(type);
         if (wrapper == null) {
-            wrapped.remove(type);
-            scopedRoots.put(type, v -> provider.invoke());
+            removeWrapped(type);
+            putScopedRoot(type, v -> provider.invoke());
         } else {
-            scopedRoots.remove(type);
-            wrapped.put(type, new ScopedTypeEntry(v -> provider.invoke(), wrapper));
+            removeScopedRoot(type);
+            putWrapped(type, new ScopedTypeEntry(v -> provider.invoke(), wrapper));
         }
         return (B) this;
     }
@@ -162,20 +260,20 @@ public abstract class AbstractScopedProviderBuilder<B extends ScopedProviderBuil
     @SuppressWarnings("unchecked")
     public B addScopedInstance(Type type, Object instance) {
         Objects.requireNonNull(type);
-        promised.remove(type);
-        scopedTypes.remove(type);
-        wrapped.remove(type);
-        scopedRoots.put(type, v -> instance);
+        removePromised(type);
+        removeScopedType(type);
+        removeWrapped(type);
+        putScopedRoot(type, WrapUtil.wrapInstance(instance));
         return (B) this;
     }
 
     @Override
     @SuppressWarnings("unchecked")
     public B removeScoped(Type type) {
-        promised.remove(type);
-        scopedRoots.remove(type);
-        scopedTypes.remove(type);
-        wrapped.remove(type);
+        removePromised(type);
+        removeScopedRoot(type);
+        removeScopedType(type);
+        removeWrapped(type);
         return (B) this;
     }
 
@@ -186,14 +284,14 @@ public abstract class AbstractScopedProviderBuilder<B extends ScopedProviderBuil
         Objects.requireNonNull(type);
         Objects.requireNonNull(impl);
         checkInheritance(type, impl);
-        promised.remove(type);
-        scopedRoots.remove(type);
+        removePromised(type);
+        removeScopedRoot(type);
         if (wrapper == null) {
-            wrapped.remove(type);
-            scopedTypes.put(type, impl);
+            removeWrapped(type);
+            putScopedType(type, impl);
         } else {
-            scopedTypes.remove(type);
-            wrapped.put(type, new ScopedTypeEntry(impl, wrapper));
+            removeScopedType(type);
+            putWrapped(type, new ScopedTypeEntry(impl, wrapper));
         }
         return (B) this;
     }
@@ -205,14 +303,14 @@ public abstract class AbstractScopedProviderBuilder<B extends ScopedProviderBuil
         Objects.requireNonNull(type);
         Objects.requireNonNull(impl);
         checkInheritance(type, impl);
-        promised.remove(type);
-        scopedRoots.remove(type);
+        removePromised(type);
+        removeScopedRoot(type);
         if (wrapper == null) {
-            wrapped.remove(type);
-            scopedTypes.put(type, impl);
+            removeWrapped(type);
+            putScopedType(type, impl);
         } else {
-            scopedTypes.remove(type);
-            wrapped.put(type, new ScopedTypeEntry(impl, wrapper));
+            removeScopedType(type);
+            putWrapped(type, new ScopedTypeEntry(impl, wrapper));
         }
         return (B) this;
     }
@@ -224,15 +322,15 @@ public abstract class AbstractScopedProviderBuilder<B extends ScopedProviderBuil
         Objects.requireNonNull(impl);
         checkInheritance(type.getRawType(), impl);
         var complex = type.getType();
-        promised.remove(complex);
         // noinspection DuplicatedCode
-        scopedRoots.remove(complex);
+        removePromised(complex);
+        removeScopedRoot(complex);
         if (wrapper == null) {
-            wrapped.remove(complex);
-            scopedTypes.put(complex, impl);
+            removeWrapped(complex);
+            putScopedType(complex, impl);
         } else {
-            scopedTypes.remove(complex);
-            wrapped.put(complex, new ScopedTypeEntry(impl, wrapper));
+            removeScopedType(complex);
+            putWrapped(complex, new ScopedTypeEntry(impl, wrapper));
         }
         return (B) this;
     }
@@ -240,16 +338,16 @@ public abstract class AbstractScopedProviderBuilder<B extends ScopedProviderBuil
     @Override
     @SuppressWarnings("unchecked")
     public B addScoped(Class<?> impl, ServiceWrapper wrapper) {
-        // noinspection DuplicatedCode
         Objects.requireNonNull(impl);
-        promised.remove(impl);
-        scopedRoots.remove(impl);
+        // noinspection DuplicatedCode
+        removePromised(impl);
+        removeScopedRoot(impl);
         if (wrapper == null) {
-            wrapped.remove(impl);
-            scopedTypes.put(impl, impl);
+            removeWrapped(impl);
+            putScopedType(impl, impl);
         } else {
-            scopedTypes.remove(impl);
-            wrapped.put(impl, new ScopedTypeEntry(impl, wrapper));
+            removeScopedType(impl);
+            putWrapped(impl, new ScopedTypeEntry(impl, wrapper));
         }
         return (B) this;
     }
@@ -318,25 +416,41 @@ public abstract class AbstractScopedProviderBuilder<B extends ScopedProviderBuil
 
     @Override
     public B addScopedSingleton(Type type, Class<?> impl) {
-        return addScoped(type, impl, LazyObjectFactory::new);
+        return addScoped(type, impl, WrapUtil.wrapLazy(impl));
     }
 
     @Override
     public <T> B addScopedSingleton(Class<T> type, Class<? extends T> impl) {
-        return addScoped(type, impl, LazyObjectFactory::new);
+        return addScoped(type, impl, WrapUtil.wrapLazy(impl));
     }
 
     @Override
     public <T> B addScopedSingleton(JType<T> type, Class<? extends T> impl) {
-        return addScoped(type, impl, LazyObjectFactory::new);
+        return addScoped(type, impl, WrapUtil.wrapLazy(impl));
     }
 
     @Override
     public B addScopedSingleton(Class<?> impl) {
-        return addScoped(impl, LazyObjectFactory::new);
+        return addScoped(impl, WrapUtil.wrapLazy(impl));
     }
 
     // Utility methods
+
+    protected boolean hasPromised(Type type) {
+        return promised != null && promised.contains(type);
+    }
+
+    protected boolean hasScopedRoot(Type type) {
+        return scopedRoots != null && scopedRoots.containsKey(type);
+    }
+
+    protected boolean hasScopedType(Type type) {
+        return scopedTypes != null && scopedTypes.containsKey(type);
+    }
+
+    protected boolean hasWrapped(Type type) {
+        return wrapped != null && wrapped.containsKey(type);
+    }
 
     /**
      * Determines the appropriate cache mode for the given {@link ClassSchema} based on
@@ -362,10 +476,7 @@ public abstract class AbstractScopedProviderBuilder<B extends ScopedProviderBuil
         var types = schema.getTypes();
         for (var type : types) {
             // Skip all overwritten types
-            if (promised.contains(type)
-                    || scopedRoots.containsKey(type)
-                    || scopedTypes.containsKey(type)
-                    || wrapped.containsKey(type)) {
+            if (hasPromised(type) || hasScopedRoot(type) || hasScopedType(type) || hasWrapped(type)) {
                 mode = CacheMode.PARTIAL;
                 continue;
             }
@@ -422,7 +533,7 @@ public abstract class AbstractScopedProviderBuilder<B extends ScopedProviderBuil
         }
         var types = schema.getTypes();
         for (var type : types) {
-            if (promised.contains(type) || wrapped.containsKey(type)) {
+            if (hasPromised(type) || hasWrapped(type)) {
                 return CacheMode.PARTIAL;
             }
         }
@@ -436,7 +547,10 @@ public abstract class AbstractScopedProviderBuilder<B extends ScopedProviderBuil
      * @return true if no scoped types are registered, false otherwise
      */
     protected boolean noScoped() {
-        return promised.isEmpty() && scopedRoots.isEmpty() && scopedTypes.isEmpty() && wrapped.isEmpty();
+        return (promised == null || promised.isEmpty())
+                && (scopedRoots == null || scopedRoots.isEmpty())
+                && (scopedTypes == null || scopedTypes.isEmpty())
+                && (wrapped == null || wrapped.isEmpty());
     }
 
     /**
@@ -459,11 +573,14 @@ public abstract class AbstractScopedProviderBuilder<B extends ScopedProviderBuil
                                                    StubFactory stubFactory,
                                                    List<StubEntry> delayed,
                                                    CacheMode mode) {
-        if (scopedRoots.isEmpty() && scopedTypes.isEmpty()) {
+        if ((scopedRoots == null || scopedRoots.isEmpty()) && (scopedTypes == null || scopedTypes.isEmpty())) {
             return Collections.EMPTY_MAP;
         }
         // Add root types
-        var ret = new HashMap<>(scopedRoots);
+        var ret = scopedRoots == null ? new HashMap<Type, ObjectFactory>() : new HashMap<>(scopedRoots);
+        if (scopedTypes == null || scopedTypes.isEmpty()) {
+            return ret;
+        }
         // Add scoped weak types
         for (var entry : scopedTypes.entrySet()) {
             var type = entry.getKey();
@@ -494,23 +611,22 @@ public abstract class AbstractScopedProviderBuilder<B extends ScopedProviderBuil
      * @param stubFactory    the factory to create stub object factories from schemas
      * @param delayed        a list to accumulate stub entries that require delayed dependency wiring
      * @param mode           the desired cache mode for created factories
-     * @return a map from scoped types to their wrapped entries containing factory and wrapper
+     * @return TODO
      */
-    @SuppressWarnings("unchecked")
-    protected Map<Type, WrappedEntry> buildWrapped(SchemaProvider schemaProvider,
-                                                   StubFactory stubFactory,
-                                                   List<StubEntry> delayed,
-                                                   CacheMode mode) {
-        if (wrapped.isEmpty()) {
-            return Collections.EMPTY_MAP;
+    protected WrappedEntry[] buildWrapped(SchemaProvider schemaProvider,
+                                          StubFactory stubFactory,
+                                          List<StubEntry> delayed,
+                                          CacheMode mode) {
+        if (wrapped == null || wrapped.isEmpty()) {
+            return null;
         }
-        var ret = new HashMap<Type, WrappedEntry>();
+        var ret = new ArrayList<WrappedEntry>(wrapped.size());
         for (var wrappedEntry : wrapped.entrySet()) {
             var type = wrappedEntry.getKey();
             var entry = wrappedEntry.getValue();
             // Handle wrapped root type
             if (entry.impl == null) {
-                ret.put(type, new WrappedEntry(entry.factory, entry.wrapper));
+                ret.add(new WrappedEntry(type, entry.factory, entry.wrapper));
                 continue;
             }
             // Build schema
@@ -521,9 +637,9 @@ public abstract class AbstractScopedProviderBuilder<B extends ScopedProviderBuil
             if (stub instanceof CachedObjectFactory) {
                 delayed.add(new StubEntry(schema.getTypes(), (CachedObjectFactory) stub));
             }
-            ret.put(type, new WrappedEntry(stub, entry.wrapper));
+            ret.add(new WrappedEntry(type, stub, entry.wrapper));
         }
-        return ret;
+        return ret.toArray(new WrappedEntry[0]);
     }
 
     /**
@@ -537,10 +653,10 @@ public abstract class AbstractScopedProviderBuilder<B extends ScopedProviderBuil
      * @return the factory instance or null if not found or promised/wrapped
      */
     protected ObjectFactory findType(Type type, Map<Type, ObjectFactory> scoped, TypeRepository repository) {
-        if (promised.contains(type)) {
+        if (hasPromised(type)) {
             return null;
         }
-        if (wrapped.containsKey(type)) {
+        if (hasWrapped(type)) {
             return null;
         }
         var ret = scoped.get(type);

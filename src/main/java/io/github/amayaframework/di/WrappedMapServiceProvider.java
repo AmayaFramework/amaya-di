@@ -4,18 +4,21 @@ import io.github.amayaframework.di.core.*;
 
 import java.lang.reflect.Type;
 import java.util.HashMap;
+import java.util.Map;
 
-final class WrappedServiceProvider extends AbstractCloseableProvider {
+final class WrappedMapServiceProvider extends AbstractCloseableProvider {
+    private final Map<Type, ObjectFactory> scoped;
     private final WrappedEntry[] wrapped;
 
-    WrappedServiceProvider(TypeRepository repository, WrappedEntry[] wrapped) {
+    WrappedMapServiceProvider(TypeRepository repository, Map<Type, ObjectFactory> scoped, WrappedEntry[] wrapped) {
         super(repository);
+        this.scoped = scoped;
         this.wrapped = wrapped;
     }
 
     @Override
     public ScopedServiceProvider createScoped() {
-        var map = new HashMap<Type, ObjectFactory>();
+        var map = new HashMap<>(scoped);
         for (var entry : wrapped) {
             map.put(entry.type, entry.wrap());
         }
