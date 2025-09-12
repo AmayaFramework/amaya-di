@@ -3,7 +3,6 @@ package io.github.amayaframework.di;
 import com.github.romanqed.jfunc.Function0;
 import com.github.romanqed.jtype.JType;
 import io.github.amayaframework.di.core.ObjectFactory;
-import io.github.amayaframework.di.core.ScopedRepository;
 import io.github.amayaframework.di.core.TypeRepository;
 import io.github.amayaframework.di.schema.ClassSchema;
 import io.github.amayaframework.di.schema.SchemaFactory;
@@ -13,7 +12,6 @@ import io.github.amayaframework.di.stub.StubFactory;
 
 import java.lang.reflect.Type;
 import java.util.*;
-import java.util.function.Supplier;
 
 /**
  * Abstract base implementation of {@link ScopedProviderBuilder} that
@@ -436,18 +434,42 @@ public abstract class AbstractScopedProviderBuilder<B extends ScopedProviderBuil
 
     // Utility methods
 
+    /**
+     * TODO
+     *
+     * @param type
+     * @return
+     */
     protected boolean hasPromised(Type type) {
         return promised != null && promised.contains(type);
     }
 
+    /**
+     * TODO
+     *
+     * @param type
+     * @return
+     */
     protected boolean hasScopedRoot(Type type) {
         return scopedRoots != null && scopedRoots.containsKey(type);
     }
 
+    /**
+     * TODO
+     *
+     * @param type
+     * @return
+     */
     protected boolean hasScopedType(Type type) {
         return scopedTypes != null && scopedTypes.containsKey(type);
     }
 
+    /**
+     * TODO
+     *
+     * @param type
+     * @return
+     */
     protected boolean hasWrapped(Type type) {
         return wrapped != null && wrapped.containsKey(type);
     }

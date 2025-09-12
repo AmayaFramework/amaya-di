@@ -1,10 +1,10 @@
-package io.github.amayaframework.di;
+package io.github.amayaframework.di.internal;
 
 import io.github.amayaframework.di.core.*;
 
-final class PlainServiceProvider extends AbstractCloseableProvider {
+public final class PlainServiceProvider extends AbstractCloseableProvider {
 
-    PlainServiceProvider(TypeRepository repository) {
+    public PlainServiceProvider(TypeRepository repository) {
         super(repository);
     }
 

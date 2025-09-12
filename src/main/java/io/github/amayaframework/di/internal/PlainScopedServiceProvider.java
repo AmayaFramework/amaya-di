@@ -1,9 +1,9 @@
-package io.github.amayaframework.di;
+package io.github.amayaframework.di.internal;
 
 import io.github.amayaframework.di.core.*;
 
-final class PlainScopedServiceProvider extends AbstractCloseableScopedProvider {
-    PlainScopedServiceProvider(ScopedRepository repository) {
+public final class PlainScopedServiceProvider extends AbstractCloseableScopedProvider {
+    public PlainScopedServiceProvider(ScopedRepository repository) {
         super(repository);
     }
 

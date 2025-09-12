@@ -1,24 +1,22 @@
-package io.github.amayaframework.di;
+package io.github.amayaframework.di.internal;
 
+import io.github.amayaframework.di.WrappedEntry;
 import io.github.amayaframework.di.core.*;
 
 import java.lang.reflect.Type;
 import java.util.HashMap;
-import java.util.Map;
 
-final class WrappedMapServiceProvider extends AbstractCloseableProvider {
-    private final Map<Type, ObjectFactory> scoped;
+public final class WrappedServiceProvider extends AbstractCloseableProvider {
     private final WrappedEntry[] wrapped;
 
-    WrappedMapServiceProvider(TypeRepository repository, Map<Type, ObjectFactory> scoped, WrappedEntry[] wrapped) {
+    public WrappedServiceProvider(TypeRepository repository, WrappedEntry[] wrapped) {
         super(repository);
-        this.scoped = scoped;
         this.wrapped = wrapped;
     }
 
     @Override
     public ScopedServiceProvider createScoped() {
-        var map = new HashMap<>(scoped);
+        var map = new HashMap<Type, ObjectFactory>();
         for (var entry : wrapped) {
             map.put(entry.type, entry.wrap());
         }

@@ -2,6 +2,7 @@ package io.github.amayaframework.di;
 
 import io.github.amayaframework.di.core.ServiceProvider;
 import io.github.amayaframework.di.core.TypeRepository;
+import io.github.amayaframework.di.internal.*;
 import io.github.amayaframework.di.schema.ClassSchema;
 import io.github.amayaframework.di.schema.SchemaFactory;
 import io.github.amayaframework.di.stub.CacheMode;

@@ -1,4 +1,4 @@
-package io.github.amayaframework.di;
+package io.github.amayaframework.di.internal;
 
 import io.github.amayaframework.di.core.*;
 
@@ -6,10 +6,10 @@ import java.lang.reflect.Type;
 import java.util.HashMap;
 import java.util.Map;
 
-final class MapScopedServiceProvider extends AbstractCloseableProvider {
+public final class MapScopedServiceProvider extends AbstractCloseableProvider {
     private final Map<Type, ObjectFactory> scoped;
 
-    MapScopedServiceProvider(TypeRepository repository, Map<Type, ObjectFactory> scoped) {
+    public MapScopedServiceProvider(TypeRepository repository, Map<Type, ObjectFactory> scoped) {
         super(repository);
         this.scoped = scoped;
     }

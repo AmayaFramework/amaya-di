@@ -16,6 +16,7 @@ import java.lang.reflect.Type;
  * @see ServiceWrapper
  * @see AbstractScopedProviderBuilder#buildWrapped(SchemaProvider, io.github.amayaframework.di.stub.StubFactory, java.util.List, io.github.amayaframework.di.stub.CacheMode)
  */
+// TODO Update class javadoc
 public final class WrappedEntry {
 
     /**
@@ -34,10 +35,10 @@ public final class WrappedEntry {
     public final ServiceWrapper wrapper;
 
     /**
-     * Constructs a new {@code WrappedEntry} with the given factory and wrapper.
-     *
-     * @param factory the original object factory
-     * @param wrapper the wrapper to apply in each scope
+     * TODO
+     * @param type
+     * @param factory
+     * @param wrapper
      */
     public WrappedEntry(Type type, ObjectFactory factory, ServiceWrapper wrapper) {
         this.type = type;

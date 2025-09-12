@@ -1,6 +1,8 @@
 package io.github.amayaframework.di;
 
 import io.github.amayaframework.di.core.ServiceProvider;
+import io.github.amayaframework.di.internal.PlainServiceProvider;
+import io.github.amayaframework.di.internal.SuppliedPlainServiceProvider;
 import io.github.amayaframework.di.schema.SchemaFactory;
 import io.github.amayaframework.di.stub.CacheMode;
 import io.github.amayaframework.di.stub.StubFactory;

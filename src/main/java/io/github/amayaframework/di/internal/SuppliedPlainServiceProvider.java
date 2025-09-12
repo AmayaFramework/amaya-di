@@ -1,13 +1,13 @@
-package io.github.amayaframework.di;
+package io.github.amayaframework.di.internal;
 
 import io.github.amayaframework.di.core.*;
 
 import java.util.function.Supplier;
 
-final class SuppliedPlainServiceProvider extends AbstractCloseableProvider {
+public final class SuppliedPlainServiceProvider extends AbstractCloseableProvider {
     private final Supplier<ScopedRepository> supplier;
 
-    SuppliedPlainServiceProvider(TypeRepository repository, Supplier<ScopedRepository> supplier) {
+    public SuppliedPlainServiceProvider(TypeRepository repository, Supplier<ScopedRepository> supplier) {
         super(repository);
         this.supplier = supplier;
     }

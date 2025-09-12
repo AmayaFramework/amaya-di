@@ -1,22 +1,18 @@
-package io.github.amayaframework.di;
+package io.github.amayaframework.di.internal;
 
+import io.github.amayaframework.di.WrappedEntry;
 import io.github.amayaframework.di.core.*;
 
-import java.lang.reflect.Type;
-import java.util.Map;
 import java.util.function.Supplier;
 
-final class SuppliedWrappedMapServiceProvider extends AbstractCloseableProvider {
-    private final Map<Type, ObjectFactory> scoped;
+public final class SuppliedWrappedServiceProvider extends AbstractCloseableProvider {
     private final WrappedEntry[] wrapped;
     private final Supplier<ScopedRepository> supplier;
 
-    SuppliedWrappedMapServiceProvider(TypeRepository repository,
-                                      Map<Type, ObjectFactory> scoped,
-                                      WrappedEntry[] wrapped,
-                                      Supplier<ScopedRepository> supplier) {
+    public SuppliedWrappedServiceProvider(TypeRepository repository,
+                                   WrappedEntry[] wrapped,
+                                   Supplier<ScopedRepository> supplier) {
         super(repository);
-        this.scoped = scoped;
         this.wrapped = wrapped;
         this.supplier = supplier;
     }
@@ -24,7 +20,6 @@ final class SuppliedWrappedMapServiceProvider extends AbstractCloseableProvider 
     @Override
     public ScopedServiceProvider createScoped() {
         var supplied = supplier.get();
-        supplied.putAll(scoped);
         for (var entry : wrapped) {
             supplied.put(entry.type, entry.wrap());
         }
