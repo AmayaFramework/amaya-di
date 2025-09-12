@@ -58,8 +58,8 @@ public interface TypeRepository extends TypeProvider, Iterable<Type> {
      * @param type     the type to associate with the instance, must be non-null
      * @param instance the closeable instance to associate, must be non-null
      */
-    default void put(Type type, Closeable instance) {
-        put(type, (ObjectFactory) new CloseableObjectFactory() {
+    default void putCloseable(Type type, Closeable instance) {
+        put(type, new CloseableObjectFactory() {
             @Override
             public Object create(TypeProvider provider) {
                 return instance;
@@ -94,8 +94,8 @@ public interface TypeRepository extends TypeProvider, Iterable<Type> {
      *
      * @param instance the closeable instance to associate, must be non-null
      */
-    default void put(Closeable instance) {
-        put((ObjectFactory) new CloseableObjectFactory() {
+    default void putCloseable(Closeable instance) {
+        put(new CloseableObjectFactory() {
             @Override
             public Object create(TypeProvider provider) {
                 return instance;
