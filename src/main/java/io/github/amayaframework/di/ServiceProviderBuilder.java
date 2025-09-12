@@ -14,12 +14,29 @@ import java.lang.reflect.Type;
 import java.util.function.Supplier;
 
 /**
- * A builder interface for constructing a {@link ServiceProvider}.
+ * Fluent builder for constructing a {@link ServiceProvider}.
  * <p>
- * Allows configuring repositories, schema/stub factories, and registering
- * services (factories, instances, implementations) with optional scoping.
+ * Extends {@link ServiceProviderConfigurer}, so all configuration methods return
+ * {@link ServiceProviderBuilder} for chaining. Supports registering services via raw
+ * {@link ObjectFactory} instances, functional providers, prebuilt instances, or
+ * implementation classes (with optional {@link ServiceWrapper}) and lifetime helpers
+ * (transient/singleton).
  * <p>
- * Each call to {@link #build()} resets the internal builder state.
+ * Behavior highlights:
+ * <ul>
+ *   <li>If you register implementation classes, a {@link StubFactory} must be supplied;
+ *       otherwise only direct factories/instances can be built.</li>
+ *   <li>Singleton helpers use lazy instantiation. If a produced value implements the
+ *       DI-core close contract ({@link io.github.amayaframework.di.core.Closeable}),
+ *       it will be closed when the owning provider/scope is closed.</li>
+ *   <li>If {@link #withScopedRepository(Supplier)} is provided, the resulting
+ *       {@link ServiceProvider} will support {@code createScoped()} even for “plain”
+ *       (non-scoped) builders.</li>
+ *   <li>The builder is not thread-safe. Reuse across threads requires external synchronization.</li>
+ * </ul>
+ * <p>
+ * Each call to {@link #build()} produces a new provider and then resets the internal
+ * builder state so the instance can be reused for a different configuration.
  */
 public interface ServiceProviderBuilder extends ServiceProviderConfigurer {
 
@@ -108,13 +125,16 @@ public interface ServiceProviderBuilder extends ServiceProviderConfigurer {
     ServiceProviderBuilder addSingleton(Class<?> impl);
 
     /**
-     * Builds a new {@link ServiceProvider} and resets the builder.
+     * Builds a new {@link ServiceProvider} from the current configuration and resets the builder.
+     * <p>
+     * The returned provider may support {@code createScoped()} if the underlying builder is scoped
+     * or a {@link ScopedRepository} supplier was provided via {@link #withScopedRepository(Supplier)}.
      * <p>
      * If an error occurs during the build process, the builder is still reset.
      *
      * @return a newly constructed {@link ServiceProvider}
-     * @throws RuntimeException if the build process fails
-     * @throws Error            if the build process fails
+     * @throws RuntimeException if the configuration cannot be built
+     * @throws Error            if a fatal error occurs during build
      */
     ServiceProvider build();
 }

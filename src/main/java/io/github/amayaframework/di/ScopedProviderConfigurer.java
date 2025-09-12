@@ -13,7 +13,23 @@ import java.lang.reflect.Type;
 import java.util.function.Supplier;
 
 /**
- * TODO
+ * Extends {@link ServiceProviderConfigurer} with APIs for configuring <em>scoped</em> services —
+ * dependencies that are resolved only inside scopes created from the resulting provider.
+ * <p>
+ * Concepts:
+ * <ul>
+ *   <li><b>Promised scoped type</b> — declared as required in a scope, but its implementation must be
+ *       supplied externally at scope creation time (e.g., via {@link ScopedRepository}). Not available in the root.</li>
+ *   <li><b>Scoped factory</b> — a factory stored by the builder and copied into each new scope; invoked within that scope.</li>
+ *   <li><b>Wrapped scoped factory</b> — a factory plus {@link ServiceWrapper} applied per scope,
+ *       enabling per-scope decorations/proxies/lifetimes.</li>
+ *   <li><b>Scoped transient</b> — implementation bound without wrapper; a new instance is created on each resolve within a scope.</li>
+ *   <li><b>Scoped singleton</b> — implementation bound with the builder’s lazy wrapper; a single instance
+ *       is created per scope and reused within that scope. If the produced value implements the DI-core
+ *       close contract ({@link io.github.amayaframework.di.core.Closeable}), it will be closed when the scope is closed.</li>
+ *   <li><b>Scoped instance</b> — a fixed instance exposed in all scopes (shared across scopes), not per scope.</li>
+ * </ul>
+ * All methods are fluent (return {@code this}). This configurer is not thread-safe.
  */
 public interface ScopedProviderConfigurer extends ServiceProviderConfigurer {
 
@@ -302,7 +318,7 @@ public interface ScopedProviderConfigurer extends ServiceProviderConfigurer {
      * @return this builder instance for chaining
      */
     ScopedProviderConfigurer addScopedSingleton(Class<?> impl);
-    
+
     // api fixes
 
 

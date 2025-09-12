@@ -13,9 +13,9 @@ public final class SuppliedWrappedMapServiceProvider extends AbstractCloseablePr
     private final Supplier<ScopedRepository> supplier;
 
     public SuppliedWrappedMapServiceProvider(TypeRepository repository,
-                                      Map<Type, ObjectFactory> scoped,
-                                      WrappedEntry[] wrapped,
-                                      Supplier<ScopedRepository> supplier) {
+                                             Map<Type, ObjectFactory> scoped,
+                                             WrappedEntry[] wrapped,
+                                             Supplier<ScopedRepository> supplier) {
         super(repository);
         this.scoped = scoped;
         this.wrapped = wrapped;

@@ -11,8 +11,8 @@ public final class SuppliedMapScopedServiceProvider extends AbstractCloseablePro
     private final Supplier<ScopedRepository> supplier;
 
     public SuppliedMapScopedServiceProvider(TypeRepository repository,
-                                     Map<Type, ObjectFactory> scoped,
-                                     Supplier<ScopedRepository> supplier) {
+                                            Map<Type, ObjectFactory> scoped,
+                                            Supplier<ScopedRepository> supplier) {
         super(repository);
         this.scoped = scoped;
         this.supplier = supplier;

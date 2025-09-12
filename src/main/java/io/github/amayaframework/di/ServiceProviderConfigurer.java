@@ -13,12 +13,31 @@ import java.lang.reflect.Type;
 import java.util.function.Supplier;
 
 /**
- * TODO
+ * Fluent configuration API used by {@link ServiceProviderBuilder} to register services,
+ * choose factories and caching strategy, and customize repositories.
+ * <p>
+ * Supports registering services via raw {@link ObjectFactory} instances, functional providers,
+ * prebuilt instances, or implementation classes (with optional {@link ServiceWrapper}).
+ * Transient and singleton helpers are provided for the common lifetimes.
+ * <p>
+ * Notes:
+ * <ul>
+ *   <li>All {@code add(...)} methods overwrite previously registered bindings for the same {@link Type}.</li>
+ *   <li>If you register implementation classes (i.e., use methods that need codegen/stubs),
+ *       a {@link StubFactory} must be supplied; otherwise the build will fail.</li>
+ *   <li>Singleton helpers use lazy instantiation. If the resulting factory produces a
+ *       {@code Closeable} value (DI-core close contract), the close will be propagated
+ *       when the owning provider/scope is closed.</li>
+ *   <li>{@link #withScopedRepository(Supplier)} optionally enables creation of scopes even
+ *       for plain providers by supplying a {@link ScopedRepository} instance per scope.</li>
+ * </ul>
  */
 public interface ServiceProviderConfigurer {
 
     /**
-     * TODO
+     * Resets this configurer to the initial state.
+     * <br>
+     * Clears all registered bindings and removes factory/cache/repository overrides.
      */
     void reset();
 
@@ -47,7 +66,9 @@ public interface ServiceProviderConfigurer {
     ServiceProviderConfigurer withCacheMode(CacheMode mode);
 
     /**
-     * Sets the {@link TypeRepository} to store built object factories.
+     * Sets the concrete {@link TypeRepository} that will store built object factories.
+     * <br>
+     * Overrides any repository supplier provided via {@link #withRepository(Supplier)}.
      *
      * @param repository the repository instance
      * @return this builder instance for chaining
@@ -56,6 +77,9 @@ public interface ServiceProviderConfigurer {
 
     /**
      * Sets a lazy provider of the {@link TypeRepository}.
+     * <br>
+     * Used when the repository should be created on build. Overrides any concrete
+     * repository set via {@link #withRepository(TypeRepository)}.
      *
      * @param supplier the supplier that provides the repository
      * @return this builder instance for chaining
@@ -63,9 +87,9 @@ public interface ServiceProviderConfigurer {
     ServiceProviderConfigurer withRepository(Supplier<TypeRepository> supplier);
 
     /**
-     * Sets a lazy provider of the {@link ScopedRepository}.
+     * Provides a supplier for creating {@link ScopedRepository} instances for newly created scopes.
      *
-     * @param supplier the supplier that provides the repository
+     * @param supplier the supplier that provides a scoped repository per scope
      * @return this builder instance for chaining
      */
     ServiceProviderConfigurer withScopedRepository(Supplier<ScopedRepository> supplier);

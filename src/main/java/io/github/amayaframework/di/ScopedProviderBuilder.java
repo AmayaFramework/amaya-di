@@ -13,22 +13,34 @@ import java.lang.reflect.Type;
 import java.util.function.Supplier;
 
 /**
- * A builder for creating service providers with support for scoped services.
+ * A builder for creating a scope-aware {@link io.github.amayaframework.di.core.ServiceProvider}.
  * <p>
- * Scoped services are services that exist only within a scope.
- * They are accessible exclusively inside the scope they belong to.
+ * In addition to all root (non-scoped) registrations available via {@link ServiceProviderBuilder},
+ * this builder lets you declare and configure <em>scoped</em> services — dependencies that can be
+ * resolved only inside scopes created from the resulting provider.
  * <p>
- * This builder supports registering both actual scoped service implementations
- * and "promised" scoped types — types declared as required but expected to be
- * provided externally when the scope is created.
+ * Supported scoped patterns:
+ * <ul>
+ *   <li><b>Promised types</b> – declared as required for a scope, but must be supplied externally
+ *       at scope creation time via a {@link ScopedRepository}. Promised types are not resolvable at the root.</li>
+ *   <li><b>Scoped factories</b> – factories stored in the builder and copied into each new scope.</li>
+ *   <li><b>Wrapped scoped factories</b> – a factory plus {@link ServiceWrapper}; the wrapper is applied
+ *       per scope (not at build time), enabling per-scope decoration/proxying.</li>
+ *   <li><b>Scoped transient</b> – a new instance is created on every resolve within a scope.</li>
+ *   <li><b>Scoped singleton</b> – one lazily-created instance <em>per scope</em>; if the produced value
+ *       implements {@link io.github.amayaframework.di.core.Closeable}, it will be closed when the scope closes.</li>
+ *   <li><b>Scoped instance</b> – a fixed instance exposed to all scopes (shared across scopes).</li>
+ * </ul>
+ * Wrappers registered for scoped types are applied each time a new scope is created.
  * <p>
- * All wrapped types registered with a {@link ServiceWrapper} will have their wrapper
- * applied each time a new scope is created.
- * <p>
- * This interface extends {@link ServiceProviderBuilder}, so it supports
- * all service registrations available there as well.
+ * Thread-safety: this builder is not thread-safe. A successful {@link #build()} resets internal state,
+ * just like {@link ServiceProviderBuilder#build()}.
  *
  * @see ServiceProviderBuilder
+ * @see ScopedProviderConfigurer
+ * @see io.github.amayaframework.di.core.ServiceProvider
+ * @see ScopedRepository
+ * @see io.github.amayaframework.di.core.Closeable
  */
 public interface ScopedProviderBuilder extends ScopedProviderConfigurer, ServiceProviderBuilder {
 

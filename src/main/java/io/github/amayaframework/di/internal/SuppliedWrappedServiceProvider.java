@@ -10,8 +10,8 @@ public final class SuppliedWrappedServiceProvider extends AbstractCloseableProvi
     private final Supplier<ScopedRepository> supplier;
 
     public SuppliedWrappedServiceProvider(TypeRepository repository,
-                                   WrappedEntry[] wrapped,
-                                   Supplier<ScopedRepository> supplier) {
+                                          WrappedEntry[] wrapped,
+                                          Supplier<ScopedRepository> supplier) {
         super(repository);
         this.wrapped = wrapped;
         this.supplier = supplier;

@@ -64,7 +64,11 @@ public abstract class AbstractServiceProviderBuilder<B extends ServiceProviderBu
     protected Supplier<TypeRepository> repositorySupplier;
 
     /**
-     * TODO
+     * A supplier used to create {@link ScopedRepository} instances for new scopes.
+     * <br>
+     * If set, built providers will request a fresh scoped repository from this supplier
+     * whenever a scope is created. May be {@code null} if the provider should construct
+     * a default scoped repository on its own.
      */
     protected Supplier<ScopedRepository> scopedRepositorySupplier;
 
@@ -144,9 +148,13 @@ public abstract class AbstractServiceProviderBuilder<B extends ServiceProviderBu
     // Lazy accessors
 
     /**
-     * TODO
+     * Lazily initializes the root bindings map (if needed) and associates
+     * the given {@link Type} with the provided {@link ObjectFactory}.
+     * <br>
+     * Existing entry for the type, if any, is overwritten.
      *
-     * @return
+     * @param type    the target type
+     * @param factory the factory to register
      */
     protected void putRoot(Type type, ObjectFactory factory) {
         if (roots == null) {
@@ -156,9 +164,13 @@ public abstract class AbstractServiceProviderBuilder<B extends ServiceProviderBu
     }
 
     /**
-     * TODO
+     * Lazily initializes the implementation bindings map (if needed) and associates
+     * the given {@link Type} with the provided {@link TypeEntry}.
+     * <br>
+     * Existing entry for the type, if any, is overwritten.
      *
-     * @return
+     * @param type  the target type
+     * @param entry the implementation entry to register
      */
     protected void putType(Type type, TypeEntry entry) {
         if (types == null) {
@@ -168,9 +180,11 @@ public abstract class AbstractServiceProviderBuilder<B extends ServiceProviderBu
     }
 
     /**
-     * TODO
+     * Removes a direct root factory binding for the specified type, if present.
+     * <br>
+     * No-op if the root bindings map is not initialized or the type is absent.
      *
-     * @param type
+     * @param type the type to remove from root bindings
      */
     protected void removeRoot(Type type) {
         if (roots != null) {
@@ -179,9 +193,11 @@ public abstract class AbstractServiceProviderBuilder<B extends ServiceProviderBu
     }
 
     /**
-     * TODO
+     * Removes an implementation (stub-generated) binding for the specified type, if present.
+     * <br>
+     * No-op if the implementation map is not initialized or the type is absent.
      *
-     * @param type
+     * @param type the type to remove from implementation bindings
      */
     protected void removeType(Type type) {
         if (types != null) {
@@ -189,10 +205,26 @@ public abstract class AbstractServiceProviderBuilder<B extends ServiceProviderBu
         }
     }
 
+    /**
+     * Returns whether a direct root factory is registered for the given type.
+     * Root bindings are those added via explicit factories/providers/instances
+     * (not generated from implementation classes).
+     *
+     * @param type the type to check, must be non-null
+     * @return {@code true} if a root binding exists; {@code false} otherwise
+     */
     protected boolean hasRoot(Type type) {
         return roots != null && roots.containsKey(type);
     }
 
+    /**
+     * Returns whether an implementation (stub-generated) binding is registered
+     * for the given type. These entries are added via implementation-based
+     * registrations (e.g., add/addTransient/addSingleton with an impl class).
+     *
+     * @param type the type to check, must be non-null
+     * @return {@code true} if an implementation binding exists; {@code false} otherwise
+     */
     protected boolean hasType(Type type) {
         return types != null && types.containsKey(type);
     }
@@ -563,11 +595,11 @@ public abstract class AbstractServiceProviderBuilder<B extends ServiceProviderBu
         /**
          * The implementation class
          */
-        protected Class<?> impl;
+        public final Class<?> impl;
         /**
          * The wrapper to apply to the factory
          */
-        protected ServiceWrapper wrapper;
+        public ServiceWrapper wrapper;
 
         /**
          * Creates a new binding entry.
@@ -575,7 +607,7 @@ public abstract class AbstractServiceProviderBuilder<B extends ServiceProviderBu
          * @param impl    the implementation class
          * @param wrapper the factory wrapper to use
          */
-        protected TypeEntry(Class<?> impl, ServiceWrapper wrapper) {
+        public TypeEntry(Class<?> impl, ServiceWrapper wrapper) {
             this.impl = impl;
             this.wrapper = wrapper;
         }

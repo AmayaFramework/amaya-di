@@ -25,8 +25,10 @@ public class ServiceProviderBuilderTest {
     }
 
     public void testComplexType(Supplier<ServiceProviderBuilder> s) {
-        var ctI = new JType<List<Integer>>(){};
-        var ctS = new JType<List<String>>(){};
+        var ctI = new JType<List<Integer>>() {
+        };
+        var ctS = new JType<List<String>>() {
+        };
         var b = s.get();
         var sp = b
                 .addInstance(ctS, List.of("a", "b", "c"))
@@ -169,6 +171,10 @@ public class ServiceProviderBuilderTest {
         assertEquals(Set.of(IS4.class, App.class), new HashSet<>(c));
     }
 
+    public interface IS4 {
+        S3 s3();
+    }
+
     public static final class S1 {
         final String v;
 
@@ -188,10 +194,6 @@ public class ServiceProviderBuilderTest {
         public S3(S1 s1) {
             this.s1 = s1;
         }
-    }
-
-    public interface IS4 {
-        S3 s3();
     }
 
     public static final class S41 implements IS4 {
@@ -222,9 +224,9 @@ public class ServiceProviderBuilderTest {
     }
 
     public static final class App {
+        final S2 s2;
         @Inject
         public S1 s1;
-        final S2 s2;
         S3 s3;
         IS4 s4;
 
@@ -233,13 +235,13 @@ public class ServiceProviderBuilderTest {
         }
 
         @Inject
-        public void setS3(S3 s3) {
-            this.s3 = s3;
+        public static void setS4(App app, IS4 is4) {
+            app.s4 = is4;
         }
 
         @Inject
-        public static void setS4(App app, IS4 is4) {
-            app.s4 = is4;
+        public void setS3(S3 s3) {
+            this.s3 = s3;
         }
     }
 }
