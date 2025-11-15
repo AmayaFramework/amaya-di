@@ -65,8 +65,8 @@ public final class ReflectStubFactory implements StubFactory {
     }
 
     private ObjectFactory wrap(ConstructorSchema schema, CacheMode mode, Map<Type, Consumer<ObjectFactory>> updaters) {
-        var mapping = schema.getMapping();
-        var target = cloner.clone(schema.getTarget());
+        var mapping = schema.mapping();
+        var target = cloner.clone(schema.target());
         target.setAccessible(true);
         if (mapping.length == 0) {
             return new EmptyConstructorObjectFactory(target);
@@ -84,8 +84,8 @@ public final class ReflectStubFactory implements StubFactory {
     }
 
     private MethodInvoker wrap(MethodSchema schema, CacheMode mode, Map<Type, Consumer<ObjectFactory>> updaters) {
-        var mapping = schema.getMapping();
-        var target = cloner.clone(schema.getTarget());
+        var mapping = schema.mapping();
+        var target = cloner.clone(schema.target());
         target.setAccessible(true);
         var isStatic = Modifier.isStatic(target.getModifiers());
         // Wrap with no cache
@@ -105,14 +105,14 @@ public final class ReflectStubFactory implements StubFactory {
     }
 
     private FieldEntry wrap(FieldSchema schema, CacheMode mode, Map<Type, Consumer<ObjectFactory>> updaters) {
-        var target = cloner.clone(schema.getTarget());
+        var target = cloner.clone(schema.target());
         target.setAccessible(true);
         // Wrap with no cache
         if (mode == CacheMode.NONE) {
-            return new FieldEntry(target, schema.getType());
+            return new FieldEntry(target, schema.type());
         }
         // Wrap cached
-        var type = schema.getType();
+        var type = schema.type();
         if (mode == CacheMode.FULL) {
             var ret = new FieldEntry(target);
             register(updaters, type, ret);
@@ -148,9 +148,9 @@ public final class ReflectStubFactory implements StubFactory {
     private ObjectFactory createFactory(ClassSchema schema,
                                         CacheMode mode,
                                         Map<Type, Consumer<ObjectFactory>> updaters) {
-        var constructor = wrap(schema.getConstructorSchema(), mode, updaters);
-        var methodSchemas = schema.getMethodSchemas();
-        var fieldSchemas = schema.getFieldSchemas();
+        var constructor = wrap(schema.constructorSchema(), mode, updaters);
+        var methodSchemas = schema.methodSchemas();
+        var fieldSchemas = schema.fieldSchemas();
         if (methodSchemas.isEmpty() && fieldSchemas.isEmpty()) {
             return constructor;
         }

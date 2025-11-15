@@ -27,7 +27,7 @@ public final class FieldSchema extends AbstractSchema<Field> {
      *
      * @return non-null type of the field dependency
      */
-    public Type getType() {
+    public Type type() {
         return type;
     }
 
@@ -37,7 +37,7 @@ public final class FieldSchema extends AbstractSchema<Field> {
      * @return non-null, single-element immutable set of types
      */
     @Override
-    public Set<Type> getTypes() {
+    public Set<Type> types() {
         return Set.of(type);
     }
 

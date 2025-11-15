@@ -20,5 +20,5 @@ public interface ExecutableSchema<T extends Executable> extends Schema<T> {
      *
      * @return non-null array of {@link Type}, matching executable parameters order
      */
-    Type[] getMapping();
+    Type[] mapping();
 }

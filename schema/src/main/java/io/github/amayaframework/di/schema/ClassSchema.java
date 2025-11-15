@@ -41,7 +41,7 @@ public final class ClassSchema extends AbstractSchema<Class<?>> {
      *
      * @return non-null {@link ConstructorSchema} for the class
      */
-    public ConstructorSchema getConstructorSchema() {
+    public ConstructorSchema constructorSchema() {
         return constructorSchema;
     }
 
@@ -50,7 +50,7 @@ public final class ClassSchema extends AbstractSchema<Class<?>> {
      *
      * @return non-null, immutable set of field schemas
      */
-    public Set<FieldSchema> getFieldSchemas() {
+    public Set<FieldSchema> fieldSchemas() {
         return fieldSchemas;
     }
 
@@ -59,7 +59,7 @@ public final class ClassSchema extends AbstractSchema<Class<?>> {
      *
      * @return non-null, immutable set of method schemas
      */
-    public Set<MethodSchema> getMethodSchemas() {
+    public Set<MethodSchema> methodSchemas() {
         return methodSchemas;
     }
 
@@ -81,7 +81,7 @@ public final class ClassSchema extends AbstractSchema<Class<?>> {
      * @return non-null, immutable set of required {@link Type}s
      */
     @Override
-    public Set<Type> getTypes() {
+    public Set<Type> types() {
         if (types == null) {
             types = Collections.unmodifiableSet(collectTypes());
         }

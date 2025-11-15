@@ -74,10 +74,10 @@ public final class AsmStubFactory implements StubFactory {
     private static void processExecutable(MethodVisitor visitor,
                                           ExecutableSchema<?> schema,
                                           BiConsumer<MethodVisitor, Type> loader) {
-        var target = schema.getTarget();
+        var target = schema.target();
         var offset = Modifier.isStatic(target.getModifiers()) ? 1 : 0;
         var types = target.getParameterTypes();
-        var mapping = schema.getMapping();
+        var mapping = schema.mapping();
         for (var i = 0; i < mapping.length; ++i) {
             loader.accept(visitor, mapping[i]);
             AsmUtil.castReference(visitor, types[i + offset]);
@@ -87,7 +87,7 @@ public final class AsmStubFactory implements StubFactory {
     private static void generateCreateMethod(ClassWriter writer,
                                              ClassSchema schema,
                                              BiConsumer<MethodVisitor, Type> loader) {
-        var target = schema.getTarget();
+        var target = schema.target();
         // Declare method signature
         var visitor = writer.visitMethod(
                 Opcodes.ACC_PUBLIC,
@@ -103,16 +103,16 @@ public final class AsmStubFactory implements StubFactory {
         visitor.visitInsn(Opcodes.DUP);
         // Invoke constructor by schema
         // var v = new Type(arg1, arg2, arg3, ...);
-        var constructor = schema.getConstructorSchema();
+        var constructor = schema.constructorSchema();
         processExecutable(visitor, constructor, loader);
-        AsmUtil.invoke(visitor, constructor.getTarget());
+        AsmUtil.invoke(visitor, constructor.target());
         // Process field schemas
-        var fields = schema.getFieldSchemas();
+        var fields = schema.fieldSchemas();
         for (var fieldSchema : fields) {
             // ref.<field> = (Type) instance;
             visitor.visitInsn(Opcodes.DUP);
-            loader.accept(visitor, fieldSchema.getType());
-            var field = fieldSchema.getTarget();
+            loader.accept(visitor, fieldSchema.type());
+            var field = fieldSchema.target();
             var type = field.getType();
             AsmUtil.castReference(visitor, type);
             visitor.visitFieldInsn(
@@ -123,11 +123,11 @@ public final class AsmStubFactory implements StubFactory {
             );
         }
         // Process method schemas
-        var methods = schema.getMethodSchemas();
+        var methods = schema.methodSchemas();
         for (var method : methods) {
             visitor.visitInsn(Opcodes.DUP);
             processExecutable(visitor, method, loader);
-            AsmUtil.invoke(visitor, method.getTarget());
+            AsmUtil.invoke(visitor, method.target());
         }
         // Return constructed instance
         visitor.visitInsn(Opcodes.ARETURN);
@@ -473,25 +473,25 @@ public final class AsmStubFactory implements StubFactory {
     }
 
     private ObjectFactory createFull(ClassSchema schema) {
-        var name = getName(schema.getTarget(), CACHED_STUB);
+        var name = getName(schema.target(), CACHED_STUB);
         return factory.create(name, () ->
-                generateCached(name, schema, MapUtil.ofAll(schema.getTypes(), ""), null)
+                generateCached(name, schema, MapUtil.ofAll(schema.types(), ""), null)
         );
     }
 
     private ObjectFactory createPartial(ClassSchema schema) {
-        var name = getName(schema.getTarget(), PARTIAL_STUB);
-        var types = MapUtil.ofComplex(schema.getTypes());
+        var name = getName(schema.target(), PARTIAL_STUB);
+        var types = MapUtil.ofComplex(schema.types());
         return factory.create(
                 name,
-                () -> generateCached(name, schema, MapUtil.ofAll(schema.getTypes(), "f"), types),
+                () -> generateCached(name, schema, MapUtil.ofAll(schema.types(), "f"), types),
                 clazz -> instantiate(clazz, types)
         );
     }
 
     private ObjectFactory createNone(ClassSchema schema) {
-        var name = getName(schema.getTarget(), STUB);
-        var map = MapUtil.ofComplex(schema.getTypes());
+        var name = getName(schema.target(), STUB);
+        var map = MapUtil.ofComplex(schema.types());
         return factory.create(
                 name,
                 () -> generateResolved(name, schema, map),

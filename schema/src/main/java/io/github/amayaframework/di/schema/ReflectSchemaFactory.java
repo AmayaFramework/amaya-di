@@ -198,9 +198,6 @@ public final class ReflectSchemaFactory implements SchemaFactory {
         Objects.requireNonNull(clazz);
         // Check class
         var modifiers = clazz.getModifiers();
-        if (!Modifier.isPublic(modifiers)) {
-            throw new IllegalClassException("Cannot create schema of non-public class", clazz);
-        }
         if (Modifier.isAbstract(modifiers)) {
             throw new IllegalClassException("Cannot create schema of abstract class", clazz);
         }

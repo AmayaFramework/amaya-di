@@ -15,12 +15,12 @@ public interface Schema<T> {
      *
      * @return non-null dependent entity
      */
-    T getTarget();
+    T target();
 
     /**
      * Returns the set of types required by the dependent entity.
      *
      * @return non-null set of types
      */
-    Set<Type> getTypes();
+    Set<Type> types();
 }

@@ -10,7 +10,7 @@ abstract class AbstractSchema<T> implements Schema<T> {
     }
 
     @Override
-    public T getTarget() {
+    public T target() {
         return target;
     }
 

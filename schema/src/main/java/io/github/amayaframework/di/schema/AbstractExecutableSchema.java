@@ -17,12 +17,12 @@ abstract class AbstractExecutableSchema<T extends Executable> extends AbstractSc
     }
 
     @Override
-    public Set<Type> getTypes() {
+    public Set<Type> types() {
         return types;
     }
 
     @Override
-    public Type[] getMapping() {
+    public Type[] mapping() {
         return mapping.clone();
     }
 }
